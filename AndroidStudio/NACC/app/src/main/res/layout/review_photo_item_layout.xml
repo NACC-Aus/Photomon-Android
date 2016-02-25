@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/info_panel"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/photo_review_panel_height"
+        android:layout_alignParentBottom="true"
+        android:background="@color/panel_bgr_color"
+        android:gravity="center_vertical" >
+
+        <LinearLayout
+            android:id="@+id/button_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            android:orientation="vertical" >
+
+            <Button
+                android:id="@+id/make_guide_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/btn_default_color_light"
+                android:text="@string/make_guide"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/save_to_roll_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/btn_default_color_light"
+                android:text="@string/save_to_roll"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/delete_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/btn_default_color_light"
+                android:text="@string/delete"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toLeftOf="@id/button_layout"
+            android:gravity="center_vertical"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp" >
+
+            <SeekBar
+                android:id="@+id/seekOpacity"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true" />
+            
+            <TextView
+                android:id="@+id/image_name_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:maxLines="2"
+                android:textColor="@android:color/white"
+                android:textSize="@dimen/photo_text_view_size" >
+            </TextView>
+
+            <TextView
+                android:layout_marginTop="5dp"
+                android:id="@+id/image_desc_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/image_thumbnail_view"
+                android:layout_below="@id/image_name_view"
+                android:layout_centerVertical="true"
+                android:textColor="@android:color/white" >
+            </TextView>
+
+            
+
+        </RelativeLayout>
+    </RelativeLayout>
+    
+    <ImageView
+        android:id="@+id/review_image_view"
+        android:layout_above="@id/info_panel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"/>
+
+</RelativeLayout>

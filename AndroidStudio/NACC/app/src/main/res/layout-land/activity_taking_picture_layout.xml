@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/taking_picture_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:background="@android:color/black"
+        android:orientation="vertical"
+        android:weightSum="10" >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3.5"
+            android:background="@color/semi_panel_bgr_color" >
+
+            <ImageButton
+                android:id="@+id/change_cam_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/btn_default_color_light"
+                android:onClick="onChangeCam"
+                android:src="@drawable/ic_device_access_switch_camera"
+                android:text="Cam" />
+
+            <ImageButton
+                android:id="@+id/flash_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/change_cam_btn"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/btn_default_color_light"
+                android:onClick="onChangeFlash"
+                android:src="@drawable/ic_device_access_flash_off"
+                android:text="Flash" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3" >
+
+            <ImageButton
+                android:id="@+id/taking_picture_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:background="@drawable/btn_default_color_light"
+                android:src="@drawable/ic_camera"
+                android:text="CAPTURE" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3.5"
+            android:background="@color/semi_panel_bgr_color"
+            android:paddingBottom="10dp" >
+
+            <ImageButton
+                android:id="@+id/choose_galery_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/btn_default_color_light"
+                android:onClick="onGoToLibrary"
+                android:src="@drawable/ic_library"
+                android:text="Lib" />
+        </RelativeLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/surface_view_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_toLeftOf="@id/taking_picture_layout" >
+
+        <SurfaceView
+            android:id="@+id/surface_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center" >
+        </SurfaceView>
+
+        <ImageView
+            android:id="@+id/guide_image_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:tag="1" />
+
+        <RelativeLayout
+            android:id="@+id/config_panel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:background="@android:color/transparent" >
+
+            <Button
+                android:id="@+id/guide_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:background="@drawable/btn_default_color_light"
+                android:onClick="doGuideChanged"
+                android:text="@string/guide_on"
+                android:textColor="@drawable/selected_button_text_color" />
+
+            <SeekBar
+                android:id="@+id/seekOpacityCamera"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true" />
+        </RelativeLayout>
+    </FrameLayout>
+
+</RelativeLayout>

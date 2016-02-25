@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/black"
+                android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/image_info_panel"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/taking_picture_height"
+        android:layout_alignParentBottom="true"
+        android:background="@color/panel_bgr_color">
+
+
+        <Button
+            android:id="@+id/add_note_btn"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerInParent="true"
+            android:background="@drawable/btn_default_color_light"
+            android:text="@string/note"
+            android:textColor="@android:color/white"
+            />
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toLeftOf="@id/add_note_btn"
+            android:gravity="center_vertical"
+            android:paddingLeft="10dp">
+
+            <TextView
+                android:id="@+id/image_name_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@android:color/white"/>
+
+            <TextView
+                android:id="@+id/image_description_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/image_name_text"
+                android:paddingTop="5dp"
+                android:textColor="@android:color/white"/>
+        </RelativeLayout>
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/image_preview_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/image_info_panel"
+        android:layout_alignParentTop="true"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"/>
+
+</RelativeLayout>

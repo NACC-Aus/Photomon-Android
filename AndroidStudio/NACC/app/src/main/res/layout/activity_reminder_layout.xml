@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <PreferenceCategory
+        android:summary=""
+        android:title="Reminder" >
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="reminder_enable"
+            android:title="Enable" />
+
+        <com.appiphany.nacc.ui.controls.DatePreference
+            android:dependency="reminder_enable"
+            android:key="reminder_date"
+            android:title="Date" >
+        </com.appiphany.nacc.ui.controls.DatePreference>
+
+        <com.appiphany.nacc.ui.controls.TimePreference
+            android:dependency="reminder_enable"
+            android:key="reminder_time"
+            android:title="Time" >
+        </com.appiphany.nacc.ui.controls.TimePreference>
+
+        <ListPreference
+            android:defaultValue="0"
+            android:dependency="reminder_enable"
+            android:dialogTitle="Frequency"
+            android:entries="@array/frequency_array"
+            android:entryValues="@array/frequency_values"
+            android:key="reminder_frequency"
+            android:title="Frequency" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

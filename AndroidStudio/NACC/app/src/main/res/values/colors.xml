@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="button_normal_color">#FFFFFFFF</color>
+    <color name="button_pressed_color">#FF0000FF</color>
+    <color name="panel_bgr_color">#FF000000</color>
+    <color name="semi_panel_bgr_color">#FF4C4949</color>
+    <color name="guide_color_bgr">#FFDBF7C6</color>
+    <color name="gray_background">#B3B3B3</color>
+</resources>

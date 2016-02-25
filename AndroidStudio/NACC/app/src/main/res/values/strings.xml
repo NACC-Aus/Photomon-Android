@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Photomon</string>
+    <string name="saved_photos_title">Saved photos</string>
+    <string name="reminder_title">Reminder</string>
+    <string name="site_title">Sites</string>
+    
+    <string name="server_addr_hint">Server address</string>
+    <string name="email_hint">Email</string>
+    <string name="password_hint">Password</string>
+    <string name="login_button_text">Login</string>
+    <string name="saved_successfully">Saved successfully</string>
+    <string name="common_error">Error happens while processing your request. Please try again!</string>
+    <string name="connection_error">Upload failed. Please check your connection.</string>
+    <string name="login_error">Username or Password is wrong</string>
+    <string name="login_connection_error">There is no network connection to login</string>    
+    <string name="ok_text">Ok</string>
+    <string name="cancel_text">Cancel</string>
+    <string name="dialog_title">Information</string>
+    <string name="server_required">Please give a valid server address.</string>
+    <string name="email_required">Please give a valid email</string>
+    <string name="password_required">Please give a password</string>
+    <string name="main_screen_alert">By uploading pictures using this app, the user acknowledges the right of the project partners to use those pictures for reasonable purposes</string>
+    <string name="main_screen_alert_2">Photographs containing children must not be uploaded</string>
+    <string name="logout_confirmed">Are you sure to logout?</string>
+    <string name="storage_low_error">There are not enough storage to use this feature. Please free some.</string>
+    <string name="logout_text">Logout</string>
+    <string name="reminder_text">Reminder</string>
+    <string name="manage_sites">Manage sites</string>
+    <string name="delete_sites">delete</string>
+    <string name="edit_sites">edit</string>
+    <string name="done_sites">Download</string>
+    <string name="n_text">N</string>
+    <string name="s_text">S</string>
+    <string name="e_text">E</string>
+    <string name="w_text">W</string>
+    <string name="p_text">Photopoint</string>
+    <string name="north_text">North</string>
+    <string name="south_text">South</string>
+    <string name="east_text">East</string>
+    <string name="west_text">West</string>
+    <string name="guide_on">Guide On</string>
+    <string name="guide_off">Guide Off</string>
+    <string name="no_guide">No Guide</string>
+    <string name="make_guide">Make Guide</string>
+    <string name="save_text">Save</string>
+    <string name="save_to_roll">Save to roll</string>
+    <string name="delete">Delete</string>
+    <string name="remove_guide">Remove guide</string>
+    <string name="remove_guide_confirm">Would you like to unselect this guide picture?</string>
+    <string name="remove_delete_confirm">Are you sure you would like to delete this picture?</string>
+    <string name="remove_delete_error">Guide pictures can\'t be deleted. To delete this picture, please select \"Remove Guide\" before deleting.</string>
+    <string name="no_gps">Please turn on GPS to identify the proper site location</string>
+    <string name="no_photo_name_error">We can\'t retrieve enough information to process your request. Please turn on GPS or check your internet connection.</string>
+    <string name="reminder_notifications">It\'s time to take your monitor picture.</string>
+    <string name="unable_to_upload">To keep uploading your photo. Please check your connection and open NACC app.</string>
+    <string name="take_photo">Take a photo</string>
+    
+    <string-array name="frequency_array">
+        <item>1 year</item>
+        <item>6 months</item>
+        <item>3 months</item>
+        <item>Monthly</item>
+        <item>Fortnightly</item>
+        <item>Weekly</item>
+    </string-array>
+    <string-array name="frequency_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    
+    <string name="info_text">Info</string>
+    <string name="demo_button_text">Demo</string>
+    <string name="note">Note</string>
+    <string name="done">Done</string>
+    <string name="input_site_name">Input site name</string>
+    <string name="insert_site_fail">Insert new site not complete. Please try again!</string>
+    <string name="site_exist">Site name already exists. Please input new name!</string>
+    <string name="site_name_hint_text">New Adhoc site name</string>
+    <string name="upload_note_fail">Upload note fail. Please try agian!</string>
+    <string name="wifi_setting_title">Wifi Setting</string>
+    <string name="wifi_setting_message">Wifi is not enabled. Do you want to go to settings menu?</string>
+    <string name="gps_setting_title">GPS Setting</string>
+    <string name="gps_setting_message">GPS and network are not enabled. Do you want to go to settings menu?</string>
+    <string name="gps_setting_confirm_message">To get the current location, we will need GPS turned on in your settings. Do you want to go to settings menu?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="confirm_exit">Do you want to exit application?</string>
+    <string name="donation">Donation</string>
+    <string name="donate">Donate</string>
+    <string name="select_amount_to_donate">Select amount to donate:</string>
+    <string name="guides">Guide photo</string>
+    
+    <string name="server_url_title">Error</string>
+    <string name="msg_select_direction">Please select the direction</string>
+	<string name="msg_server_url_not_available">The server url is not available. Please try again.</string>
+</resources>
