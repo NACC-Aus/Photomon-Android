@@ -1,5 +1,6 @@
 package com.appiphany.nacc.screens;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -219,26 +220,42 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
             showEditTexts(true);
         } else {
             saveLoginInfoToCache();
-            Intent showMainScreenIntent = new Intent(this, MainScreenActivity.class);
             Config.setAccessToken(this, result);
             Config.setActiveServer(this, mServerText);
             Config.setActiveUser(this, mEmailText);
             Config.setDemoMode(this, result);
-            showMainScreenIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            showMainScreenIntent.putExtra(MainScreenActivity.FROM_LOGIN_EXTRA, true);
-            showMainScreenIntent.putExtra(MainScreenActivity.DOWNLOAD_GUIDE_EXTRA, true);
-            
-            finish();
-            startActivity(showMainScreenIntent);
-            UIUtils.hideSoftKeyboard(this);
+
+            checkForPermission(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.CAMERA});
+        }
+    }
+
+    @Override
+    protected void executeTaskAfterPermission(String[] permissions) {
+        goToMainScreen();
+    }
+
+    private void goToMainScreen() {
+        if(!verifyPermissionGranted(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.CAMERA})){
+            return;
         }
 
+        GlobalState.getInstance().initLocation();
+        Intent showMainScreenIntent = new Intent(this, MainScreenActivity.class);
+        showMainScreenIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        showMainScreenIntent.putExtra(MainScreenActivity.FROM_LOGIN_EXTRA, true);
+        showMainScreenIntent.putExtra(MainScreenActivity.DOWNLOAD_GUIDE_EXTRA, true);
+
+        finish();
+        startActivity(showMainScreenIntent);
+        UIUtils.hideSoftKeyboard(this);
     }
 
     private static class LoginTask extends AsyncTask<String, Void, String> {
         private WeakReference<LoginActivity> mContext;
 
-        public LoginTask(LoginActivity context) {
+        LoginTask(LoginActivity context) {
             mContext = new WeakReference<>(context);
         }
 
@@ -333,7 +350,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
         editor.putString(SERVER_TAG, mServerText);
         editor.putString(EMAIL_TAG, mEmailText);
         editor.putString(PASSWORD_TAG, mPasswordText);
-        editor.commit();
+        editor.apply();
     }
 
     private void saveAccountToCache() {
@@ -342,6 +359,6 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
         editor.putString(ACCOUNT_SERVER_TAG, mServerText);
         editor.putString(ACCOUNT_EMAIL_TAG, mEmailText);
         editor.putString(ACCOUNT_PASS_TAG, mPasswordText);
-        editor.commit();
+        editor.apply();
     }
 }

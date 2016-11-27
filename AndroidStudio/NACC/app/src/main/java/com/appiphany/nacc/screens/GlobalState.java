@@ -10,12 +10,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import android.Manifest;
 import android.app.AlarmManager;
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.ViewConfiguration;
 
@@ -92,8 +95,13 @@ public class GlobalState extends Application {
         }
     }
     
-    private void initLocation(){
+    public void initLocation(){
 		try {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                    != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+
 			LocationLibrary.showDebugOutput(GeneralUtil.isDebugMode());			
             LocationLibrary.initialiseLibrary(getBaseContext(), AlarmManager.INTERVAL_FIFTEEN_MINUTES, (int)AlarmManager.INTERVAL_HOUR, "com.appiphany.nacc");
         }

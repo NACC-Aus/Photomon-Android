@@ -99,4 +99,5 @@
     <string name="server_url_title">Error</string>
     <string name="msg_select_direction">Please select the direction</string>
 	<string name="msg_server_url_not_available">The server url is not available. Please try again.</string>
+    <string name="msg_permission_required">Please accept permissions in order to use this app</string>
 </resources>

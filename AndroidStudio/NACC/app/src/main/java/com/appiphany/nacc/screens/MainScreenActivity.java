@@ -270,6 +270,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
                 return convertView;
             }
         };
+
         getSupportActionBar()
                 .setListNavigationCallbacks(adapter, new ActionBar.OnNavigationListener() {
 					
