@@ -2,12 +2,12 @@ package com.appiphany.nacc.screens;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
-import com.actionbarsherlock.view.MenuItem;
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.utils.Config;
 
@@ -42,6 +42,7 @@ public class InfoActivity extends BaseActivity {
         initActionBar();
     }
 
+    @SuppressWarnings("ConstantConditions")
     private void initActionBar() {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);

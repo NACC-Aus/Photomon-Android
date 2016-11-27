@@ -1,14 +1,13 @@
 package com.appiphany.nacc.screens;
 
-import roboguice.inject.InjectView;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.model.Photo;
 
@@ -20,7 +19,6 @@ public class AddNoteActivity extends BaseActivity {
     public static final String SHOW_NOTE = "show_note";
     public static final String ADD_NOTE = "add_note";
 
-    @InjectView(R.id.note_edittex)
     private EditText mEtNote;
 
     private String mNoteString;
@@ -34,6 +32,7 @@ public class AddNoteActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_add_note);
+        mEtNote = (EditText) findViewById(R.id.note_edittex);
         initActionBar();
 
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -57,6 +56,7 @@ public class AddNoteActivity extends BaseActivity {
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     private void initActionBar() {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -67,7 +67,7 @@ public class AddNoteActivity extends BaseActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportMenuInflater().inflate(R.menu.add_note_menu, menu);
+        getMenuInflater().inflate(R.menu.add_note_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

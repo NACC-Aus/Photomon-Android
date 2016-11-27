@@ -1,25 +1,23 @@
 package com.appiphany.nacc.screens;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.appiphany.nacc.events.UpdateProject;
-import com.appiphany.nacc.model.Photo;
-import com.appiphany.nacc.model.Project;
-import com.appiphany.nacc.model.Site;
-import com.appiphany.nacc.model.Photo.DIRECTION;
-import com.appiphany.nacc.services.CacheService;
-import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
-import com.appiphany.nacc.utils.Config;
-import com.appiphany.nacc.utils.GeneralUtil;
-import com.appiphany.nacc.utils.Ln;
-import com.appiphany.nacc.utils.NetworkUtils;
-import com.appiphany.nacc.utils.UncaughtExceptionHandler;
-
 import android.app.IntentService;
 import android.content.Intent;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+
+import com.appiphany.nacc.events.UpdateProject;
+import com.appiphany.nacc.model.Photo;
+import com.appiphany.nacc.model.Photo.DIRECTION;
+import com.appiphany.nacc.model.Project;
+import com.appiphany.nacc.model.Site;
+import com.appiphany.nacc.services.CacheService;
+import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
+import com.appiphany.nacc.utils.Config;
+import com.appiphany.nacc.utils.Ln;
+import com.appiphany.nacc.utils.NetworkUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
@@ -35,7 +33,6 @@ public class DownloadService extends IntentService {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(GeneralUtil.getLogFilePath(this)));
 	}
 	
 	public DownloadService() {

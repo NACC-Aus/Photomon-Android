@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.channels.FileChannel;
 import java.util.List;
-import roboguice.inject.InjectView;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
@@ -72,35 +71,23 @@ import com.appiphany.nacc.utils.UncaughtExceptionHandler;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
 import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.SimpleImageLoadingListener;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 public class ImageTakingActivity extends BaseActivity implements OnClickListener, Callback, PictureCallback, OnSeekBarChangeListener {
 	private static final String ALPHA_KEY = "alpha_key";
-    @InjectView(R.id.surface_view_layout)
     private FrameLayout mSurfaceViewLayout;
-    @InjectView(R.id.taking_picture_layout)
     private LinearLayout mCameraPanel;
-    @InjectView(R.id.taking_picture_btn)
     private ImageButton mTakingPictureBtn;
-    @InjectView(R.id.change_cam_btn)
     private ImageButton mChangeCamBtn;
-    @InjectView(R.id.flash_btn)
     private ImageButton mChangeFlashBtn;
-    @InjectView(R.id.surface_view)
     private SurfaceView mSurfaceView;
-    @InjectView(R.id.guide_btn)
     private Button mGuideButton;
     
     private ImageView mGuideImageView;
 
-    @InjectView (R.id.seekOpacityCamera)
     private SeekBar seekOpacityCamera;
-    
-    @InjectView(R.id.config_panel)
-    private RelativeLayout mRlConfigPanel;
 
-    @InjectView(R.id.surface_view_layout)
-    private FrameLayout mFlSurfaceView;
+    private RelativeLayout mRlConfigPanel;
 
     private ProgressDialog mProgressDialog;
 
@@ -132,7 +119,16 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_taking_picture_layout);
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(GeneralUtil.getLogFilePath(this)));
+
+        mSurfaceViewLayout = (FrameLayout) findViewById(R.id.surface_view_layout);
+        mCameraPanel = (LinearLayout) findViewById(R.id.taking_picture_layout);
+        mTakingPictureBtn = (ImageButton) findViewById(R.id.taking_picture_btn);
+        mChangeCamBtn = (ImageButton) findViewById(R.id.change_cam_btn);
+        mChangeFlashBtn = (ImageButton) findViewById(R.id.flash_btn);
+        mSurfaceView = (SurfaceView) findViewById(R.id.surface_view);
+        mGuideButton = (Button) findViewById(R.id.guide_btn);
+        seekOpacityCamera = (SeekBar) findViewById(R.id.seekOpacityCamera);
+        mRlConfigPanel = (RelativeLayout) findViewById(R.id.config_panel);
 
         mTakingPictureBtn = (ImageButton) findViewById(R.id.taking_picture_btn);
         mTakingPictureBtn.setOnClickListener(this);
@@ -178,8 +174,7 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
         }
 
         mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setIndeterminateDrawable(getResources().getDrawable(
-                com.actionbarsherlock.R.drawable.abs__progress_medium_holo));  
+        mProgressDialog.setProgressStyle(android.R.style.Widget_DeviceDefault_Light_ProgressBar_Large);
         
         if(Config.shouldShowDirectionDialog(this)){
         	showChangeDirectionDialog();
@@ -217,8 +212,8 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
                 final int guideHeight;
                 int orientation = getResources().getConfiguration().orientation;
                 if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-                    guideWidth = mFlSurfaceView.getMeasuredWidth();
-                    guideHeight = mFlSurfaceView.getMeasuredHeight();
+                    guideWidth = mSurfaceViewLayout.getMeasuredWidth();
+                    guideHeight = mSurfaceViewLayout.getMeasuredHeight();
                 } else {
                     guideWidth = mRlConfigPanel.getMeasuredWidth();
                     guideHeight = mRlConfigPanel.getMeasuredHeight();

@@ -15,11 +15,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.Window;
 import android.widget.Toast;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.services.CacheService;
@@ -30,7 +30,7 @@ import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.UncaughtExceptionHandler;
 
-public class ImageReviewActivity extends BaseFragmentActivity implements OnPageChangeListener {
+public class ImageReviewActivity extends BaseActivity implements OnPageChangeListener {
     private static final int SHOW_NOTE_CODE = 222;
     private ViewPager mViewPager;
     private int mCurrentPhotoId;
@@ -79,6 +79,7 @@ public class ImageReviewActivity extends BaseFragmentActivity implements OnPageC
         localMgr.unregisterReceiver(mReceiver);
     }
 
+    @SuppressWarnings("ConstantConditions")
     private void initActionBar() {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
@@ -95,7 +96,7 @@ public class ImageReviewActivity extends BaseFragmentActivity implements OnPageC
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportMenuInflater().inflate(R.menu.reupload_menu, menu);
+        getMenuInflater().inflate(R.menu.reupload_menu, menu);
         mReuploadMenu = menu.findItem(R.id.reupload_menu);
         mAddNoteMenu = menu.findItem(R.id.note_menu);
         mViewPager.setOnPageChangeListener(this);

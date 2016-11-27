@@ -24,6 +24,7 @@
         android:name=".screens.GlobalState"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
+        android:logo="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         
@@ -44,7 +45,7 @@
             android:name=".screens.SplashActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Sherlock.Light.NoActionBar" >
+            android:theme="@style/NoActionBarTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -64,7 +65,7 @@
         <activity
             android:name=".screens.ImageTakingActivity"
             android:label="@string/app_name" 
-            android:theme="@style/Theme.Sherlock.Light.NoActionBar"
+            android:theme="@style/NoActionBarTheme"
             android:screenOrientation="fullSensor">
         </activity>
         <activity

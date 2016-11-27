@@ -16,8 +16,11 @@ import android.os.Message;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.view.Gravity;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -27,10 +30,6 @@ import android.widget.RelativeLayout.LayoutParams;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.actionbarsherlock.app.SherlockActivity;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
-import com.actionbarsherlock.view.Window;
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Site;
@@ -52,7 +51,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-import roboguice.inject.InjectView;
 
 public class ImagePreviewActivity extends BaseActivity implements OnClickListener {
     private static final int ADD_NOTE_CODE = 111;
@@ -64,16 +62,11 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     // The minimum time between updates in milliseconds
     private static final long MIN_TIME_BW_UPDATES = 1000; // 1 second
 
-    @InjectView(R.id.image_preview_view)
     private ImageView mPreviewView;
-    @InjectView(R.id.image_name_text)
     private TextView mDirectionTextView;
-    @InjectView(R.id.image_description_text)
     private TextView mDescriptionTextView;
-    @InjectView(R.id.image_info_panel)
     private RelativeLayout mInfoLayout;
 
-    @InjectView(R.id.add_note_btn)
     private Button mBtNote;
 
     private boolean isFullscreen = false;
@@ -98,21 +91,27 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     private boolean hasRegisterReceiver;
     private UpdateSiteReceiver updateSiteReceiver;
     private CacheService cacheService;
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-        
+
         setContentView(R.layout.activity_picture_preview_layout);
-        
+
+        mPreviewView = (ImageView) findViewById(R.id.image_preview_view);
+        mDirectionTextView = (TextView) findViewById(R.id.image_name_text);
+        mDescriptionTextView = (TextView) findViewById(R.id.image_description_text);
+        mInfoLayout = (RelativeLayout) findViewById(R.id.image_info_panel);
+        mBtNote = (Button) findViewById(R.id.add_note_btn);
+
         mPreviewView.setOnClickListener(this);
         mBtNote.setOnClickListener(this);
 
         LocationLibrary.forceLocationUpdate(this);
         LocationLibrary.startAlarmAndListener(this);
-        
+
         Intent intent = getIntent();
         if (intent != null) {
             mFilename = intent.getStringExtra(BackgroundService.PHOTO_PATH_EXTRA);
@@ -120,7 +119,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             mDirection = intent.getStringExtra(BackgroundService.DIRECTION_EXTRA);
             mBestSite = (Site) intent.getSerializableExtra(BackgroundService.BEST_SITE);
             mUserLocation = GlobalState.getCurrentUserLocation();
-            
+
             mDirectionTextView.setText(mDirection);
             mDescriptionTextView.setText(UIUtils.getPhotoDate(new Date()));
             if (mFilename != null && mPhotoId != null) {
@@ -150,10 +149,11 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     		cacheService = CacheService.getInstance(this,
                     CacheService.createDBNameFromUser(Config.getActiveServer(this), Config.getActiveUser(this)));
     	}
-    	
+
     	return cacheService;
     }
-    
+
+    @SuppressWarnings("ConstantConditions")
     private void initActionBar() {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
@@ -222,22 +222,22 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             doGetSites();
         }
     }
-    
+
     private DialogHandler showDialogHandler = new DialogHandler(this);
-    
+
     private static class DialogHandler extends Handler{
-    	private final WeakReference<ImagePreviewActivity> mService; 
+    	private final WeakReference<ImagePreviewActivity> mService;
 
     	DialogHandler(ImagePreviewActivity service) {
             mService = new WeakReference<ImagePreviewActivity>(service);
         }
-    	
+
     	public void handleMessage(Message msg) {
     		ImagePreviewActivity service = mService.get();
             if (service == null) {
                  return;
             }
-            
+
     		if (msg.what == SHOW_DIALOG) {
     			Ln.d("handle show dialog message");
     			if (!service.isFinishing()) {
@@ -247,13 +247,13 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     	            	if(service.mUserLocation == null){
     	            		service.mUserLocation = GlobalState.getCurrentUserLocation();
     	            	}
-    	            	
+
     	            	if (service.mUserLocation == null) {
 	    	            	if (!NetworkUtils.isNetworkOnline(service)) {
 	    	            		DialogUtil.showSettingsAlert(service, R.string.wifi_setting_title,
 	    	                            R.string.wifi_setting_message, Settings.ACTION_WIFI_SETTINGS);
 	    	            	} else if (!NetworkUtils.isGPSAvailable(service)) {
-	    	            		DialogUtil.showSettingsAlert(service, R.string.gps_setting_title, 
+	    	            		DialogUtil.showSettingsAlert(service, R.string.gps_setting_title,
 	    	            				R.string.gps_setting_message, Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 	    	            	}
     	            	} else {
@@ -264,20 +264,20 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     		}
     	};
     }
-    
+
     Dialog dialog;
     // show dialog to create new site for local
-    private void showAddSiteDialog(SherlockActivity activity, final CacheService cacheService, final Location location) {
+    private void showAddSiteDialog(Activity activity, final CacheService cacheService, final Location location) {
     	Ln.d("call showAddSiteDialog");
-    	
+
     	if(dialog == null){
     		dialog = new Dialog(activity);
     	}
-    	
+
     	if(dialog.isShowing()){
     		return;
     	}
-    	
+
     	getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     	UIUtils.showKeyBoard(ImagePreviewActivity.this);
         dialog.requestWindowFeature((int) Window.FEATURE_NO_TITLE);
@@ -297,7 +297,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
                 }
             }
         });
-        
+
         Button btOk = (Button) dialog.findViewById(R.id.ok_button);
         btOk.setOnClickListener(new OnClickListener() {
 
@@ -357,7 +357,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             updateSiteName(GlobalState.getSites());
             if (mUserLocation == null) {
             	mUserLocation = GlobalState.getCurrentUserLocation();
-            	
+
 	        	if (mUserLocation == null) {
 	        		 getLocation();
 	        	}
@@ -365,6 +365,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
         }
     }
 
+    @SuppressWarnings("MissingPermission")
     public void getLocation() {
         try {
             locationMgr = (LocationManager) getSystemService(LOCATION_SERVICE);
@@ -417,7 +418,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportMenuInflater().inflate(R.menu.preview_menu, menu);
+        getMenuInflater().inflate(R.menu.preview_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

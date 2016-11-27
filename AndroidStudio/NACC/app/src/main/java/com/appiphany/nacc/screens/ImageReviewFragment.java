@@ -4,7 +4,6 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.List;
 
-import roboguice.util.Ln;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -17,6 +16,7 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -29,7 +29,6 @@ import android.widget.RelativeLayout.LayoutParams;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
-import com.actionbarsherlock.app.SherlockFragment;
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Photo.DIRECTION;
@@ -38,10 +37,11 @@ import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
 import com.appiphany.nacc.utils.BitmapUtil;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.GeneralUtil;
+import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.UIUtils;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
-public class ImageReviewFragment extends SherlockFragment implements OnClickListener, OnSeekBarChangeListener {
+public class ImageReviewFragment extends Fragment implements OnClickListener, OnSeekBarChangeListener {
     private View mRootView;
     private ImageView mReviewImageView;
     private TextView mImageNameView;
@@ -82,9 +82,9 @@ public class ImageReviewFragment extends SherlockFragment implements OnClickList
         mSaveToRollBtn = (Button) mRootView.findViewById(R.id.save_to_roll_btn);
         seekOpacity = (SeekBar) mRootView.findViewById(R.id.seekOpacity);
         mDeleteBtn = (Button) mRootView.findViewById(R.id.delete_btn);
-        mProgressBar = new ProgressDialog(getSherlockActivity());
-        mProgressBar.setIndeterminateDrawable(getResources().getDrawable(
-                com.actionbarsherlock.R.drawable.abs__progress_medium_holo));
+        mProgressBar = new ProgressDialog(getActivity());
+//        mProgressBar.setIndeterminateDrawable(getResources().getDrawable(
+//                com.actionbarsherlock.R.drawable.abs__progress_medium_holo));
         mProgressBar.setMessage("Executing...");
         mProgressBar.setCancelable(false);
         mGuideBtn.setOnClickListener(this);
@@ -94,7 +94,6 @@ public class ImageReviewFragment extends SherlockFragment implements OnClickList
         if (args != null) {
             mPhoto = (Photo) args.getSerializable(PHOTO_MODEL_ARGS);            
             if (mPhoto != null) {
-            	Ln.d("call get image");
             	if(mPhoto.getUploadState() != UPLOAD_STATE.DOWNLOAD){
             		mReviewImageView.setTag(mPhoto.getPhotoPath());
             		ImageLoader.getInstance().displayImage("file:///" + mPhoto.getPhotoPath(), mReviewImageView, GeneralUtil.getNewScaleOption());
@@ -129,9 +128,9 @@ public class ImageReviewFragment extends SherlockFragment implements OnClickList
             }
         }
         cacheService = CacheService.getInstance(
-                getSherlockActivity(),
-                CacheService.createDBNameFromUser(Config.getActiveServer(this.getSherlockActivity()),
-                        Config.getActiveUser(this.getSherlockActivity())));
+                getActivity(),
+                CacheService.createDBNameFromUser(Config.getActiveServer(getActivity()),
+                        Config.getActiveUser(getActivity())));
         updateGuideButton(cacheService.getGuidePhotoIds());
         seekOpacity.setIndeterminate(false);
         
@@ -234,6 +233,7 @@ public class ImageReviewFragment extends SherlockFragment implements OnClickList
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     private void handleShowImageView() {
         if (mInfoLayout != null) {
             RelativeLayout.LayoutParams lp = (LayoutParams) mReviewImageView.getLayoutParams();
@@ -242,9 +242,9 @@ public class ImageReviewFragment extends SherlockFragment implements OnClickList
                 lp.addRule(RelativeLayout.CENTER_IN_PARENT, RelativeLayout.TRUE);
 
                 mInfoLayout.setVisibility(View.INVISIBLE);
-                getSherlockActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-                getSherlockActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-                getSherlockActivity().getSupportActionBar().hide();
+                getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+                ((BaseActivity)getActivity()).getSupportActionBar().hide();
             } else {
             	if(mPhoto.getUploadState() != UPLOAD_STATE.DOWNLOAD){
             		mReviewImageView.setTag(mPhoto.getPhotoPath());
@@ -259,22 +259,22 @@ public class ImageReviewFragment extends SherlockFragment implements OnClickList
             		}
             	}
                 mInfoLayout.setVisibility(View.VISIBLE);
-                getSherlockActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-                getSherlockActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-                getSherlockActivity().getSupportActionBar().show();
+                getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+                getActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                ((BaseActivity)getActivity()).getSupportActionBar().show();
             }
             mReviewImageView.setLayoutParams(lp);
-            ((ImageReviewActivity) getSherlockActivity()).notifyFullscreen(isFullscreen);
+            ((ImageReviewActivity) getActivity()).notifyFullscreen(isFullscreen);
         }
 
     }
 
     private void handleDeleteButtonClick() {
         if (isGuidePhoto) {
-            UIUtils.buildAlertDialog(getSherlockActivity(), R.string.dialog_title, R.string.remove_delete_error, false)
+            UIUtils.buildAlertDialog(getActivity(), R.string.dialog_title, R.string.remove_delete_error, false)
                     .show();
         } else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this.getSherlockActivity());
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setTitle(R.string.dialog_title);
             builder.setMessage(R.string.remove_delete_confirm);
             builder.setNegativeButton(R.string.cancel_text, new DialogInterface.OnClickListener() {
@@ -291,13 +291,13 @@ public class ImageReviewFragment extends SherlockFragment implements OnClickList
                     if (cacheService.deletePhoto(mPhoto.getPhotoID()) > 0) {
                         Cursor cur = cacheService.getPhotos(Config.getCurrentProjectId(getActivity()));
                         if (cur != null && cur.getCount() > 0) {
-                        	ImageReviewActivity context = (ImageReviewActivity) getSherlockActivity(); 
+                        	ImageReviewActivity context = (ImageReviewActivity) getActivity();
                         	if (context != null) {                        		
                         		context.notifyDataChanged();
                         	}
                         } else {
                         	// finish activity if it has no more photos
-                        	getSherlockActivity().finish();
+                            getActivity().finish();
                         }
                     }
                 }
@@ -322,12 +322,12 @@ public class ImageReviewFragment extends SherlockFragment implements OnClickList
     private void handleFinishSaved(boolean result) {
         mSaveToRollBtn.setEnabled(true);
         if (result) {
-            UIUtils.buildAlertDialog(getSherlockActivity(), R.string.dialog_title,
+            UIUtils.buildAlertDialog(getActivity(), R.string.dialog_title,
                     R.string.saved_successfully,
                     false)
                     .show();
         } else {
-            UIUtils.buildAlertDialog(getSherlockActivity(), R.string.dialog_title,
+            UIUtils.buildAlertDialog(getActivity(), R.string.dialog_title,
                     R.string.common_error, false)
                     .show();
         }
@@ -335,7 +335,7 @@ public class ImageReviewFragment extends SherlockFragment implements OnClickList
 
     private void handleGuideClick() {
         if (isGuidePhoto) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(this.getSherlockActivity());
+            AlertDialog.Builder builder = new AlertDialog.Builder(this.getActivity());
             builder.setTitle(R.string.dialog_title);
             builder.setMessage(R.string.remove_guide_confirm);
             builder.setNegativeButton(R.string.cancel_text, new DialogInterface.OnClickListener() {
@@ -357,7 +357,7 @@ public class ImageReviewFragment extends SherlockFragment implements OnClickList
             });
             builder.show();
         } else {
-            cacheService.insertOrUpdateGuidePhoto(getSherlockActivity(), mPhoto.getPhotoID(), mPhoto.getPhotoPath(),
+            cacheService.insertOrUpdateGuidePhoto(getActivity(), mPhoto.getPhotoID(), mPhoto.getPhotoPath(),
                     DIRECTION.getDirection(mPhoto.getDirection()), mPhoto.getSiteId(), Config.getCurrentProjectId(getActivity()));
             mGuideBtn.setText(R.string.remove_guide);
             isGuidePhoto = true;
@@ -391,10 +391,10 @@ public class ImageReviewFragment extends SherlockFragment implements OnClickList
                     if(mPhoto.getPhotoPath().startsWith("http")){
                     	scaledBitmap = ImageLoader.getInstance().loadImageSync(mPhoto.getPhotoPath());
                     }else {                    
-                    	scaledBitmap = BitmapUtil.decodeFile(new File(mPhoto.getPhotoPath()), context.getSherlockActivity());
+                    	scaledBitmap = BitmapUtil.decodeFile(new File(mPhoto.getPhotoPath()), context.getActivity());
                     }
 
-					String url = MediaStore.Images.Media.insertImage(context.getSherlockActivity().getContentResolver(), scaledBitmap,
+					String url = MediaStore.Images.Media.insertImage(context.getActivity().getContentResolver(), scaledBitmap,
                     		mPhoto.getPhotoID(),
                             mPhoto.getDirection() + "\n" + UIUtils.getPhotoDate(mPhoto.getTakenDate()));
                     

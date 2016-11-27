@@ -1,16 +1,15 @@
 package com.appiphany.nacc.screens;
 
-import roboguice.inject.InjectView;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.Ln;
@@ -19,25 +18,27 @@ import com.zooz.android.lib.CheckoutActivity;
 public class ZoozActivity extends BaseActivity implements OnClickListener {
 	
 	public static final int ZOOZ_ACTIVITY_ID = 111;
-	@InjectView(R.id.bt5)
 	private RadioButton mBt5;
-	@InjectView(R.id.bt10)
 	private RadioButton mBt10;
-	@InjectView(R.id.bt20)
 	private RadioButton mBt20;
-	@InjectView(R.id.bt50)
 	private RadioButton mBt50;
-	@InjectView(R.id.bt100)
 	private RadioButton mBt100;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_donation);
+        mBt5 = (RadioButton) findViewById(R.id.bt5);
+        mBt10 = (RadioButton) findViewById(R.id.bt10);
+        mBt20 = (RadioButton) findViewById(R.id.bt20);
+        mBt50 = (RadioButton) findViewById(R.id.bt50);
+        mBt100 = (RadioButton) findViewById(R.id.bt100);
+
 		initActionBar();
 	}
 	
-	private void initActionBar() {
+	@SuppressWarnings("ConstantConditions")
+    private void initActionBar() {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayUseLogoEnabled(true);
@@ -50,7 +51,7 @@ public class ZoozActivity extends BaseActivity implements OnClickListener {
 	
 	@Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportMenuInflater().inflate(R.menu.menu_donation, menu);
+        getMenuInflater().inflate(R.menu.menu_donation, menu);
         return super.onCreateOptionsMenu(menu);
     }
 	

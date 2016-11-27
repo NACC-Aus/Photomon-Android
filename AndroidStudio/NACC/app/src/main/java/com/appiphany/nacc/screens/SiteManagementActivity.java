@@ -4,12 +4,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import roboguice.util.Ln;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.SparseBooleanArray;
+import android.view.ActionMode;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -17,17 +20,13 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 
-import com.actionbarsherlock.app.SherlockListActivity;
-import com.actionbarsherlock.view.ActionMode;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuInflater;
-import com.actionbarsherlock.view.MenuItem;
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.utils.Config;
+import com.appiphany.nacc.utils.Ln;
 
-public class SiteManagementActivity extends SherlockListActivity implements OnItemClickListener {
+public class SiteManagementActivity extends BaseActivity implements OnItemClickListener {
 	private ListView lvSites;
 	private ActionMode mMode;
 	private List<Site> siteData;
@@ -40,26 +39,27 @@ public class SiteManagementActivity extends SherlockListActivity implements OnIt
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_manage_sites);
+        lvSites = (ListView) findViewById(R.id.listSites);
 		mMode = null;
-		lvSites = getListView();
 		lvSites.setItemsCanFocus(false);
 		lvSites.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
 		lvSites.setOnItemClickListener(this);
 
 		cacheService = new CacheService(this, CacheService.createDBNameFromUser(Config.getActiveServer(this), Config.getActiveUser(this)));
-		if (cacheService != null && cacheService.getAllSite(Config.getCurrentProjectId(this)).size() > 0) {
+		if (cacheService.getAllSite(Config.getCurrentProjectId(this)).size() > 0) {
 			siteData = cacheService.getAllSite(Config.getCurrentProjectId(this));
 			siteNames = getSiteNameData();
 
-			adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_multiple_choice, siteNames);
-			setListAdapter(adapter);
+			adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_multiple_choice, siteNames);
+            lvSites.setAdapter(adapter);
 		}
 
 		initActionBar();
 
 	}
 
-	private void initActionBar() {
+	@SuppressWarnings("ConstantConditions")
+    private void initActionBar() {
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setDisplayShowHomeEnabled(true);
 		getSupportActionBar().setDisplayShowTitleEnabled(true);
@@ -152,7 +152,7 @@ public class SiteManagementActivity extends SherlockListActivity implements OnIt
 		boolean hasCheckedElement = false;
 		int checkCount = 0;
 		for (int i = 0; i < checked.size(); i++) {
-			if (hasCheckedElement == false) {
+			if (!hasCheckedElement) {
 				hasCheckedElement = checked.valueAt(i);
 			}
 
@@ -182,7 +182,7 @@ public class SiteManagementActivity extends SherlockListActivity implements OnIt
 		@Override
 		public boolean onCreateActionMode(ActionMode mode, Menu menu) {
 			// Create the menu from the xml file
-			MenuInflater inflater = getSupportMenuInflater();
+			MenuInflater inflater = getMenuInflater();
 			inflater.inflate(R.menu.manage_sites_menu, menu);
 			return true;
 		}

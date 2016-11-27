@@ -1,14 +1,5 @@
 package com.appiphany.nacc.screens;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import roboguice.inject.InjectView;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -30,10 +21,8 @@ import com.appiphany.nacc.model.Project;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.DialogUtil;
-import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.NetworkUtils;
 import com.appiphany.nacc.utils.UIUtils;
-import com.appiphany.nacc.utils.UncaughtExceptionHandler;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
@@ -45,15 +34,20 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class LoginActivity extends BaseActivity implements OnClickListener {
-    @InjectView(R.id.email_input_view)
     private EditText mUsernameEditText;
-    @InjectView(R.id.password_input_view)
     private EditText mPasswordEditText;
-    @InjectView(R.id.login_button_view)
     private Button mSubmitButton;
-    @InjectView(R.id.demo_button_view)
     private Button mBtDemo;
+
     private ProgressDialog mProgressBar;
     private LoginTask mTask;
     private String mEmailText;
@@ -77,12 +71,14 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
         getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.activity_login);
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(GeneralUtil.getLogFilePath(this)));
+        mUsernameEditText = (EditText) findViewById(R.id.email_input_view);
+        mPasswordEditText = (EditText) findViewById(R.id.password_input_view);
+        mSubmitButton = (Button) findViewById(R.id.login_button_view);
+        mBtDemo = (Button) findViewById(R.id.demo_button_view);
+
         mSubmitButton.setOnClickListener(this);
         mBtDemo.setOnClickListener(this);
         mProgressBar = new ProgressDialog(this);
-        mProgressBar.setIndeterminateDrawable(getResources().getDrawable(
-                com.actionbarsherlock.R.drawable.abs__progress_medium_holo));
         mProgressBar.setMessage("Signing in...");
         mProgressBar.setCancelable(false);
 

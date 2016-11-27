@@ -1,11 +1,5 @@
 package com.appiphany.nacc.screens;
 
-import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
-
-import de.greenrobot.event.EventBus;
-import roboguice.inject.InjectView;
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -17,20 +11,23 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.ActionBar;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
-import com.actionbarsherlock.app.ActionBar;
-import com.actionbarsherlock.app.ActionBar.OnNavigationListener;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.events.UpdateProject;
 import com.appiphany.nacc.model.Photo;
@@ -43,13 +40,16 @@ import com.appiphany.nacc.utils.DialogUtil;
 import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.UIUtils;
-import com.appiphany.nacc.utils.UncaughtExceptionHandler;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+
+import de.greenrobot.event.EventBus;
+
 public class MainScreenActivity extends BaseActivity implements OnItemClickListener {
-    @InjectView(R.id.list_photos)
     private ListView mListView;
-    @InjectView(R.id.demo_view)
     private LinearLayout mDemoView;
 
     private PhotoAdapter mAdapter;
@@ -77,9 +77,9 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.activity_main_screen_layout);
-        Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(GeneralUtil.getLogFilePath(this)));
-        
 
+        mListView = (ListView) findViewById(R.id.list_photos);
+        mDemoView = (LinearLayout) findViewById(R.id.demo_view);
         // just show demo view with demo mode
         if (Config.isDemoMode(this)) {
             mDemoView.setVisibility(View.VISIBLE);
@@ -112,11 +112,11 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
             refreshList();
         }
 
-        if(intent != null && intent.getBooleanExtra(DOWNLOAD_GUIDE_EXTRA, false) && !Config.isDemoMode(this)){
+        if(intent.getBooleanExtra(DOWNLOAD_GUIDE_EXTRA, false) && !Config.isDemoMode(this)){
         }
         
         if (cacheService != null) {
-            if (intent != null && intent.getBooleanExtra(FROM_LOGIN_EXTRA, false)) {
+            if (intent.getBooleanExtra(FROM_LOGIN_EXTRA, false)) {
             	if (dialog1 == null) {
             		dialog1 = UIUtils.showAlertDialog(this, R.string.dialog_title, R.string.main_screen_alert, false, dialogListener);
             		dialog1.show();
@@ -216,7 +216,10 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         localMgr.unregisterReceiver(mReceiver);
     }
 
+
+    @SuppressWarnings("ConstantConditions")
     private void initActionBar() {
+        getSupportActionBar().setIcon(R.drawable.ic_launcher);
     	getSupportActionBar().setDisplayUseLogoEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayUseLogoEnabled(true);
@@ -248,14 +251,31 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         		currentIndex = projects.indexOf(project);
         	}
 		}
-        
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getSupportActionBar().getThemedContext(), android.R.layout.simple_list_item_1, items);
-       
+
+
+//        ArrayAdapter<String> adapter = new ArrayAdapter<>(getSupportActionBar().getThemedContext(),
+//                android.R.layout.simple_list_item_1, items);
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainScreenActivity.this
+                , R.layout.action_bar_dropdown_item,
+                android.R.id.text1, items){
+            @NonNull
+            @Override
+            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
+                if (convertView == null) {
+                    convertView = LayoutInflater.from(getContext()).inflate(R.layout.action_bar_spinner_item, null);
+                }
+
+                TextView textView = (TextView) convertView.findViewById(android.R.id.text1);
+                textView.setText(items.get(getSupportActionBar().getSelectedNavigationIndex()));
+                return convertView;
+            }
+        };
         getSupportActionBar()
-                .setListNavigationCallbacks(adapter, new OnNavigationListener() {
+                .setListNavigationCallbacks(adapter, new ActionBar.OnNavigationListener() {
 					
 					@Override
 					public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+                        adapter.notifyDataSetChanged();
 						Config.setCurrentProjectId(getActivityContext(), projects.get(itemPosition).getUid());
 						refreshList();
 						return false;
@@ -275,7 +295,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getSupportMenuInflater().inflate(R.menu.main_screen_menu, menu);   
+        getMenuInflater().inflate(R.menu.main_screen_menu, menu);
         return super.onCreateOptionsMenu(menu);
     }
 

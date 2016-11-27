@@ -17,6 +17,6 @@
         android:layout_height="wrap_content"
         android:animationResolution="32"
         android:layout_gravity="center"
-        android:indeterminate="true"
-        android:indeterminateDrawable="@drawable/abs__progress_medium_holo" />
+        style="?android:attr/progressBarStyleLarge"
+        android:indeterminate="true"/>
 </FrameLayout>

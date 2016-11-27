@@ -9,14 +9,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
-import com.actionbarsherlock.view.Menu;
-import com.actionbarsherlock.view.MenuItem;
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Site;
@@ -26,7 +26,7 @@ import com.appiphany.nacc.utils.AbstractDataLoader;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.NetworkUtils;
 
-public class SitesActivity extends BaseFragmentActivity implements LoaderCallbacks<List<Site>>, OnItemClickListener {
+public class SitesActivity extends BaseActivity implements LoaderCallbacks<List<Site>>, OnItemClickListener {
 	private static final int LOADER_ID = SitesActivity.class.hashCode();
 	private GuideAdapter guideAdapter;
 	private ListView lvSites;
@@ -43,7 +43,8 @@ public class SitesActivity extends BaseFragmentActivity implements LoaderCallbac
 		progressLoadSites.setVisibility(View.VISIBLE);
 	}
 
-	private void initActionBar() {
+	@SuppressWarnings("ConstantConditions")
+    private void initActionBar() {
 		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		getSupportActionBar().setDisplayShowHomeEnabled(true);
 		getSupportActionBar().setDisplayShowTitleEnabled(true);
@@ -53,7 +54,7 @@ public class SitesActivity extends BaseFragmentActivity implements LoaderCallbac
 	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		 getSupportMenuInflater().inflate(R.menu.sites_menu, menu);
+		 getMenuInflater().inflate(R.menu.sites_menu, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 	

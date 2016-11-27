@@ -14,12 +14,12 @@ import android.app.AlarmManager;
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Bitmap.CompressFormat;
 import android.location.Location;
 import android.os.Build;
 import android.util.Log;
 import android.view.ViewConfiguration;
 
+import com.appiphany.nacc.BuildConfig;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
@@ -27,8 +27,9 @@ import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Ln;
 import com.crashlytics.android.Crashlytics;
+import com.crashlytics.android.core.CrashlyticsCore;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
-import com.nostra13.universalimageloader.cache.disc.impl.LimitedAgeDiscCache;
+import com.nostra13.universalimageloader.cache.disc.impl.LimitedAgeDiskCache;
 import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
 import com.nostra13.universalimageloader.cache.memory.impl.UsingFreqLimitedMemoryCache;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
@@ -63,7 +64,8 @@ public class GlobalState extends Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
-        Fabric.with(this, new Crashlytics());
+        CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
+        Fabric.with(this, new Crashlytics.Builder().core(core).build());
         
         context = getApplicationContext();
         
@@ -109,18 +111,17 @@ public class GlobalState extends Application {
         DisplayImageOptions options = new DisplayImageOptions.Builder()
                 .resetViewBeforeLoading(true)
                 .cacheInMemory(true)
-                .cacheOnDisc(true)
+                .cacheOnDisk(true)
                 .bitmapConfig(Bitmap.Config.RGB_565) // default
                 .displayer(new SimpleBitmapDisplayer()).considerExifParams(true)
                 .build();
         ImageLoaderConfiguration.Builder builder = new ImageLoaderConfiguration.Builder(getApplicationContext())
                 .memoryCacheExtraOptions(Config.CONFIG_WIDTH, Config.CONFIG_HEIGHT)
-                .discCacheExtraOptions(Config.CONFIG_WIDTH, Config.CONFIG_HEIGHT, CompressFormat.JPEG, 75, null)
                 .taskExecutor(getThreadPool())
                 .taskExecutorForCachedImages(getThreadPool())
                 .memoryCache(new UsingFreqLimitedMemoryCache(2 * 1024 * 1024)) // default
-                .discCache(new LimitedAgeDiscCache(cacheDir, 3600 * 24 * 7)) // default
-                .discCacheFileNameGenerator(new HashCodeFileNameGenerator()) // default
+                .diskCache(new LimitedAgeDiskCache(cacheDir, 3600 * 24 * 7))
+                .diskCacheFileNameGenerator(new HashCodeFileNameGenerator()) // default
                 .imageDownloader(new BaseImageDownloader(getApplicationContext())) // default
                 .defaultDisplayImageOptions(options) // default
                 .denyCacheImageMultipleSizesInMemory();
@@ -139,9 +140,7 @@ public class GlobalState extends Application {
         CacheService cacheService = new CacheService(this,
                 CacheService.createDBNameFromUser(Config.getActiveServer(this.getApplicationContext()),
                         Config.getActiveUser(this.getApplicationContext())));
-        if (cacheService != null) {
-            cacheService.close();
-        }
+        cacheService.close();
     }
 
     private void initThreadPool() {
@@ -161,7 +160,7 @@ public class GlobalState extends Application {
         return sSites;
     }
 
-    private static Object mLock = new Object();
+    private static final Object mLock = new Object();
 
     public static void setSites(List<Site> mSites) {
     	if(mSites == null || mSites.size() == 0){

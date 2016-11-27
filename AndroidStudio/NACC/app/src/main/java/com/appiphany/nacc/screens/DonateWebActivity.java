@@ -3,12 +3,12 @@ package com.appiphany.nacc.screens;
 import java.lang.reflect.Field;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.ZoomButtonsController;
-import com.actionbarsherlock.view.MenuItem;
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.utils.Config;
 
@@ -57,7 +57,8 @@ public class DonateWebActivity extends BaseActivity {
 		
 	}
 	
-	private void initActionBar() {
+	@SuppressWarnings("ConstantConditions")
+    private void initActionBar() {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);

@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/NACC.iml" filepath="$PROJECT_DIR$/NACC.iml" />
-      <module fileurl="file://$PROJECT_DIR$/actionbar_sherlock_library/actionbar_sherlock_library.iml" filepath="$PROJECT_DIR$/actionbar_sherlock_library/actionbar_sherlock_library.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

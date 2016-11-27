@@ -22,7 +22,7 @@
         android:layout_centerVertical="true"
         android:animationResolution="32"
         android:indeterminate="true"
-        android:indeterminateDrawable="@drawable/abs__progress_medium_holo" />
+        style="?android:attr/progressBarStyleLarge"/>
 
     <RelativeLayout
         android:layout_width="match_parent"

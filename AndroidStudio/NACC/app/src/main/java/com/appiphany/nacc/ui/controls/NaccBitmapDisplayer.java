@@ -12,7 +12,7 @@ import com.nostra13.universalimageloader.core.imageaware.ImageAware;
 public class NaccBitmapDisplayer implements BitmapDisplayer {
 
 	@Override
-	public Bitmap display(Bitmap bitmap, ImageAware imageAware, LoadedFrom loadedFrom) {
+	public void display(Bitmap bitmap, ImageAware imageAware, LoadedFrom loadedFrom) {
 		if (bitmap != null) {
             if (imageAware.getWrappedView().getLayoutParams() instanceof RelativeLayout.LayoutParams) {
                 RelativeLayout.LayoutParams lp = (LayoutParams) imageAware.getWrappedView().getLayoutParams();
@@ -40,6 +40,5 @@ public class NaccBitmapDisplayer implements BitmapDisplayer {
     		Bitmap rotatedBitmap = Bitmap.createBitmap(bitmap , 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
             imageAware.setImageBitmap(rotatedBitmap);
         }
-        return bitmap;
 	}
 }
