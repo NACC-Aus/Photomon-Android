@@ -48,7 +48,7 @@
             android:name=".screens.SplashActivity"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@style/NoActionBarTheme" >
+            android:theme="@style/FullScreenTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -109,30 +109,13 @@
             android:screenOrientation="portrait" >
         </activity>
         <activity
-            android:name=".screens.ZoozActivity"
-            android:screenOrientation="portrait" >
-        </activity>
-        <activity
             android:name=".screens.DonateWebActivity"
             android:screenOrientation="portrait" >
         </activity>
-        
-        <!-- ZooZ Activity --> 
-		<activity android:name="com.zooz.android.lib.CheckoutActivity"
-			android:theme="@android:style/Theme.Translucent"
-			android:configChanges="keyboardHidden|orientation|screenSize"/>
-		
-		<!-- Pay Pal -->
-		<activity android:name="com.paypal.android.MEP.PayPalActivity"
-		    android:theme="@android:style/Theme.Translucent.NoTitleBar"
-		    android:configChanges="keyboardHidden|orientation|screenSize"/>
 		
 		<!-- location library -->
 		 <service android:name="com.littlefluffytoys.littlefluffylocationlibrary.LocationBroadcastService" />
         <receiver android:name="com.littlefluffytoys.littlefluffylocationlibrary.PassiveLocationChangedReceiver" />
-
-
-    
 
     <meta-data android:name="com.crashlytics.ApiKey" android:value="da890163bea6160a63b9161e7aedd925e2210c9f"/>
     </application>

@@ -6,4 +6,9 @@
     <color name="semi_panel_bgr_color">#FF4C4949</color>
     <color name="guide_color_bgr">#FFDBF7C6</color>
     <color name="gray_background">#B3B3B3</color>
+
+    <color name="colorPrimary">#dddddd</color>
+    <color name="colorPrimaryDark">@android:color/black</color>
+    <color name="colorAccent">#0099cc</color>
+    <color name="colorPrimaryDark_v23">#dddddd</color>
 </resources>

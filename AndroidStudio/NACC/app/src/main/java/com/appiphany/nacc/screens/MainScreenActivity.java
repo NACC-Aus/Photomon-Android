@@ -219,7 +219,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 
     @SuppressWarnings("ConstantConditions")
     private void initActionBar() {
-        getSupportActionBar().setIcon(R.drawable.ic_launcher);
+        getSupportActionBar().setIcon(R.drawable.actionbar_logo_with_space);
     	getSupportActionBar().setDisplayUseLogoEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayUseLogoEnabled(true);
