@@ -14,7 +14,6 @@ import com.appiphany.nacc.model.Project;
 import com.appiphany.nacc.model.ProjectResult;
 import com.appiphany.nacc.model.Site;
 import com.crashlytics.android.Crashlytics;
-import com.flurry.org.codehaus.jackson.map.util.ISO8601Utils;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
