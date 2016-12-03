@@ -6,7 +6,8 @@
         android:title="@string/take_photo"
         android:id="@+id/menu_take_picture"
         android:icon="@drawable/ic_content_new"
-        app:showAsAction="always"/>
+        app:showAsAction="never"
+        android:visible="false"/>
 
     <item
         android:id="@+id/menu_info"

@@ -43,8 +43,7 @@ public class PhotoAdapter extends SimpleCursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        View convertView = LayoutInflater.from(mContext).inflate(R.layout.photo_item_layout, null);
-        return convertView;
+        return View.inflate(context, R.layout.photo_item_layout, null);
     }
 
     @Override

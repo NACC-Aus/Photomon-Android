@@ -1,32 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical" >
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
 
-    <ListView
-        android:id="@+id/list_photos"
-        android:cacheColorHint="@android:color/transparent"
-        android:background="@android:color/transparent"
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/main_content"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        />
-    
+        android:layout_weight="1">
+
+        <ListView
+            android:id="@+id/list_photos"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:cacheColorHint="@android:color/transparent"/>
+
+        <android.support.design.widget.FloatingActionButton
+            app:layout_behavior="com.appiphany.nacc.ui.controls.ScrollAwareFABBehavior"
+            android:id="@+id/fabAddNew"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_content_new"
+            app:borderWidth="0dp"
+            app:elevation="6dp"
+            app:fabSize="normal"
+            android:clickable="true"
+            app:layout_anchor="@id/list_photos"
+            app:layout_anchorGravity="bottom|right|end"/>
+
+    </android.support.design.widget.CoordinatorLayout>
+
     <LinearLayout
         android:id="@+id/demo_view"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content" 
-        android:gravity="center_horizontal"
+        android:layout_height="wrap_content"
         android:background="@drawable/btn_default_color_light"
-        >
-        <TextView 
+        android:gravity="center_horizontal">
+
+        <TextView
             android:layout_width="wrap_content"
-        	android:layout_height="wrap_content"
-        	android:text="@string/demo_button_text"
-        	android:layout_gravity="center_horizontal"
-        	android:gravity="center"
-        	android:textSize="22dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:text="@string/demo_button_text"
+            android:textSize="22dp"
             />
     </LinearLayout>
 

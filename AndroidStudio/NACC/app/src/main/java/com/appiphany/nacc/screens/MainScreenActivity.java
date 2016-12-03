@@ -10,8 +10,10 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.view.KeyEvent;
@@ -48,9 +50,10 @@ import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
-public class MainScreenActivity extends BaseActivity implements OnItemClickListener {
+public class MainScreenActivity extends BaseActivity implements OnItemClickListener, View.OnClickListener {
     private ListView mListView;
     private LinearLayout mDemoView;
+    private FloatingActionButton mFABAddNew;
 
     private PhotoAdapter mAdapter;
     private UploadBroadcaseReceiver mReceiver = new UploadBroadcaseReceiver(this);
@@ -80,6 +83,8 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 
         mListView = (ListView) findViewById(R.id.list_photos);
         mDemoView = (LinearLayout) findViewById(R.id.demo_view);
+        mFABAddNew = (FloatingActionButton) findViewById(R.id.fabAddNew);
+
         // just show demo view with demo mode
         if (Config.isDemoMode(this)) {
             mDemoView.setVisibility(View.VISIBLE);
@@ -150,7 +155,12 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
             });
             builder.show();
         }
-        
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mListView.setNestedScrollingEnabled(true);
+        }
+
+        mFABAddNew.setOnClickListener(this);
         initActionBar();
         LocationLibrary.forceLocationUpdate(this);
         LocationLibrary.startAlarmAndListener(this);
@@ -336,11 +346,6 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
             Intent showReminder = new Intent(this, ReminderActivity.class);
             startActivityForResult(showReminder, REQUEST_REMINDER);
             break;
-        case R.id.menu_take_picture:
-            Intent startTakingPicture = new Intent(this, ImageTakingActivity.class);
-            Config.setShowDirectionDialog(this, true);
-            startActivity(startTakingPicture);
-            break;
         case R.id.menu_info:
             Intent infoIntent = new Intent(this, InfoActivity.class);
             startActivity(infoIntent);
@@ -469,6 +474,15 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         }
         
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public void onClick(View view) {
+        if(view == mFABAddNew){
+            Intent startTakingPicture = new Intent(this, ImageTakingActivity.class);
+            Config.setShowDirectionDialog(this, true);
+            startActivity(startTakingPicture);
+        }
     }
 
     private static class UploadBroadcaseReceiver extends BroadcastReceiver {
