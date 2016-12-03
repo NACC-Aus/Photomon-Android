@@ -1,11 +1,13 @@
 package com.appiphany.nacc.screens;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -15,6 +17,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -27,6 +30,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.RelativeLayout.LayoutParams;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +48,7 @@ import com.appiphany.nacc.utils.UIUtils;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
 import com.nostra13.universalimageloader.core.ImageLoader;
+import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -52,7 +57,7 @@ import java.util.List;
 import java.util.UUID;
 
 
-public class ImagePreviewActivity extends BaseActivity implements OnClickListener {
+public class ImagePreviewActivity extends BaseActivity implements OnClickListener, SeekBar.OnSeekBarChangeListener {
     private static final int ADD_NOTE_CODE = 111;
     private static final int SHOW_DIALOG = 222;
 
@@ -66,6 +71,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     private TextView mDirectionTextView;
     private TextView mDescriptionTextView;
     private RelativeLayout mInfoLayout;
+    private ImageView mGuideImageView;
 
     private Button mBtNote;
 
@@ -78,6 +84,8 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     private LocationManager locationMgr;
     private Location mUserLocation;
     private String mNoteString = "";
+    private String mGuidePhotoPath;
+    private SeekBar seekOpacityCamera;
 
     private NetworkListener mReceiver = new NetworkListener(this);
     private GetSitesTask mTask;
@@ -91,6 +99,8 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     private boolean hasRegisterReceiver;
     private UpdateSiteReceiver updateSiteReceiver;
     private CacheService cacheService;
+    private Handler mHandler = new Handler();
+    private float currentAlpha;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,6 +115,8 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
         mDescriptionTextView = (TextView) findViewById(R.id.image_description_text);
         mInfoLayout = (RelativeLayout) findViewById(R.id.image_info_panel);
         mBtNote = (Button) findViewById(R.id.add_note_btn);
+        mGuideImageView = (ImageView) findViewById(R.id.guide_image_view);
+        seekOpacityCamera = (SeekBar) findViewById(R.id.seekOpacityCamera);
 
         mPreviewView.setOnClickListener(this);
         mBtNote.setOnClickListener(this);
@@ -119,6 +131,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             mDirection = intent.getStringExtra(BackgroundService.DIRECTION_EXTRA);
             mBestSite = (Site) intent.getSerializableExtra(BackgroundService.BEST_SITE);
             mUserLocation = GlobalState.getCurrentUserLocation();
+            mGuidePhotoPath = intent.getStringExtra(BackgroundService.GUIDE_PHOTO);
 
             mDirectionTextView.setText(mDirection);
             mDescriptionTextView.setText(UIUtils.getPhotoDate(new Date()));
@@ -141,6 +154,40 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
                 mPhotoName = mBestSite.getName();
                 mSiteId = mBestSite.getSiteId();
             }
+        }
+
+        currentAlpha = getIntent() != null ? getIntent().getFloatExtra(BackgroundService.GUIDE_PHOTO_ALPHA, 0.0f) : 0.0f;
+
+        seekOpacityCamera.setIndeterminate(false);
+        seekOpacityCamera.setOnSeekBarChangeListener(this);
+        if(currentAlpha == 0){
+            if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB){
+                seekOpacityCamera.setMax(255);
+                seekOpacityCamera.setProgress(120);
+                mGuideImageView.setAlpha(120);
+                currentAlpha = 120;
+            }else{
+                seekOpacityCamera.setMax(10);
+                seekOpacityCamera.setProgress(5);
+                mGuideImageView.setAlpha(0.5f);
+                currentAlpha = 0.5f;
+            }
+        }else{
+            if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB){
+                seekOpacityCamera.setMax(255);
+                seekOpacityCamera.setProgress((int)currentAlpha);
+                mGuideImageView.setAlpha((int)currentAlpha);
+            }else{
+                seekOpacityCamera.setMax(10);
+                seekOpacityCamera.setProgress((int)(currentAlpha * 10));
+                mGuideImageView.setAlpha(currentAlpha);
+            }
+        }
+
+        if(TextUtils.isEmpty(mGuidePhotoPath)){
+            seekOpacityCamera.setVisibility(View.INVISIBLE);
+        }else{
+            displayGuidePhoto(true);
         }
     }
 
@@ -224,6 +271,30 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     }
 
     private DialogHandler showDialogHandler = new DialogHandler(this);
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        if(fromUser){
+            if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB){
+                mGuideImageView.setAlpha(progress);
+                currentAlpha = progress;
+            }else{
+                mGuideImageView.setAlpha(progress/10.0f);
+                currentAlpha = progress/10.0f;
+            }
+        }
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+
+    }
 
     private static class DialogHandler extends Handler{
     	private final WeakReference<ImagePreviewActivity> mService;
@@ -574,6 +645,53 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             } 
         }
     }
+
+    @SuppressWarnings("deprecation")
+    @SuppressLint("NewApi")
+    private void displayGuidePhoto(boolean show) {
+        Ln.d("displayGuidePhoto");
+        if (mGuidePhotoPath != null) {
+            if (show) {
+                mHandler.postDelayed(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        if(!mGuidePhotoPath.startsWith("http")){
+                            ImageLoader.getInstance().displayImage("file://" +  mGuidePhotoPath, mGuideImageView, GeneralUtil.getNewScaleOption(), new SimpleImageLoadingListener() {
+                                @Override
+                                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+
+                                }
+                            });
+                        }else{
+                            ImageLoader.getInstance().displayImage(mGuidePhotoPath, mGuideImageView, GeneralUtil.getNewScaleOption(),new SimpleImageLoadingListener() {
+                                @Override
+                                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
+
+                                }
+                            });
+                        }
+                    }
+                }, 700);
+
+
+                seekOpacityCamera.setVisibility(View.VISIBLE);
+                if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB){
+                    seekOpacityCamera.setMax(255);
+                    mGuideImageView.setAlpha((int)currentAlpha);
+                }else{
+                    seekOpacityCamera.setMax(10);
+                    mGuideImageView.setAlpha(currentAlpha);
+                }
+
+                mGuideImageView.setVisibility(View.VISIBLE);
+            } else {
+                mGuideImageView.setVisibility(View.INVISIBLE);
+                seekOpacityCamera.setVisibility(View.INVISIBLE);
+            }
+        }
+    }
+
 
     private static class GetSitesTask extends AsyncTask<String, Void, List<Site>> {
         private WeakReference<ImagePreviewActivity> mContext;

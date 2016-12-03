@@ -815,6 +815,8 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
             showPreviewIntent.putExtra(BackgroundService.CAMERA_DEGREES, mCameraDegrees);
             showPreviewIntent.putExtra(BackgroundService.FROM_GALLERY, isSelectFromGallery);
             showPreviewIntent.putExtra(BackgroundService.BEST_SITE, mBestSite);
+            showPreviewIntent.putExtra(BackgroundService.GUIDE_PHOTO, mGuidePhotoPath);
+            showPreviewIntent.putExtra(BackgroundService.GUIDE_PHOTO_ALPHA, currentAlpha);
             startActivity(showPreviewIntent);
             
         } else {

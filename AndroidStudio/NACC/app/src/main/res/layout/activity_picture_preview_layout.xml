@@ -56,4 +56,18 @@
         android:adjustViewBounds="true"
         android:scaleType="fitCenter"/>
 
+    <ImageView
+        android:id="@+id/guide_image_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/image_info_panel"
+        android:layout_alignParentTop="true"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop" />
+
+    <SeekBar
+        android:layout_above="@id/image_info_panel"
+        android:id="@+id/seekOpacityCamera"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 </RelativeLayout>

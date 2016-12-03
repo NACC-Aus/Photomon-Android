@@ -64,6 +64,8 @@ public class BackgroundService extends IntentService {
     private static final long MAX_RETRY_TIME = 10 * 60 * 1000;
     public static final String FROM_GALLERY = "from_gallery";
     public static final String BEST_SITE = "best_site";
+    public static final String GUIDE_PHOTO = "guide_photo";
+    public static final String GUIDE_PHOTO_ALPHA = "guide_photo_alpha";
 
     private String mPhotoServerId;
     
