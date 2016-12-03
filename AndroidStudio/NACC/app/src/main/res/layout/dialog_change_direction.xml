@@ -1,56 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="10dp"
+    android:layout_gravity="center_horizontal"
+    android:gravity="center_horizontal">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:text="@string/choose_direction"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:orientation="horizontal"
-        android:padding="1dp" >
+        android:layout_marginBottom="10dp"/>
 
-        <Button
-            android:id="@+id/btnNorth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/btn_default_color_light"
-            android:text="@string/n_text"
-            android:textColor="@drawable/selected_button_text_color" />
+    <Button
+        android:id="@+id/btnNorth"
+        android:minWidth="@dimen/direction_width"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/n_text"
+        android:textColor="@drawable/selected_button_text_color" />
 
-        <Button
-            android:id="@+id/btnSouth"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/btn_default_color_light"
-            android:text="@string/s_text"
-            android:textColor="@drawable/selected_button_text_color" />
+    <Button
+        android:id="@+id/btnSouth"
+        android:minWidth="@dimen/direction_width"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/s_text"
+        android:textColor="@drawable/selected_button_text_color" />
 
-        <Button
-            android:id="@+id/btnEast"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/btn_default_color_light"
-            android:text="@string/e_text"
-            android:textColor="@drawable/selected_button_text_color" />
+    <Button
+        android:id="@+id/btnEast"
+        android:minWidth="@dimen/direction_width"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/e_text"
+        android:textColor="@drawable/selected_button_text_color" />
 
-        <Button
-            android:id="@+id/btnWest"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/btn_default_color_light"
-            android:text="@string/w_text"
-            android:textColor="@drawable/selected_button_text_color" />
-
-    </LinearLayout>
+    <Button
+        android:id="@+id/btnWest"
+        android:minWidth="@dimen/direction_width"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/w_text"
+        android:textColor="@drawable/selected_button_text_color" />
 
     <Button
         android:layout_gravity="center"
         android:id="@+id/btnPoint"
+        android:minWidth="@dimen/direction_width"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@drawable/btn_default_color_light"
         android:text="@string/p_text"
         android:textColor="@drawable/selected_button_text_color" />
 

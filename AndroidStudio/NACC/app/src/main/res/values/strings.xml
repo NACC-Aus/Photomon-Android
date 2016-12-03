@@ -56,6 +56,7 @@
     <string name="reminder_notifications">It\'s time to take your monitor picture.</string>
     <string name="unable_to_upload">To keep uploading your photo. Please check your connection and open NACC app.</string>
     <string name="take_photo">Take a photo</string>
+    <string name="choose_direction">Choose a direction</string>
     
     <string-array name="frequency_array">
         <item>1 year</item>

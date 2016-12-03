@@ -43,6 +43,7 @@ import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.UIUtils;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
+import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -216,6 +217,8 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         intentFilter.addAction(DownloadService.DOWNLOAD_GUIDE_FINISH_ACTION);
         localMgr.registerReceiver(mReceiver, intentFilter);
 
+        final IntentFilter lftIntentFilter = new IntentFilter(LocationLibraryConstants.getLocationChangedPeriodicBroadcastAction());
+        registerReceiver(lftBroadcastReceiver, lftIntentFilter);
     }
 
     @Override
@@ -224,6 +227,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         Ln.d("on stop");
         LocalBroadcastManager localMgr = LocalBroadcastManager.getInstance(this);
         localMgr.unregisterReceiver(mReceiver);
+        unregisterReceiver(lftBroadcastReceiver);
     }
 
 
@@ -598,4 +602,16 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         initActionBar();
         EventBus.getDefault().removeStickyEvent(event);
     }
+
+    private final BroadcastReceiver lftBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // extract the location info in the broadcast
+            Intent locationIntent = new Intent(MainScreenActivity.this, LocationService.class);
+            locationIntent.addCategory(LocationService.SERVICE_TAG);
+            locationIntent.setAction(LocationService.LOCATION_CHANGED);
+            locationIntent.putExtra(LocationService.LOCATION_DATA, intent.getSerializableExtra(LocationLibraryConstants.LOCATION_BROADCAST_EXTRA_LOCATIONINFO));
+            startService(locationIntent);
+        }
+    };
 }

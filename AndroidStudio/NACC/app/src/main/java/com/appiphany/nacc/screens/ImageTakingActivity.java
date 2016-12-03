@@ -6,7 +6,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.nio.channels.FileChannel;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
@@ -24,6 +27,7 @@ import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.graphics.PorterDuff;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.CameraInfo;
@@ -40,6 +44,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.StatFs;
 import android.provider.MediaStore;
+import android.support.v4.content.ContextCompat;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.Surface;
@@ -112,6 +117,8 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
     private float currentAlpha;
     private static final int version = android.os.Build.VERSION.SDK_INT;
     private boolean hasSurface;
+
+    private Map<DIRECTION, GuidePhoto> allGuidePhotos = new HashMap<>();
     
     @SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
@@ -175,7 +182,9 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setProgressStyle(android.R.style.Widget_DeviceDefault_Light_ProgressBar_Large);
-        
+
+        getAllGuidePhotos(this);
+
         if(Config.shouldShowDirectionDialog(this)){
         	showChangeDirectionDialog();
         }        
@@ -828,17 +837,43 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
         int screenwidth = getResources().getDisplayMetrics().widthPixels;
         int width = getResources().getDimensionPixelSize(R.dimen.pop_up_width);
         if(	width > screenwidth){
-        	dialog.getWindow().setLayout(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+        	dialog.getWindow().setLayout(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
         }else{
         	dialog.getWindow().setLayout(width, LayoutParams.WRAP_CONTENT);
         }
+
         dialog.getWindow().setGravity(Gravity.CENTER);
         Button btnNorth = (Button) dialog.findViewById(R.id.btnNorth);
         Button btnSouth = (Button) dialog.findViewById(R.id.btnSouth);
         Button btnEast = (Button) dialog.findViewById(R.id.btnEast);
         Button btnWest = (Button) dialog.findViewById(R.id.btnWest);        
         Button btnPoint = (Button)dialog.findViewById(R.id.btnPoint);
-        
+
+        if(allGuidePhotos.get(DIRECTION.NORTH) != null){
+            btnNorth.getBackground().setColorFilter(ContextCompat.getColor(this,
+                    R.color.guide_color_bgr), PorterDuff.Mode.MULTIPLY);
+        }
+
+        if(allGuidePhotos.get(DIRECTION.SOUTH) != null){
+            btnSouth.getBackground().setColorFilter(ContextCompat.getColor(this,
+                    R.color.guide_color_bgr), PorterDuff.Mode.MULTIPLY);
+        }
+
+        if(allGuidePhotos.get(DIRECTION.EAST) != null){
+            btnEast.getBackground().setColorFilter(ContextCompat.getColor(this,
+                    R.color.guide_color_bgr), PorterDuff.Mode.MULTIPLY);
+        }
+
+        if(allGuidePhotos.get(DIRECTION.WEST) != null){
+            btnWest.getBackground().setColorFilter(ContextCompat.getColor(this,
+                    R.color.guide_color_bgr), PorterDuff.Mode.MULTIPLY);
+        }
+
+        if(allGuidePhotos.get(DIRECTION.POINT) != null){
+            btnPoint.getBackground().setColorFilter(ContextCompat.getColor(this,
+                    R.color.guide_color_bgr), PorterDuff.Mode.MULTIPLY);
+        }
+
         OnClickListener directionClickListener = new OnClickListener() {
     		
     		@Override
@@ -1054,7 +1089,7 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			Ln.d("UpdateSiteReceiver onReceive");
-			if(intent == null || intent.getAction() == null || mContext == null && mContext.get() == null){
+			if(intent == null || intent.getAction() == null || mContext == null || mContext.get() == null){
 				return;
 			}
 			
@@ -1120,9 +1155,25 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
 		        displayGuidePhoto(isGuideOn);
 		    }
 		}
-		
+
+        if(allGuidePhotos.isEmpty()){
+            getAllGuidePhotos(context);
+        }
+
 		isLoadingGuide = false;
 	}
+
+    private void getAllGuidePhotos(Context context){
+        if(GlobalState.getBestSite() != null){
+            CacheService mCacheService = CacheService.getInstance(
+                    context, CacheService.createDBNameFromUser(Config.getActiveServer(context), Config.getActiveUser(context)));
+
+            for (DIRECTION dir : DIRECTION.values()) {
+                GuidePhoto guidePhoto = mCacheService.getGuidePhotoBySiteId(GlobalState.getBestSite().getSiteId(), dir);
+                allGuidePhotos.put(dir, guidePhoto);
+            }
+        }
+    }
 
     private void showNoGuide(){
     	Ln.d("show no guide");
