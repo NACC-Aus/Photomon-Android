@@ -102,6 +102,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     private Handler mHandler = new Handler();
     private float currentAlpha;
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -156,32 +157,19 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             }
         }
 
-        currentAlpha = getIntent() != null ? getIntent().getFloatExtra(BackgroundService.GUIDE_PHOTO_ALPHA, 0.0f) : 0.0f;
-
         seekOpacityCamera.setIndeterminate(false);
         seekOpacityCamera.setOnSeekBarChangeListener(this);
-        if(currentAlpha == 0){
-            if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB){
-                seekOpacityCamera.setMax(255);
-                seekOpacityCamera.setProgress(120);
-                mGuideImageView.setAlpha(120);
-                currentAlpha = 120;
-            }else{
-                seekOpacityCamera.setMax(10);
-                seekOpacityCamera.setProgress(5);
-                mGuideImageView.setAlpha(0.5f);
-                currentAlpha = 0.5f;
-            }
+
+        if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB){
+            seekOpacityCamera.setMax(255);
+            seekOpacityCamera.setProgress(0);
+            mGuideImageView.setAlpha(0);
+            currentAlpha = 0;
         }else{
-            if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB){
-                seekOpacityCamera.setMax(255);
-                seekOpacityCamera.setProgress((int)currentAlpha);
-                mGuideImageView.setAlpha((int)currentAlpha);
-            }else{
-                seekOpacityCamera.setMax(10);
-                seekOpacityCamera.setProgress((int)(currentAlpha * 10));
-                mGuideImageView.setAlpha(currentAlpha);
-            }
+            seekOpacityCamera.setMax(10);
+            seekOpacityCamera.setProgress(0);
+            mGuideImageView.setAlpha(0f);
+            currentAlpha = 0f;
         }
 
         if(TextUtils.isEmpty(mGuidePhotoPath)){
@@ -200,7 +188,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     	return cacheService;
     }
 
-    @SuppressWarnings("ConstantConditions")
+    @SuppressWarnings({"ConstantConditions", "deprecation"})
     private void initActionBar() {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
