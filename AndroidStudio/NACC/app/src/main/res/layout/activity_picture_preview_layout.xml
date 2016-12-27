@@ -11,7 +11,10 @@
         android:layout_height="@dimen/taking_picture_height"
         android:layout_alignParentBottom="true"
         android:background="@color/panel_bgr_color">
-
+        <SeekBar
+            android:id="@+id/seekOpacityCamera"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
 
         <Button
             android:id="@+id/add_note_btn"
@@ -21,10 +24,10 @@
             android:layout_centerInParent="true"
             android:background="@drawable/btn_default_color_light"
             android:text="@string/note"
-            android:textColor="@android:color/white"
-            />
+            android:textColor="@android:color/white"/>
 
         <RelativeLayout
+            android:layout_below="@+id/seekOpacityCamera"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_toLeftOf="@id/add_note_btn"
@@ -65,9 +68,5 @@
         android:adjustViewBounds="true"
         android:scaleType="centerCrop" />
 
-    <SeekBar
-        android:layout_above="@id/image_info_panel"
-        android:id="@+id/seekOpacityCamera"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+
 </RelativeLayout>
