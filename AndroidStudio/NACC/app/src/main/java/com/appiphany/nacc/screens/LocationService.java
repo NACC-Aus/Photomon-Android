@@ -21,7 +21,8 @@ import android.os.Looper;
 public class LocationService extends Service{
 	public static final String LOCATION_CHANGED = "location_changed";
 	public static final String LOCATION_DATA = "location_data";
-	
+    public static final String REFRESH_SITE = "REFRESH_SITE";
+
 	public static final String SERVICE_TAG = "LocationService";
 	public static final String UPDATE_SITE_ACTION = "UpdateSite";
 	private static final int CHECK_SETTING_INTERVAL = 15000;
@@ -52,8 +53,12 @@ public class LocationService extends Service{
             }
 
             context = this;
-            if (intent != null && LOCATION_CHANGED.equals(intent.getAction())) {
-                onLocationChanged(intent);
+            if (intent != null) {
+                if(LOCATION_CHANGED.equals(intent.getAction())) {
+                    onLocationChanged(intent);
+                }else if(REFRESH_SITE.equals(intent.getAction())){
+                    updateSite();
+                }
             }
 
         }catch (Exception ex){
@@ -209,5 +214,14 @@ public class LocationService extends Service{
 		updateSitesTask = new UpdateSitesTask(loc);
 		performOnBackgroundThread(updateSitesTask);
 	}
+
+    public void updateSite(){
+        if(null != updateSitesTask && updateSitesTask.isRunning || GlobalState.getCurrentUserLocation() == null){
+            return;
+        }
+
+        updateSitesTask = new UpdateSitesTask(GlobalState.getCurrentUserLocation());
+        performOnBackgroundThread(updateSitesTask);
+    }
 	
 }

@@ -293,6 +293,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
                         adapter.notifyDataSetChanged();
 						Config.setCurrentProjectId(getActivityContext(), projects.get(itemPosition).getUid());
 						refreshList();
+                        reloadCurrentSite();
 						return false;
 					}
 				});
@@ -302,7 +303,14 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         	getSupportActionBar().setSelectedNavigationItem(currentIndex);
         }
     }
-    
+
+    private void reloadCurrentSite() {
+        Intent locationIntent = new Intent(MainScreenActivity.this, LocationService.class);
+        locationIntent.addCategory(LocationService.SERVICE_TAG);
+        locationIntent.setAction(LocationService.REFRESH_SITE);
+        startService(locationIntent);
+    }
+
     private List<Project> getProjects(){
     	List<Project> ret = cacheService.getProjects();
     	return ret;
