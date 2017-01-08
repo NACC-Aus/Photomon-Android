@@ -851,29 +851,34 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
         Button btnWest = (Button) dialog.findViewById(R.id.btnWest);        
         Button btnPoint = (Button)dialog.findViewById(R.id.btnPoint);
 
+        int guideBackground = ContextCompat.getColor(this,
+                R.color.guide_dark_color_bgr);
+        int guideText = ContextCompat.getColor(this,
+                R.color.white);
+
         if(allGuidePhotos.get(DIRECTION.NORTH) != null){
-            btnNorth.getBackground().setColorFilter(ContextCompat.getColor(this,
-                    R.color.guide_color_bgr), PorterDuff.Mode.MULTIPLY);
+            btnNorth.getBackground().setColorFilter(guideBackground, PorterDuff.Mode.MULTIPLY);
+            btnNorth.setTextColor(guideText);
         }
 
         if(allGuidePhotos.get(DIRECTION.SOUTH) != null){
-            btnSouth.getBackground().setColorFilter(ContextCompat.getColor(this,
-                    R.color.guide_color_bgr), PorterDuff.Mode.MULTIPLY);
+            btnSouth.getBackground().setColorFilter(guideBackground, PorterDuff.Mode.MULTIPLY);
+            btnNorth.setTextColor(guideText);
         }
 
         if(allGuidePhotos.get(DIRECTION.EAST) != null){
-            btnEast.getBackground().setColorFilter(ContextCompat.getColor(this,
-                    R.color.guide_color_bgr), PorterDuff.Mode.MULTIPLY);
+            btnEast.getBackground().setColorFilter(guideBackground, PorterDuff.Mode.MULTIPLY);
+            btnNorth.setTextColor(guideText);
         }
 
         if(allGuidePhotos.get(DIRECTION.WEST) != null){
-            btnWest.getBackground().setColorFilter(ContextCompat.getColor(this,
-                    R.color.guide_color_bgr), PorterDuff.Mode.MULTIPLY);
+            btnWest.getBackground().setColorFilter(guideBackground, PorterDuff.Mode.MULTIPLY);
+            btnNorth.setTextColor(guideText);
         }
 
         if(allGuidePhotos.get(DIRECTION.POINT) != null){
-            btnPoint.getBackground().setColorFilter(ContextCompat.getColor(this,
-                    R.color.guide_color_bgr), PorterDuff.Mode.MULTIPLY);
+            btnPoint.getBackground().setColorFilter(guideBackground, PorterDuff.Mode.MULTIPLY);
+            btnNorth.setTextColor(guideText);
         }
 
         OnClickListener directionClickListener = new OnClickListener() {
