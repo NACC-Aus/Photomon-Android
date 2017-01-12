@@ -863,22 +863,22 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
 
         if(allGuidePhotos.get(DIRECTION.SOUTH) != null){
             btnSouth.getBackground().setColorFilter(guideBackground, PorterDuff.Mode.MULTIPLY);
-            btnNorth.setTextColor(guideText);
+            btnSouth.setTextColor(guideText);
         }
 
         if(allGuidePhotos.get(DIRECTION.EAST) != null){
             btnEast.getBackground().setColorFilter(guideBackground, PorterDuff.Mode.MULTIPLY);
-            btnNorth.setTextColor(guideText);
+            btnEast.setTextColor(guideText);
         }
 
         if(allGuidePhotos.get(DIRECTION.WEST) != null){
             btnWest.getBackground().setColorFilter(guideBackground, PorterDuff.Mode.MULTIPLY);
-            btnNorth.setTextColor(guideText);
+            btnWest.setTextColor(guideText);
         }
 
         if(allGuidePhotos.get(DIRECTION.POINT) != null){
             btnPoint.getBackground().setColorFilter(guideBackground, PorterDuff.Mode.MULTIPLY);
-            btnNorth.setTextColor(guideText);
+            btnPoint.setTextColor(guideText);
         }
 
         OnClickListener directionClickListener = new OnClickListener() {
