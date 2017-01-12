@@ -13,6 +13,7 @@
         android:orientation="vertical">
 
         <SeekBar
+            android:thumb="@drawable/thumb_normal"
             android:id="@+id/seekOpacityCamera"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>

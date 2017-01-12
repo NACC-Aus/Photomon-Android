@@ -12,6 +12,7 @@
         android:layout_alignParentBottom="true"
         android:background="@color/panel_bgr_color">
         <SeekBar
+            android:thumb="@drawable/thumb_normal"
             android:id="@+id/seekOpacityCamera"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
@@ -66,7 +67,7 @@
         android:layout_above="@id/image_info_panel"
         android:layout_alignParentTop="true"
         android:adjustViewBounds="true"
-        android:scaleType="centerCrop" />
+        android:scaleType="fitCenter"/>
 
 
 </RelativeLayout>

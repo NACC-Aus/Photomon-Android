@@ -98,7 +98,7 @@ public class GeneralUtil {
 	public static DisplayImageOptions getScaleDisplayOption() {
 		if (displayScaleOption == null) {
 			displayScaleOption = new DisplayImageOptions.Builder()
-			.cacheInMemory(true).cacheOnDisc(true).considerExifParams(true)
+			.cacheInMemory(true).cacheOnDisk(true).considerExifParams(true)
 			.imageScaleType(ImageScaleType.EXACTLY)
 			.resetViewBeforeLoading(true).build();
 		}
@@ -107,7 +107,7 @@ public class GeneralUtil {
 	}
 	
 	public static DisplayImageOptions getNewScaleOption(){
-    	return new DisplayImageOptions.Builder().cacheInMemory(true).cacheOnDisc(true).imageScaleType(ImageScaleType.EXACTLY).considerExifParams(true)
+    	return new DisplayImageOptions.Builder().cacheInMemory(true).cacheOnDisk(true).imageScaleType(ImageScaleType.EXACTLY).considerExifParams(true)
 				.resetViewBeforeLoading(true).build();
     }
 	

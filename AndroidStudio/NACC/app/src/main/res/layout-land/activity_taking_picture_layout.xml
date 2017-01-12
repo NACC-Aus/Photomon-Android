@@ -13,6 +13,7 @@
         android:layout_height="match_parent">
 
         <com.appiphany.nacc.ui.controls.VerticalSeekBar
+            android:thumb="@drawable/thumb_normal"
             android:id="@+id/seekOpacityCamera"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"/>
