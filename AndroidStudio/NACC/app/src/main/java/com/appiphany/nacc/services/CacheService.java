@@ -207,7 +207,7 @@ public class CacheService extends SQLiteOpenHelper {
         content.put(COLUMN_NOTE, photo.getNote());
         content.put(COLUMN_OPACITY, photo.getOpacity());
         content.put(COLUMN_PROJECT, photo.getProjectId());
-        long rowId = db.update(TABLE_NAME_PHOTO, content, Photo.ID + "= ?", new String[]{photo.getPhotoID()});
+        long rowId = db.update(TABLE_NAME_PHOTO, content, COLUMN_ID + "= ?", new String[]{photo.getPhotoID()});
         return rowId > 0;
     }
 
