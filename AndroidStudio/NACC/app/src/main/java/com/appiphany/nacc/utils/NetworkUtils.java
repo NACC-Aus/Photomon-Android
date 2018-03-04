@@ -107,7 +107,8 @@ public class NetworkUtils {
 
 		try {
             String url = Uri.parse(Config.getActiveServer(context) + "sites.json").buildUpon().
-                    appendQueryParameter("project_id", project).build().toString();
+                    appendQueryParameter("project_id", project)
+					.appendQueryParameter("access_token", Config.getAccessToken(context)).build().toString();
 			HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
 			HttpRequest httpRequest = httpTransport.createRequestFactory().buildGetRequest(new GenericUrl(url));
 			httpRequest.setConnectTimeout(Config.HTTP_CONNECT_TIMEOUT);
