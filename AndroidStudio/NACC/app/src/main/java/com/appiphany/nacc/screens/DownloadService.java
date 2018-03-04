@@ -109,9 +109,14 @@ public class DownloadService extends IntentService {
 				if (localPhoto != null) {
 					Ln.d("photo exist with path %s, direction = %s, siteId = %s ", photo.getPhotoPath(), photo.getDirection(), photo.getSiteId());
 					// if this site and direction don't have any guide photo, then make the image from server as guide
-					if(!cacheService.isExistGuidePhoto(localPhoto.getDirection(), localPhoto.getSiteId())){
-						cacheService.insertGuidePhoto(this, localPhoto.getPhotoID(), localPhoto.getPhotoPath(), DIRECTION.getDirection(localPhoto.getDirection()), localPhoto.getSiteId(), localPhoto.getProjectId());
-					}
+					localPhoto.setNote(photo.getNote());
+					localPhoto.setPhotoPath(photo.getPhotoPath());
+					localPhoto.setProjectId(photo.getProjectId());
+					localPhoto.setSiteId(photo.getSiteId());
+					cacheService.updatePhoto(localPhoto);
+					cacheService.insertOrUpdateGuidePhoto(this, localPhoto.getPhotoID(),
+							localPhoto.getPhotoPath(), DIRECTION.getDirection(localPhoto.getDirection()),
+							localPhoto.getSiteId(), localPhoto.getProjectId());
 					
 					continue;
 				}

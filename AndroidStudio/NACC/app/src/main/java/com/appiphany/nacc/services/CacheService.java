@@ -193,6 +193,24 @@ public class CacheService extends SQLiteOpenHelper {
         return rowId != -1;
     }
 
+    public boolean updatePhoto(Photo photo) {
+        SQLiteDatabase db = getDatabase();
+        ContentValues content = new ContentValues();
+        content.put(COLUMN_ID, photo.getPhotoID());
+        content.put(COLUMN_PHOTO_SERVER_ID, photo.getPhotoServerId());
+        content.put(COLUMN_PHOTO_PATH, photo.getPhotoPath());
+        content.put(COLUMN_NAME, photo.getPhotoName());
+        content.put(COLUMN_DIRECTION, photo.getDirection());
+        content.put(COLUMN_SITE, photo.getSiteId());
+        content.put(COLUMN_TAKEN_DATE, photo.getTakenDate() == null? new Date().getTime(): photo.getTakenDate().getTime());
+        content.put(COLUMN_STATE, photo.getUploadState().getValue());
+        content.put(COLUMN_NOTE, photo.getNote());
+        content.put(COLUMN_OPACITY, photo.getOpacity());
+        content.put(COLUMN_PROJECT, photo.getProjectId());
+        long rowId = db.update(TABLE_NAME_PHOTO, content, Photo.ID + "= ?", new String[]{photo.getPhotoID()});
+        return rowId > 0;
+    }
+
     public void closeDatabase() {
         SQLiteDatabase db = getDatabase();
         if (db != null) {

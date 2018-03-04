@@ -10,6 +10,7 @@ import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
 import com.google.gson.annotations.SerializedName;
 
 public class Photo implements Serializable {
+    public static final String ID = "photoID";
     /**
      * 
      */
