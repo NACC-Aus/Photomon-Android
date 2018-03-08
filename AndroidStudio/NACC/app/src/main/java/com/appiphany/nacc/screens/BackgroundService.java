@@ -38,6 +38,8 @@ public class BackgroundService extends IntentService {
     public static final String REMINDER_ACTION = "com.appiphany.nacc.REMINDER_ACTION";
     public static final String CONNECTED_ACTION = "com.appiphany.nacc.REUPLOAD";
     public static final String UPLOAD_NOTE = "com.appiphany.nacc.UPLOAD_NOTE";
+    public static final String MARK_GUIDE = "com.appiphany.nacc.MARK_GUIDE";
+    public static final String REMOVE_GUIDE = "com.appiphany.nacc.REMOVE_GUIDE";
     
     public static final String DB_NAME_EXTRA = "db_name_extra";
     public static final String UPLOAD_STATE_EXTRA = "upload_state_extra";
@@ -95,6 +97,14 @@ public class BackgroundService extends IntentService {
 
             if (action.equals(UPLOAD_NOTE)) {
                 handleUploadNoteIntent(intent);
+            }
+
+            if(MARK_GUIDE.equals(action)) {
+                Photo photoModel = (Photo) intent.getSerializableExtra(BackgroundService.PHOTO_DATA_EXTRA);
+                doUpdateGuide(photoModel.getPhotoServerId(), photoModel.getProjectId(), true);
+            } else if (REMOVE_GUIDE.equals(action)) {
+                Photo photoModel = (Photo) intent.getSerializableExtra(BackgroundService.PHOTO_DATA_EXTRA);
+                doUpdateGuide(photoModel.getPhotoServerId(), photoModel.getProjectId(), false);
             }
         }
     }
@@ -312,6 +322,36 @@ public class BackgroundService extends IntentService {
             httpResponse.ignore();
         } catch (Exception e) {
         	Ln.d("[BackgroundService] error = " + e.getMessage());
+            result = false;
+        }
+        return result;
+    }
+
+    private boolean doUpdateGuide(String photoId, String projectId, boolean isGuide) {
+        Ln.d("upload note to server");
+        HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
+        MultipartFormHttpContent httpContent = new MultipartFormHttpContent();
+        httpContent.addParam("access_token", Config.getAccessToken(this));
+        httpContent.addParamWithoutEncode("project_id", projectId);
+        httpContent.addParamWithoutEncode("guide_photo", String.valueOf(isGuide));
+        httpContent.addParamWithoutEncode("_method", "PUT");
+        boolean result = false;
+        try {
+            HttpRequest httpRequest = httpTransport.createRequestFactory().buildPostRequest(
+                    new GenericUrl(Config.getActiveServer(this) + "photos/" + photoId + ".json"),
+                    httpContent);
+            httpRequest.setConnectTimeout(Config.HTTP_CONNECT_TIMEOUT);
+            httpRequest.setRetryOnExecuteIOException(false);
+            httpRequest.setNumberOfRetries(0);
+            HttpResponse httpResponse = httpRequest.execute();
+            if (httpResponse.getStatusCode() == 200) {
+                result = true;
+            }
+
+            Ln.d("HTTP RESPONSE " + httpResponse.getStatusCode() + " " + httpResponse.parseAsString());
+            httpResponse.ignore();
+        } catch (Exception e) {
+            Ln.d("[BackgroundService] error = " + e.getMessage());
             result = false;
         }
         return result;

@@ -10,6 +10,7 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -353,6 +354,13 @@ public class ImageReviewFragment extends Fragment implements OnClickListener, On
                     cacheService.deleteGuidePhoto(mPhoto.getPhotoID());
                     dialog.dismiss();
 
+                    if (!Config.isDemoMode(getContext()) && mPhoto != null) {
+                        Intent intentService = new Intent(getContext(), BackgroundService.class);
+                        intentService.setAction(BackgroundService.REMOVE_GUIDE);
+                        intentService.putExtra(BackgroundService.PHOTO_DATA_EXTRA, mPhoto);
+                        getContext().startService(intentService);
+                    }
+
                 }
             });
             builder.show();
@@ -361,6 +369,13 @@ public class ImageReviewFragment extends Fragment implements OnClickListener, On
                     DIRECTION.getDirection(mPhoto.getDirection()), mPhoto.getSiteId(), Config.getCurrentProjectId(getActivity()));
             mGuideBtn.setText(R.string.remove_guide);
             isGuidePhoto = true;
+
+            if (!Config.isDemoMode(getContext()) && mPhoto != null) {
+                Intent intentService = new Intent(getContext(), BackgroundService.class);
+                intentService.setAction(BackgroundService.MARK_GUIDE);
+                intentService.putExtra(BackgroundService.PHOTO_DATA_EXTRA, mPhoto);
+                getContext().startService(intentService);
+            }
         }
     }
 
