@@ -209,4 +209,27 @@ public class NetworkUtils {
 		return new ArrayList<>();
 	}
 
+	public static Site addNewSite(Context context, String projectId, String name, String latitude, String longitude){
+		Site result = null;
+		try {
+			com.appiphany.nacc.utils.HttpRequest request = com.appiphany.nacc.utils.HttpRequest.post(Config.getActiveServer(context) + "sites");
+			request.part("access_token", Config.getAccessToken(context));
+			request.part("project_id", projectId);
+			request.part("name", name);
+			request.part("latitude", latitude);
+			request.part("longitude", longitude);
+			if(request.ok()) {
+				String json = request.body();
+				result = new Gson().fromJson(json, Site.class);
+				result.setLat(GeneralUtil.parseDouble(result.getLatitude()));
+				result.setLng(GeneralUtil.parseDouble(result.getLongitude()));
+			}
+			request.disconnect();
+
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+
+		return result;
+	}
 }

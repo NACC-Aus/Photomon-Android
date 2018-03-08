@@ -52,6 +52,7 @@ import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListene
 
 import java.io.File;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -368,7 +369,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
                     return;
                 } else {
                     // check site name is exist?
-                    if (cacheService.checkSiteNameExist(siteName)) {
+                    if (Config.isDemoMode(getActivityContext()) && cacheService.checkSiteNameExist(siteName)) {
                         Toast.makeText(ImagePreviewActivity.this, R.string.site_exist, Toast.LENGTH_SHORT).show();
                         return;
                     }
@@ -388,26 +389,74 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
                     	longitude = mBestSite.getLng();
                     	latitude = mBestSite.getLat();
                     }
-                    Site site = new Site(UUID.randomUUID().toString(), siteName, latitude, longitude, Config.getCurrentProjectId(getActivityContext()));
-                    if (cacheService.insertSite(site)) {
-                    	getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+
+                    if(Config.isDemoMode(getActivityContext())) {
+                        Site site = new Site(UUID.randomUUID().toString(), siteName, latitude, longitude, Config.getCurrentProjectId(getActivityContext()));
+                        if (cacheService.insertSite(site)) {
+                            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+                            dialog.dismiss();
+                            dialog = null;
+                            UIUtils.hideKeyboard(ImagePreviewActivity.this, etSiteName);
+                        } else {
+                            UIUtils.buildAlertDialog(ImagePreviewActivity.this, R.string.dialog_title,
+                                    R.string.insert_site_fail, true);
+                            return;
+                        }
+
+                        getSupportActionBar().setTitle(site.getName());
+                        mPhotoName = site.getName();
+                        mSiteId = site.getSiteId();
+                    }else{
                         dialog.dismiss();
                         dialog = null;
+                        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
                         UIUtils.hideKeyboard(ImagePreviewActivity.this, etSiteName);
-                    } else {
-                        UIUtils.buildAlertDialog(ImagePreviewActivity.this, R.string.dialog_title,
-                                R.string.insert_site_fail, true);
-                        return;
+                        addNewSite(siteName, String.valueOf(latitude), String.valueOf(longitude));
                     }
-
-                    getSupportActionBar().setTitle(site.getName());
-                    mPhotoName = site.getName();
-                    mSiteId = site.getSiteId();
                 }
             }
         });
 
         dialog.show();
+    }
+
+    private void addNewSite(String name, String lat, String lng){
+        new AddSiteTask(this).execute(name, lat, lng);
+    }
+
+    private static class AddSiteTask extends AsyncTask<String, Void, Site>{
+        private WeakReference<ImagePreviewActivity> weakReference;
+        private String currentProjectId;
+
+        public AddSiteTask(ImagePreviewActivity context) {
+            this.weakReference = new WeakReference<>(context);
+            currentProjectId = Config.getCurrentProjectId(context);
+        }
+
+        @Override
+        protected Site doInBackground(String... params) {
+            String name = params[0];
+            String lat = params[1];
+            String lng = params[2];
+            return NetworkUtils.addNewSite(weakReference.get(), currentProjectId, name, lat, lng);
+        }
+
+        @Override
+        protected void onPostExecute(Site site) {
+            if(weakReference.get() == null || weakReference.get().getCacheService() == null || site == null){
+                return;
+            }
+
+            if (!weakReference.get().getCacheService().insertSite(site)) {
+                UIUtils.buildAlertDialog(weakReference.get(), R.string.dialog_title,
+                        R.string.insert_site_fail, true);
+                return;
+            }
+
+            weakReference.get().getSupportActionBar().setTitle(site.getName());
+            weakReference.get().mPhotoName = site.getName();
+            weakReference.get().mSiteId = site.getSiteId();
+        }
     }
 
     private void doGetSites() {
@@ -613,7 +662,14 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
 			mTask.execute(Config.getActiveServer(this));
 			return;
 		}
-		
+
+		if(sites != null && sites.isEmpty()) {
+            CacheService cacheService = CacheService.getInstance(getActivityContext(),
+                    CacheService.createDBNameFromUser(Config.getActiveServer(getActivityContext()), Config.getActiveUser(getActivityContext())));
+		    showAddSiteDialog(getActivityContext(), cacheService, mUserLocation);
+		    return;
+        }
+
         setSupportProgressBarIndeterminateVisibility(false);
         
     	if(mUserLocation == null){

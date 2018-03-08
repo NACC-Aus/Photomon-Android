@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 import android.database.Cursor;
 
+import com.google.gson.annotations.SerializedName;
+
 public class Site implements Serializable {   
     private static final long serialVersionUID = 1L;
 
@@ -14,12 +16,23 @@ public class Site implements Serializable {
     public static final String LONGIDUTE = "longitude";
     public static final String PROJECT_ID = "project_id";
 
+    @SerializedName("ID")
     private String siteId;
+
+    @SerializedName("Name")
     private String mName;
+
+    @SerializedName("Latitude")
+    private String latitude;
+    @SerializedName("Longitude")
+    private String longitude;
+
     private double mLat;
     private double mLng;
     private boolean isSelected;
     private boolean isDownloaded;
+
+    @SerializedName("ProjectId")
     private String projectId;
     
     public Site(String siteId, String siteName, double lat, double lng, String projectId) {
@@ -98,4 +111,19 @@ public class Site implements Serializable {
 		this.projectId = projectId;
 	}
 
+    public String getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(String latitude) {
+        this.latitude = latitude;
+    }
+
+    public String getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(String longitude) {
+        this.longitude = longitude;
+    }
 }

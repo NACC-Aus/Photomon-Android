@@ -287,4 +287,12 @@ public class GeneralUtil {
 	public static boolean deleteLogFile(Context context){
 		return new File(context.getFilesDir() , "nacc_error_log.txt").delete();
 	}
+
+	public static double parseDouble(String val) {
+		try{
+			return Double.parseDouble(val);
+		}catch(Throwable e){
+			return 0;
+		}
+	}
 }

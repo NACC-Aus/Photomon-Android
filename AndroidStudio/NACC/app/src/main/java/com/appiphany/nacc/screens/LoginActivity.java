@@ -22,6 +22,7 @@ import com.appiphany.nacc.model.Project;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.DialogUtil;
+import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.NetworkUtils;
 import com.appiphany.nacc.utils.UIUtils;
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -329,7 +330,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
                     message = null;
                 }
 
-                e.printStackTrace();
+                Ln.d(e);
             }
 
             return message;
