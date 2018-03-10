@@ -5,7 +5,7 @@
               android:layout_height="match_parent"
               android:orientation="vertical">
 
-    <android.support.design.widget.CoordinatorLayout
+    <FrameLayout
         android:id="@+id/main_content"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -19,21 +19,22 @@
             android:cacheColorHint="@android:color/transparent"/>
 
         <android.support.design.widget.FloatingActionButton
-            app:layout_behavior="com.appiphany.nacc.ui.controls.ScrollAwareFABBehavior"
             android:id="@+id/fabAddNew"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
             android:src="@drawable/ic_content_new"
+            android:tint="@color/white"
             app:borderWidth="0dp"
             app:elevation="6dp"
             app:fabSize="normal"
+            android:focusable="true"
             android:clickable="true"
             app:layout_anchor="@id/list_photos"
             app:layout_anchorGravity="bottom|right|end"/>
 
-    </android.support.design.widget.CoordinatorLayout>
+    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/demo_view"
