@@ -701,14 +701,19 @@ public class CacheService extends SQLiteOpenHelper {
     	return projects;
     }
     
-    public boolean insertProject(Project project){    	
-    	SQLiteDatabase db = getDatabase();
-        ContentValues values = new ContentValues();
-        values.put(Project.ID, project.getUid());
-        values.put(Project.NAME, project.getName());
+    public boolean insertProject(Project project){
+        try {
+            SQLiteDatabase db = getDatabase();
+            ContentValues values = new ContentValues();
+            values.put(Project.ID, project.getUid());
+            values.put(Project.NAME, project.getName());
 
-        long rowId = db.insert(Project.TABLE_NAME, null, values);
-        return rowId != -1;
+            long rowId = db.insert(Project.TABLE_NAME, null, values);
+            return rowId != -1;
+        }catch (Throwable throwable){
+            Ln.d(throwable);
+            return false;
+        }
     }
     
     public boolean updateProject(Project project){
