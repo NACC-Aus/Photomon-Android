@@ -92,7 +92,11 @@ public class SitesActivity extends BaseActivity implements LoaderCallbacks<List<
 			lvSites.setAdapter(guideAdapter);
 			lvSites.setOnItemClickListener(this);
 		}else{
-			Toast.makeText(this, "There was an error while loading guide photos, permission denied", Toast.LENGTH_SHORT).show();
+			if(NetworkUtils.isNetworkOnline(this)) {
+				Toast.makeText(this, "There was an error while loading guide photos, permission denied", Toast.LENGTH_SHORT).show();
+			}else {
+				Toast.makeText(this, "There was an error when loading guide photos, please check network connection and try again later", Toast.LENGTH_SHORT).show();
+			}
 		}
 	}
 
