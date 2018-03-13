@@ -324,7 +324,6 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.getItem(3).setVisible(Config.isDemoMode(this));
         menu.getItem(4).setVisible(!Config.isDemoMode(this));
     	return super.onPrepareOptionsMenu(menu);
     }
@@ -367,7 +366,13 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         	startActivity(zoozIntent);
         	break;
         case R.id.menu_manage_sites:
-        	Intent siteIntent = new Intent(this, SiteManagementActivity.class);
+            Intent siteIntent;
+            if(Config.isDemoMode(this)) {
+                siteIntent = new Intent(this, SiteManagementActivity.class);
+            }else{
+                siteIntent = new Intent(this, OnlineSitesActivity.class);
+            }
+
         	startActivityForResult(siteIntent, REQUEST_MANAGE_SITE);
         	break;
         case R.id.menu_guides:
