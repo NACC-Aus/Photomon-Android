@@ -1,9 +1,5 @@
 package com.appiphany.nacc.screens;
 
-import java.io.File;
-import java.lang.ref.WeakReference;
-import java.util.List;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -14,10 +10,13 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.MediaStore;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,6 +29,7 @@ import android.widget.RelativeLayout.LayoutParams;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Photo.DIRECTION;
@@ -41,6 +41,10 @@ import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.UIUtils;
 import com.nostra13.universalimageloader.core.ImageLoader;
+
+import java.io.File;
+import java.lang.ref.WeakReference;
+import java.util.List;
 
 public class ImageReviewFragment extends Fragment implements OnClickListener, OnSeekBarChangeListener {
     private View mRootView;
@@ -409,22 +413,32 @@ public class ImageReviewFragment extends Fragment implements OnClickListener, On
                     	scaledBitmap = BitmapUtil.decodeFile(new File(mPhoto.getPhotoPath()), context.getActivity());
                     }
 
-					String url = MediaStore.Images.Media.insertImage(context.getActivity().getContentResolver(), scaledBitmap,
-                    		mPhoto.getPhotoID(),
-                            mPhoto.getDirection() + "\n" + UIUtils.getPhotoDate(mPhoto.getTakenDate()));
-                    
+
+                    File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+                    dir = new File(dir, mContext.get().getString(R.string.app_name));
+                    //noinspection ResultOfMethodCallIgnored
+                    dir.mkdirs();
+
+                    File imageFile = new File(dir, mPhoto.getPhotoID() + ".jpg"); // Imagename.png
+                    GeneralUtil.saveBitmap(scaledBitmap, imageFile.getAbsolutePath());
+                    MediaScannerConnection.scanFile(mContext.get().getContext(),
+                            new String[] { imageFile.getAbsolutePath() }, null,new MediaScannerConnection.OnScanCompletedListener() {
+                        public void onScanCompleted(String path, Uri uri) {
+                            Log.i("ExternalStorage", "Scanned " + path + ":");
+                            Log.i("ExternalStorage", "-> uri=" + uri);
+                        }
+                    });
+
                     if(!mPhoto.getPhotoPath().startsWith("http")){
                     	scaledBitmap.recycle();
                     }
 
-                    Ln.d("URL " + url);
-                    result = url != null;
-
+                    result = true;
                 } catch (OutOfMemoryError e) {
                 	Ln.d("[ImageReviewFragment] OutOfMemoryError error = " + e.getMessage());
                 	result = false;
                 }
-                catch (Exception e) {
+                catch (Throwable e) {
                 	Ln.d("[ImageReviewFragment] error = " + e.getMessage());
                 	result = false;
 				}
