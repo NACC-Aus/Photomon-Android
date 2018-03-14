@@ -105,8 +105,7 @@
             app:cameraGestureLongTap="none"
             app:cameraGesturePinch="zoom"
             app:cameraSessionType="picture"
-            app:cameraPictureSizeMinWidth="700"
-            app:cameraPictureSizeMaxWidth="2000"
+            app:cameraPictureSizeBiggest="true"
             android:layout_gravity="center"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />

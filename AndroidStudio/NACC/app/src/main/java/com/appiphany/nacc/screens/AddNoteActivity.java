@@ -40,10 +40,10 @@ public class AddNoteActivity extends BaseActivity {
 
         Intent intent = getIntent();
         if (intent != null) {
-            if (intent.getAction().equals(ADD_NOTE)) {
+            if (ADD_NOTE.equalsIgnoreCase(intent.getAction())) {
                 mIsEditNote = false;
                 mNoteString = intent.getStringExtra(NOTE);
-            } else if (intent.getAction().equals(SHOW_NOTE)) {
+            } else if (SHOW_NOTE.equalsIgnoreCase(intent.getAction())) {
                 mIsEditNote = true;
                 mPhoto = (Photo) intent.getSerializableExtra(BackgroundService.PHOTO_DATA_EXTRA);
                 if (mPhoto != null) {

@@ -402,17 +402,14 @@ public class ImageReviewFragment extends Fragment implements OnClickListener, On
         protected Boolean doInBackground(Photo... params) {
             Photo mPhoto = params[0];
             boolean result = false;
-            ImageReviewFragment context = null;
             if (mPhoto != null && mContext != null && mContext.get() != null) {
                 try {
-                    context = mContext.get();
                     Bitmap scaledBitmap = null;
                     if(mPhoto.getPhotoPath().startsWith("http")){
                     	scaledBitmap = ImageLoader.getInstance().loadImageSync(mPhoto.getPhotoPath());
                     }else {                    
-                    	scaledBitmap = BitmapUtil.decodeFile(new File(mPhoto.getPhotoPath()), context.getActivity());
+                        scaledBitmap = ImageLoader.getInstance().loadImageSync("file://" + mPhoto.getPhotoPath());
                     }
-
 
                     File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
                     dir = new File(dir, mContext.get().getString(R.string.app_name));

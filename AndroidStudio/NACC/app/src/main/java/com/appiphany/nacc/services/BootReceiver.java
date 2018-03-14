@@ -30,7 +30,7 @@ public class BootReceiver extends BroadcastReceiver {
                         ConnectivityManager cm = (ConnectivityManager) context
                                 .getSystemService(Context.CONNECTIVITY_SERVICE);
                         NetworkInfo networkInfo = ConnectivityManagerCompat.getNetworkInfoFromBroadcast(cm, intent);
-                        if (networkInfo.isConnected()) {
+                        if (networkInfo != null && networkInfo.isConnected()) {
                             Intent broadcastIntent = new Intent(BackgroundService.CONNECTED_ACTION);
                             localBroadcastMgr.sendBroadcast(broadcastIntent);
                         }

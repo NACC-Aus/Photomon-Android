@@ -741,11 +741,15 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
         private WeakReference<ImagePreviewActivity> mContext;
 
         public GetSitesTask(ImagePreviewActivity context) {
-            mContext = new WeakReference<ImagePreviewActivity>(context);
+            mContext = new WeakReference<>(context);
         }
 
         @Override
         protected List<Site> doInBackground(String... params) {
+            if(mContext.get() == null) {
+                return null;
+            }
+
             return NetworkUtils.getAllSite(mContext.get(), Config.getCurrentProjectId(mContext.get()));
         }
 
@@ -754,7 +758,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             // store site to use for no wireless case
             GlobalState.setSites(result);
 
-            if (mContext != null) {
+            if (mContext.get() != null) {
                 ImagePreviewActivity mActivity = mContext.get();
                 if (mActivity != null) {
                     mActivity.updateSiteName(GlobalState.getSites());
