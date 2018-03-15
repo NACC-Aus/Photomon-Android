@@ -100,7 +100,7 @@
         <com.otaliastudios.cameraview.CameraView
             android:id="@+id/camera"
             android:keepScreenOn="true"
-            app:cameraJpegQuality="100"
+            app:cameraJpegQuality="80"
             app:cameraGestureTap="focusWithMarker"
             app:cameraGestureLongTap="none"
             app:cameraGesturePinch="zoom"
