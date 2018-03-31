@@ -2,6 +2,7 @@ package com.appiphany.nacc.screens;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -171,7 +172,7 @@ public class GlobalState extends Application {
     private static final Object mLock = new Object();
 
     public static void setSites(List<Site> mSites) {
-    	if(mSites == null || mSites.size() == 0){
+    	if(mSites == null){
     		return;
     	}
     	
@@ -198,6 +199,14 @@ public class GlobalState extends Application {
     	synchronized (mLock) {
             GlobalState.mBestSite = mBestSite;
         }
+    }
+
+    public static void clearBestSite(){
+        mBestSite = null;
+    }
+
+    public static void clearSites(){
+        sSites = null;
     }
 
 	public static Location getCurrentUserLocation() {

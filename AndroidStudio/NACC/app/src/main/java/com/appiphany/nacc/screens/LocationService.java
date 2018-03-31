@@ -177,12 +177,8 @@ public class LocationService extends Service{
 			
 			GlobalState.setSites(result);
 			
-			
 			Site mBestSite = UIUtils.getBestSite(GlobalState.getSites(), currentLocation, context);
-			
-			if(mBestSite != null){
-				GlobalState.setBestSite(mBestSite);
-			}
+			GlobalState.setBestSite(mBestSite);
 			
 			Intent intent = new Intent();
 			intent.setAction(UPDATE_SITE_ACTION);

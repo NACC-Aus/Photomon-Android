@@ -76,7 +76,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
     private List<String> mGuidePhotoIds;
 	private AlertDialog dialog1;
 	private AlertDialog dialog2;
-
+    private boolean firstLoading;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,6 +84,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.activity_main_screen_layout);
 
+        firstLoading = true;
         mListView = (ListView) findViewById(R.id.list_photos);
         mDemoView = (LinearLayout) findViewById(R.id.demo_view);
         mFABAddNew = (FloatingActionButton) findViewById(R.id.fabAddNew);
@@ -295,6 +296,12 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
                         adapter.notifyDataSetChanged();
 						Config.setCurrentProjectId(getActivityContext(), projects.get(itemPosition).getUid());
 						refreshList();
+						if(!firstLoading) {
+                            GlobalState.clearBestSite();
+                            GlobalState.clearSites();
+                        }
+
+                        firstLoading = false;
                         reloadCurrentSite();
 						return false;
 					}

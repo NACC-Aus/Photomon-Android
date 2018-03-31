@@ -443,10 +443,16 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
 
         @Override
         protected void onPostExecute(Site site) {
-            if(weakReference.get() == null || weakReference.get().getCacheService() == null || site == null){
+            if(weakReference.get() == null || weakReference.get().getCacheService() == null){
                 return;
             }
 
+            if(site == null) {
+                Toast.makeText(weakReference.get(), R.string.msg_error_add_site, Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            weakReference.get().reloadCurrentSite();
             if (!weakReference.get().getCacheService().insertSite(site)) {
                 UIUtils.buildAlertDialog(weakReference.get(), R.string.dialog_title,
                         R.string.insert_site_fail, true);
@@ -457,6 +463,13 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             weakReference.get().mPhotoName = site.getName();
             weakReference.get().mSiteId = site.getSiteId();
         }
+    }
+
+    private void reloadCurrentSite() {
+        Intent locationIntent = new Intent(this, LocationService.class);
+        locationIntent.addCategory(LocationService.SERVICE_TAG);
+        locationIntent.setAction(LocationService.REFRESH_SITE);
+        startService(locationIntent);
     }
 
     private void doGetSites() {
