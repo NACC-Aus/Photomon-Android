@@ -14,19 +14,17 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.hardware.Camera;
 import android.location.Location;
 import android.location.LocationListener;
-import android.support.media.ExifInterface;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.StatFs;
 import android.provider.MediaStore;
+import android.support.media.ExifInterface;
 import android.support.v4.content.ContextCompat;
 import android.view.Gravity;
 import android.view.View;
@@ -56,7 +54,6 @@ import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.otaliastudios.cameraview.CameraListener;
-import com.otaliastudios.cameraview.CameraUtils;
 import com.otaliastudios.cameraview.CameraView;
 import com.otaliastudios.cameraview.Flash;
 import com.otaliastudios.cameraview.Gesture;
@@ -474,44 +471,44 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
     public void onPictureTaken(byte[] picture) {
     	Ln.d("call onPictureTaken");
         mTakingPictureBtn.setEnabled(false);
-        CameraUtils.decodeBitmap(picture, new CameraUtils.BitmapCallback() {
-            @Override
-            public void onBitmapReady(Bitmap bitmap) {
-                String photoId = CacheService.getNewPhotoID();
-                String path = null;
-                long availabelInternalMem = getAvailableInternalMemorySize();
-                if (availabelInternalMem < 1024 * 1024 * 2) {
-                    availabelInternalMem = getAvailableExternalMemorySize();
-                    if (availabelInternalMem == -1 || availabelInternalMem < 1024 * 1024 * 2) {
-                        path = null;
-                    } else {
-                        File dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-                        if (dir != null) {
-                            path = dir.getAbsolutePath();
-                        }
-                    }
+        try {
+            String photoId = CacheService.getNewPhotoID();
+            String path = null;
+            long availabelInternalMem = getAvailableInternalMemorySize();
+            if (availabelInternalMem < 1024 * 1024 * 2) {
+                availabelInternalMem = getAvailableExternalMemorySize();
+                if (availabelInternalMem == -1 || availabelInternalMem < 1024 * 1024 * 2) {
+                    path = null;
                 } else {
-                    File dir = getDir("photos", MODE_PRIVATE);
+                    File dir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
                     if (dir != null) {
                         path = dir.getAbsolutePath();
-                        Ln.d("[ImageTakingActivity] path = " + path);
                     }
                 }
-
-                if(path != null) {
-                    File file = new File(path, photoId + ".jpg");
-                    try {
-                        GeneralUtil.saveBitmap(bitmap, file.getAbsolutePath());
-                        goToPreview(file.getAbsolutePath(), photoId, false);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }else{
-                    UIUtils.buildAlertDialog(getActivityContext(), R.string.dialog_title, R.string.storage_low_error, false).show();
+            } else {
+                File dir = getDir("photos", MODE_PRIVATE);
+                if (dir != null) {
+                    path = dir.getAbsolutePath();
+                    Ln.d("[ImageTakingActivity] path = " + path);
                 }
             }
-        });
 
+
+
+            if(path != null) {
+                File file = new File(path, photoId + ".jpg");
+                try {
+                    GeneralUtil.saveBitmap(picture, file.getAbsolutePath());
+                    goToPreview(file.getAbsolutePath(), photoId, false);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }else{
+                UIUtils.buildAlertDialog(getActivityContext(), R.string.dialog_title, R.string.storage_low_error, false).show();
+            }
+        }catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
     }
 
     @Override

@@ -40,6 +40,7 @@ import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.UIUtils;
+import com.bumptech.glide.Glide;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.io.File;
@@ -100,15 +101,9 @@ public class ImageReviewFragment extends Fragment implements OnClickListener, On
             mPhoto = (Photo) args.getSerializable(PHOTO_MODEL_ARGS);            
             if (mPhoto != null) {
             	if(mPhoto.getUploadState() != UPLOAD_STATE.DOWNLOAD){
-            		mReviewImageView.setTag(mPhoto.getPhotoPath());
-            		ImageLoader.getInstance().displayImage("file:///" + mPhoto.getPhotoPath(), mReviewImageView, GeneralUtil.getNewScaleOption());
+            		Glide.with(getContext()).load(new File(mPhoto.getPhotoPath())).into(mReviewImageView);
             	}else{
-            		Bitmap cacheBmp = ImageLoader.getInstance().getMemoryCache().get(mPhoto.getPhotoPath());
-            		if(cacheBmp != null){
-            			mReviewImageView.setImageBitmap(cacheBmp);
-            		}else{
-            			ImageLoader.getInstance().displayImage(mPhoto.getPhotoPath(), mReviewImageView, GeneralUtil.getScaleDisplayOption());
-            		}
+                    Glide.with(getContext()).load(mPhoto.getPhotoPath()).into(mReviewImageView);
             	}
             	
                 mImageNameView.setText(mPhoto.getPhotoName());
@@ -252,16 +247,9 @@ public class ImageReviewFragment extends Fragment implements OnClickListener, On
                 ((BaseActivity)getActivity()).getSupportActionBar().hide();
             } else {
             	if(mPhoto.getUploadState() != UPLOAD_STATE.DOWNLOAD){
-            		mReviewImageView.setTag(mPhoto.getPhotoPath());
-            		ImageLoader.getInstance().displayImage("file://" + mPhoto.getPhotoPath(), mReviewImageView,
-                        Config.FULL_OPTIONS);
+                    Glide.with(getContext()).load(new File(mPhoto.getPhotoPath())).into(mReviewImageView);
             	}else{
-            		Bitmap cacheBmp = ImageLoader.getInstance().getMemoryCache().get(mPhoto.getPhotoPath());
-            		if(cacheBmp != null){
-            			mReviewImageView.setImageBitmap(cacheBmp);
-            		}else{
-            			ImageLoader.getInstance().displayImage(mPhoto.getPhotoPath(), mReviewImageView, GeneralUtil.getScaleDisplayOption());
-            		}
+            	    Glide.with(getContext()).load(mPhoto.getPhotoPath()).into(mReviewImageView);
             	}
                 mInfoLayout.setVisibility(View.VISIBLE);
                 getActivity().getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);

@@ -98,7 +98,7 @@
         android:layout_above="@id/taking_picture_layout"
         android:layout_alignParentTop="true">
 
-        <com.otaliastudios.cameraview.CameraView
+        <com.otaliastudios.cameraview.ExCameraView
             android:id="@+id/camera"
             android:keepScreenOn="true"
             app:cameraJpegQuality="80"
