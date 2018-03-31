@@ -47,6 +47,8 @@ import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import de.greenrobot.event.EventBus;
@@ -312,7 +314,25 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
     }
 
     private List<Project> getProjects(){
-    	List<Project> ret = cacheService.getProjects();
+    	final List<Project> ret = cacheService.getProjects();
+        Collections.sort(ret, new Comparator<Project>() {
+            @Override
+            public int compare(Project o1, Project o2) {
+                if(o1.getName() == null && o2.getName() == null) {
+                    return 0;
+                }
+
+                if(o1.getName() == null) {
+                    return  -1;
+                }
+
+                if(o2.getName() == null) {
+                    return 1;
+                }
+
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
     	return ret;
     }
 
