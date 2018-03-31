@@ -1,25 +1,28 @@
 package com.appiphany.nacc.services;
 
-import java.util.Date;
-import java.util.List;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v4.widget.SimpleCursorAdapter;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.model.Photo.DIRECTION;
 import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.UIUtils;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
+
+import java.io.File;
+import java.util.Date;
+import java.util.List;
 
 public class PhotoAdapter extends SimpleCursorAdapter {
     private Context mContext;
@@ -87,15 +90,27 @@ public class PhotoAdapter extends SimpleCursorAdapter {
         }
 
         if (uploadStateVal == UPLOAD_STATE.DOWNLOAD) {
-        	ImageLoader.getInstance().displayImage(photoPath, thumbnailView, new SimpleImageLoadingListener(){
-        		@Override
-        		public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-        			progressBar.setVisibility(View.GONE);
-        		}
-        	});
+            GlideDrawableImageViewTarget target = new GlideDrawableImageViewTarget(thumbnailView) {
+                @Override
+                public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> animation) {
+                    super.onResourceReady(resource, animation);
+                    progressBar.setVisibility(View.GONE);
+                }
+            };
+
+            if(photoPath.startsWith("http")) {
+                Glide.with(mContext).load(photoPath).into(target);
+            }else{
+                Glide.with(mContext).load(new File(photoPath)).into(target);
+            }
         }else{
-        	ImageLoader.getInstance().displayImage("file://" + photoPath, thumbnailView);
+            if(photoPath.startsWith("http")){
+                Glide.with(mContext).load(photoPath).into(thumbnailView);
+            }else {
+                Glide.with(mContext).load(new File(photoPath)).into(thumbnailView);
+            }
         }
+
         imageNameTextView.setText(photoName);
         convertView.setTag(photoId);
         imageDetailView.setText(imageDirection + " " + UIUtils.getPhotoDate(new Date(photoDate)));
