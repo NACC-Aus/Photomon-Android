@@ -42,6 +42,7 @@ import com.appiphany.nacc.utils.DialogUtil;
 import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.UIUtils;
+import com.crashlytics.android.Crashlytics;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
 
@@ -194,16 +195,21 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
      * get list photos not upload yet and send to background service to upload
      */
     private void reUpload() {
-        List<Photo> notUploadedPhotos = cacheService.getNotUploadedPhotos();
-        if (notUploadedPhotos != null && notUploadedPhotos.size() > 0) {
-            for (Photo photo : notUploadedPhotos) {
-                Intent intentService = new Intent(this, BackgroundService.class);
-                intentService.setAction(BackgroundService.UPLOAD_ACTION);
-                intentService.putExtra(BackgroundService.PHOTO_DATA_EXTRA, photo);
-                intentService.putExtra(BackgroundService.DB_NAME_EXTRA, cacheService.getMyDatabaseName());
-                startService(intentService);
+        try {
+            List<Photo> notUploadedPhotos = cacheService.getNotUploadedPhotos();
+            if (notUploadedPhotos != null && notUploadedPhotos.size() > 0) {
+                for (Photo photo : notUploadedPhotos) {
+                    Intent intentService = new Intent(this, BackgroundService.class);
+                    intentService.setAction(BackgroundService.UPLOAD_ACTION);
+                    intentService.putExtra(BackgroundService.PHOTO_DATA_EXTRA, photo);
+                    intentService.putExtra(BackgroundService.DB_NAME_EXTRA, cacheService.getMyDatabaseName());
+                    startService(intentService);
 
+                }
             }
+        }catch (Throwable throwable) {
+            Crashlytics.logException(throwable);
+            throwable.printStackTrace();
         }
     }
 

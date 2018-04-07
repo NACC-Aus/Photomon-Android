@@ -368,6 +368,7 @@ public class CacheService extends SQLiteOpenHelper {
                 String photoName = cursor.getString(cursor.getColumnIndex(CacheService.COLUMN_NAME));
                 DIRECTION imageDirection = DIRECTION.getDirection(cursor.getString(cursor
                         .getColumnIndex(CacheService.COLUMN_DIRECTION)));
+
                 long photoDate = cursor.getLong(cursor.getColumnIndex(CacheService.COLUMN_TAKEN_DATE));
                 UPLOAD_STATE uploadStateVal = UPLOAD_STATE.valueOf(cursor.getInt(cursor
                         .getColumnIndex(CacheService.COLUMN_STATE)));
@@ -375,7 +376,11 @@ public class CacheService extends SQLiteOpenHelper {
                 String note = cursor.getString(cursor.getColumnIndex(CacheService.COLUMN_NOTE));
                 Float opacity = cursor.getFloat(cursor.getColumnIndex(CacheService.COLUMN_OPACITY));
                 String projectId = cursor.getString(cursor.getColumnIndex(CacheService.COLUMN_PROJECT));
-                
+
+                if(imageDirection == null) {
+                    continue;
+                }
+
                 Photo photo = new Photo(photoId, photoServerId, photoPath, photoName, siteId,
                         imageDirection.getValue(),
                         uploadStateVal, new Date(photoDate), note, opacity, projectId);
