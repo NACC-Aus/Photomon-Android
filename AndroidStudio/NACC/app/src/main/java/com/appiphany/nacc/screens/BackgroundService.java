@@ -3,6 +3,10 @@ package com.appiphany.nacc.screens;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Map;
+
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import android.app.IntentService;
@@ -15,18 +19,23 @@ import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import com.appiphany.nacc.R;
+import com.appiphany.nacc.model.CacheItem;
 import com.appiphany.nacc.model.Photo;
+import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.MultipartFormHttpContent;
+import com.appiphany.nacc.utils.NetworkUtils;
 import com.appiphany.nacc.utils.UIUtils;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 /**
  * Background running service.
@@ -40,6 +49,7 @@ public class BackgroundService extends IntentService {
     public static final String UPLOAD_NOTE = "com.appiphany.nacc.UPLOAD_NOTE";
     public static final String MARK_GUIDE = "com.appiphany.nacc.MARK_GUIDE";
     public static final String REMOVE_GUIDE = "com.appiphany.nacc.REMOVE_GUIDE";
+    public static final String PROCESS_CACHE = "com.appiphany.nacc.PROCESS_CACHE";
     
     public static final String DB_NAME_EXTRA = "db_name_extra";
     public static final String UPLOAD_STATE_EXTRA = "upload_state_extra";
@@ -59,6 +69,9 @@ public class BackgroundService extends IntentService {
      * Extra for photo path.
      */
     public static final String PHOTO_PATH_EXTRA = "photo_path_extra";
+
+    public static final String CACHES_DATA_EXTRA = "caches_data_extra";
+
     public static final String DIRECTION_EXTRA = "direction_extra";
     private static final String SERVICE_NAME = "BackgroundService";
 
@@ -97,6 +110,10 @@ public class BackgroundService extends IntentService {
 
             if (action.equals(UPLOAD_NOTE)) {
                 handleUploadNoteIntent(intent);
+            }
+
+            if (action.equals(PROCESS_CACHE)) {
+                handleCache(intent);
             }
 
             if(MARK_GUIDE.equals(action)) {
@@ -357,4 +374,26 @@ public class BackgroundService extends IntentService {
         return result;
     }
 
+    private void handleCache(Intent intent) {
+        try {
+            Gson gson = new Gson();
+            Type type = new TypeToken<Map<String, String>>(){}.getType();
+            CacheService cacheService = CacheService.getInstance(this,
+                    CacheService.createDBNameFromUser(Config.getActiveServer(this), Config.getActiveUser(this)));
+
+            @SuppressWarnings("unchecked") ArrayList<CacheItem> cacheItems = (ArrayList<CacheItem>) intent.getSerializableExtra(BackgroundService.CACHES_DATA_EXTRA);
+            for (CacheItem item: cacheItems) {
+                if(item.getType() == CacheItem.TYPE_SITE) {
+                    Map<String, String> params = gson.fromJson(item.getData(), type);
+                    Site site = NetworkUtils.addNewSite(this, params.get("project_id"),
+                            params.get("name"), params.get("latitude"), params.get("longitude"));
+                    if (site != null) {
+                        cacheService.deleteCache(item);
+                    }
+                }
+            }
+        }catch (Throwable throwable) {
+            throwable.printStackTrace();
+        }
+    }
 }

@@ -193,7 +193,7 @@ public class Photo implements Serializable {
         public static DIRECTION getDirection(String input) {
             if (input != null) {
                 for (DIRECTION direction : DIRECTION.values()) {
-                    if (direction.getValue().toLowerCase().equals(input.toLowerCase())) {
+                    if (direction.getValue().equalsIgnoreCase(input)) {
                         return direction;
                     }
                 }

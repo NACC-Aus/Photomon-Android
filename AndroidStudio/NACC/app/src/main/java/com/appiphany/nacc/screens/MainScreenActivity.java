@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -32,8 +33,10 @@ import android.widget.TextView;
 
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.events.UpdateProject;
+import com.appiphany.nacc.model.CacheItem;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Project;
+import com.appiphany.nacc.services.BootReceiver;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
 import com.appiphany.nacc.services.PhotoAdapter;
@@ -78,6 +81,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 	private AlertDialog dialog1;
 	private AlertDialog dialog2;
     private boolean firstLoading;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -103,7 +107,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         mListView.setOnItemClickListener(this);
         Intent intent = getIntent();
         Ln.d("[MainScreen] on create ");
-        
+
         String action = intent.getAction();
         if (action != null) {
             if (action.equals(REQUEST_UPLOAD) && !Config.isDemoMode(this)) {
@@ -207,6 +211,15 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 
                 }
             }
+
+            ArrayList<CacheItem> cacheItems = cacheService.getCaches();
+            if(!cacheItems.isEmpty()) {
+                Intent intentService = new Intent(this, BackgroundService.class);
+                intentService.setAction(BackgroundService.PROCESS_CACHE);
+                intentService.putExtra(BackgroundService.CACHES_DATA_EXTRA, cacheItems);
+                startService(intentService);
+            }
+
         }catch (Throwable throwable) {
             Crashlytics.logException(throwable);
             throwable.printStackTrace();
@@ -228,6 +241,9 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 
         final IntentFilter lftIntentFilter = new IntentFilter(LocationLibraryConstants.getLocationChangedPeriodicBroadcastAction());
         registerReceiver(lftBroadcastReceiver, lftIntentFilter);
+
+        IntentFilter networkFilter = new IntentFilter();
+        networkFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
     }
 
     @Override

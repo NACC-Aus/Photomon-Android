@@ -23,6 +23,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.appiphany.nacc.R;
+import com.appiphany.nacc.model.CacheItem;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.utils.AbstractDataLoader;
@@ -30,10 +31,13 @@ import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.NetworkUtils;
 import com.appiphany.nacc.utils.UIUtils;
+import com.google.gson.Gson;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class OnlineSitesActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<List<Site>> {
     private static final int LOADER_ID = OnlineSitesActivity.class.hashCode();
@@ -243,10 +247,29 @@ public class OnlineSitesActivity extends BaseActivity implements LoaderManager.L
 
         @Override
         protected Site doInBackground(String... params) {
+            if(weakReference.get() == null) {
+                return null;
+            }
+
             String name = params[0];
             String lat = params[1];
             String lng = params[2];
-            return NetworkUtils.addNewSite(weakReference.get(), currentProjectId, name, lat, lng);
+
+            Map<String, String> data = new HashMap<>();
+            data.put("project_id", currentProjectId);
+            data.put("name", name);
+            data.put("latitude", lat);
+            data.put("longitude", lng);
+            CacheService cacheService = weakReference.get().getCacheService();
+            CacheItem cacheItem = new CacheItem(CacheItem.TYPE_SITE, new Gson().toJson(data));
+            cacheService.insertCache(cacheItem);
+
+            Site site = NetworkUtils.addNewSite(weakReference.get(), currentProjectId, name, lat, lng);
+            if(site != null) {
+                cacheService.deleteCache(cacheItem);
+            }
+
+            return site;
         }
 
         @Override

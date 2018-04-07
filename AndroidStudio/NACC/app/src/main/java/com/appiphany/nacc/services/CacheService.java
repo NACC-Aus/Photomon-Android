@@ -14,6 +14,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.text.TextUtils;
 
+import com.appiphany.nacc.model.CacheItem;
 import com.appiphany.nacc.model.GuidePhoto;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Photo.DIRECTION;
@@ -36,8 +37,8 @@ public class CacheService extends SQLiteOpenHelper {
     public static final String COLUMN_OPACITY = "opacity";
     public static final String COLUMN_PROJECT = "project_id";
     
-    public static final int DATABASE_VERSION = 4;
-    public static final String DATABASE_CREATE_PHOTO = "create table "
+    public static final int DATABASE_VERSION = 5;
+    public static final String DATABASE_CREATE_PHOTO = "create table IF NOT EXISTS "
             + TABLE_NAME_PHOTO + "(" + COLUMN_ID + " string primary key, "
             + COLUMN_PHOTO_SERVER_ID + " text not null, "
             + COLUMN_PHOTO_PATH + " text not null, "
@@ -51,7 +52,7 @@ public class CacheService extends SQLiteOpenHelper {
             + COLUMN_OPACITY + " real not null "
             + ");";
 
-    public static final String DATABASE_CREATE_SITE = "create table "
+    public static final String DATABASE_CREATE_SITE = "CREATE TABLE IF NOT EXISTS "
             + Site.TABLE_NAME + "("
             + Site.SITE_ID + " text primary key, "
             + Site.SITE_NAME + " text not null, "
@@ -60,7 +61,7 @@ public class CacheService extends SQLiteOpenHelper {
             + Site.LONGIDUTE + " text not null "
             + ");";
 
-    public static final String DATABASE_CREATE_GUIDE = "create table "
+    public static final String DATABASE_CREATE_GUIDE = "CREATE TABLE IF NOT EXISTS "
             + GuidePhoto.TABLE_NAME + "("
             + GuidePhoto.GUIDE_ID + " integer primary key autoincrement, "
             + GuidePhoto.GUIDE_PHOTO_ID + " text, "
@@ -70,16 +71,24 @@ public class CacheService extends SQLiteOpenHelper {
             + GuidePhoto.SITE_ID + " text "
             + ");";
 
-    public static final String DATABASE_CREATE_PROJECT = "create table "
+    public static final String DATABASE_CREATE_PROJECT = "CREATE TABLE IF NOT EXISTS "
     		+ Project.TABLE_NAME + "("
     		+ Project.ID + " text primary key, "
     		+ Project.NAME + " text not null "
     				+ ")";
+
+    public static final String DATABASE_CREATE_CACHE = "CREATE TABLE IF NOT EXISTS "
+            + CacheItem.TABLE_NAME + "("
+            + CacheItem.ID + " text primary key , "
+            + CacheItem.TYPE + " integer not null, "
+            + CacheItem.DATA + " text not null "
+            + ");";
     
-    public static final String DATABASE_DELETE = "drop table " + TABLE_NAME_PHOTO + ";";
-    public static final String DATABASE_DELETE_SITE = "drop table " + Site.TABLE_NAME + ";";
-    public static final String DATABASE_DELETE_GUIDE = "drop table " + GuidePhoto.TABLE_NAME + ";";
-    public static final String DATABASE_DELETE_PROJECT = "drop table " + Project.TABLE_NAME + ";";
+    public static final String DATABASE_DELETE = "DROP TABLE IF EXISTS " + TABLE_NAME_PHOTO + ";";
+    public static final String DATABASE_DELETE_SITE = "DROP TABLE IF EXISTS " + Site.TABLE_NAME + ";";
+    public static final String DATABASE_DELETE_GUIDE = "DROP TABLE IF EXISTS " + GuidePhoto.TABLE_NAME + ";";
+    public static final String DATABASE_DELETE_PROJECT = "DROP TABLE IF EXISTS " + Project.TABLE_NAME + ";";
+    public static final String DATABASE_DELETE_CACHE = "DROP TABLE IF EXISTS " + CacheItem.TABLE_NAME + ";";
     
     private static String mMyDatabaseName;
     private static Context mContext;
@@ -141,6 +150,7 @@ public class CacheService extends SQLiteOpenHelper {
         db.execSQL(DATABASE_CREATE_SITE);
         db.execSQL(DATABASE_CREATE_GUIDE);
         db.execSQL(DATABASE_CREATE_PROJECT);
+        db.execSQL(DATABASE_CREATE_CACHE);
     }
 
     @Override
@@ -155,6 +165,12 @@ public class CacheService extends SQLiteOpenHelper {
             db.execSQL(DATABASE_DELETE_SITE);
             db.execSQL(DATABASE_DELETE_GUIDE);
             db.execSQL(DATABASE_DELETE_PROJECT);
+            db.execSQL(DATABASE_DELETE_CACHE);
+
+            db.execSQL(DATABASE_CREATE_SITE);
+            db.execSQL(DATABASE_CREATE_GUIDE);
+            db.execSQL(DATABASE_CREATE_PROJECT);
+            db.execSQL(DATABASE_CREATE_CACHE);
         }
         db.execSQL(DATABASE_CREATE_PHOTO);
 
@@ -489,6 +505,44 @@ public class CacheService extends SQLiteOpenHelper {
         }
 
         return siteIds;
+    }
+
+    public void insertCache(CacheItem cacheItem){
+        SQLiteDatabase db = getDatabase();
+        ContentValues values = new ContentValues();
+        values.put(CacheItem.ID, UUID.randomUUID().toString());
+        values.put(CacheItem.TYPE, cacheItem.getType());
+        values.put(CacheItem.DATA, cacheItem.getData());
+        db.insert(CacheItem.TABLE_NAME, null, values);
+    }
+
+    public ArrayList<CacheItem> getCaches(){
+        SQLiteDatabase db = getDatabase();
+        ArrayList<CacheItem> results = new ArrayList<>();
+        Cursor cur = db.query(CacheItem.TABLE_NAME, null, null, null, null, null, null);
+        if (cur != null && cur.getCount() > 0) {
+            cur.moveToFirst();
+            while (!cur.isAfterLast()) {
+                String id = cur.getString(cur.getColumnIndex(CacheItem.ID));
+                int type = cur.getInt(cur.getColumnIndex(CacheItem.TYPE));
+                String data = cur.getString(cur.getColumnIndex(CacheItem.DATA));
+                results.add(new CacheItem(id, type, data));
+                cur.moveToNext();
+            }
+
+        }
+
+        if(cur != null){
+            cur.close();
+        }
+
+        return results;
+    }
+
+    public boolean deleteCache(CacheItem cacheItem){
+        SQLiteDatabase db = getDatabase();
+        int row = db.delete(CacheItem.TABLE_NAME, CacheItem.ID + " = '" + cacheItem.getId() + "'", null);
+        return row > 0;
     }
     
     public void insertOrUpdateGuidePhoto(Context context, String photoId, String photoPath, DIRECTION photoDirection, String siteId, String projectId) {
