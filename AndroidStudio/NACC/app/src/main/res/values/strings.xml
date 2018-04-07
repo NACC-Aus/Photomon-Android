@@ -82,7 +82,7 @@
     <string name="input_site_name">Input site name</string>
     <string name="insert_site_fail">Insert new site not complete. Please try again!</string>
     <string name="site_exist">Site name already exists. Please input new name!</string>
-    <string name="site_name_hint_text">New Adhoc site name</string>
+    <string name="site_name_hint_text">New site name</string>
     <string name="upload_note_fail">Upload note fail. Please try agian!</string>
     <string name="wifi_setting_title">Wifi Setting</string>
     <string name="wifi_setting_message">Wifi is not enabled. Do you want to go to settings menu?</string>
