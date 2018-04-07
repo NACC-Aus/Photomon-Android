@@ -359,7 +359,7 @@ public class CacheService extends SQLiteOpenHelper {
         Cursor cursor = db.query(TABLE_NAME_PHOTO, null, COLUMN_STATE + " != \"" + UPLOAD_STATE.UPLOADED.getValue() + "\"",
                 null,
                 null, null, COLUMN_TAKEN_DATE + " desc");
-        List<Photo> result = new ArrayList<Photo>();
+        List<Photo> result = new ArrayList<>();
         for (int i = 0; i < cursor.getCount(); i++) {
             if (cursor.moveToPosition(i)) {
                 String photoPath = cursor.getString(cursor.getColumnIndex(CacheService.COLUMN_PHOTO_PATH));
@@ -383,10 +383,8 @@ public class CacheService extends SQLiteOpenHelper {
                 result.add(photo);
             }
         }
-        
-        if(cursor != null){
-        	cursor.close();
-        }
+
+        cursor.close();
 
         return result;
     }

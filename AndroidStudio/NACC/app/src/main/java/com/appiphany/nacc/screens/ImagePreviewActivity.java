@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
@@ -17,6 +18,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.Menu;
@@ -103,6 +105,8 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     private Handler mHandler = new Handler();
     private float currentAlpha;
 
+    private boolean hasCancel;
+
     @SuppressWarnings("ConstantConditions")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,6 +127,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
         mPreviewView.setOnClickListener(this);
         mBtNote.setOnClickListener(this);
 
+        hasCancel = false;
         LocationLibrary.forceLocationUpdate(this);
         LocationLibrary.startAlarmAndListener(this);
 
@@ -327,92 +332,111 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
 
     Dialog dialog;
     // show dialog to create new site for local
-    private void showAddSiteDialog(Activity activity, final CacheService cacheService, final Location location) {
+    private void showAddSiteDialog(final Activity activity, final CacheService cacheService, final Location location) {
     	Ln.d("call showAddSiteDialog");
+        if(hasCancel || activity == null || activity.isFinishing()) {
+            return;
+        }
 
+        View contentView = View.inflate(getActivityContext(), R.layout.add_new_site, null);
+        final EditText etSiteName = (EditText) contentView.findViewById(R.id.site_name_edittext);
     	if(dialog == null){
-    		dialog = new Dialog(activity);
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivityContext());
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+            builder.setCancelable(true);
+            builder.setView(contentView);
+            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int which) {
+                    String siteName = etSiteName.getText().toString().trim();
+                    if (siteName.length() == 0) {
+                        Toast.makeText(ImagePreviewActivity.this, R.string.input_site_name, Toast.LENGTH_SHORT).show();
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                showAddSiteDialog(activity, cacheService, location);
+                            }
+                        }, 500);
+                        return;
+                    } else {
+                        // check site name is exist?
+                        if (Config.isDemoMode(getActivityContext()) && cacheService.checkSiteNameExist(siteName)) {
+                            Toast.makeText(ImagePreviewActivity.this, R.string.site_exist, Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+
+                        // save new site to database
+                        if (location == null) {
+                            Toast.makeText(ImagePreviewActivity.this, "Waiting for get location!", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        double longitude;
+                        double latitude;
+                        // save for first site
+                        if (mBestSite == null) {
+                            longitude = location.getLongitude();
+                            latitude = location.getLatitude();
+                        } else {
+                            longitude = mBestSite.getLng();
+                            latitude = mBestSite.getLat();
+                        }
+
+                        if(Config.isDemoMode(getActivityContext())) {
+                            Site site = new Site(UUID.randomUUID().toString(), siteName, latitude, longitude, Config.getCurrentProjectId(getActivityContext()));
+                            if (cacheService.insertSite(site)) {
+                                getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+                                dialog.dismiss();
+                                UIUtils.hideKeyboard(ImagePreviewActivity.this, etSiteName);
+                            } else {
+                                UIUtils.buildAlertDialog(ImagePreviewActivity.this, R.string.dialog_title,
+                                        R.string.insert_site_fail, true);
+                                return;
+                            }
+
+                            getSupportActionBar().setTitle(site.getName());
+                            mPhotoName = site.getName();
+                            mSiteId = site.getSiteId();
+                        }else{
+                            dialog.dismiss();
+                            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
+                            UIUtils.hideKeyboard(ImagePreviewActivity.this, etSiteName);
+                            addNewSite(siteName, String.valueOf(latitude), String.valueOf(longitude));
+                        }
+                    }
+
+                    etSiteName.setText("");
+                }
+            });
+
+            builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    UIUtils.hideKeyboard(getActivityContext(), etSiteName);
+                    etSiteName.setText("");
+                    hasCancel = true;
+                }
+            });
+
+            dialog = builder.create();
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setCanceledOnTouchOutside(true);
+            int width = getResources().getDimensionPixelSize(R.dimen.dialog_width);
+            dialog.getWindow().setLayout(width, RelativeLayout.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setGravity(Gravity.CENTER);
     	}
 
     	if(dialog.isShowing()){
     		return;
     	}
 
-    	getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     	UIUtils.showKeyBoard(ImagePreviewActivity.this);
-        dialog.requestWindowFeature((int) Window.FEATURE_NO_TITLE);
-        dialog.setCancelable(false);
-        dialog.setCanceledOnTouchOutside(false);
-        dialog.setContentView(R.layout.add_new_site);
-        int width = getResources().getDimensionPixelSize(R.dimen.dialog_width);
-        dialog.getWindow().setLayout(width, LayoutParams.WRAP_CONTENT);
-        dialog.getWindow().setGravity(Gravity.CENTER);
 
-        final EditText etSiteName = (EditText) dialog.findViewById(R.id.site_name_edittext);
         etSiteName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
             public void onFocusChange(View v, boolean hasFocus) {
                 if (hasFocus) {
                     dialog.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
-                }
-            }
-        });
-
-        Button btOk = (Button) dialog.findViewById(R.id.ok_button);
-        btOk.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                String siteName = etSiteName.getText().toString().trim();
-                if (siteName.length() == 0) {
-                    Toast.makeText(ImagePreviewActivity.this, R.string.input_site_name, Toast.LENGTH_SHORT).show();
-                    return;
-                } else {
-                    // check site name is exist?
-                    if (Config.isDemoMode(getActivityContext()) && cacheService.checkSiteNameExist(siteName)) {
-                        Toast.makeText(ImagePreviewActivity.this, R.string.site_exist, Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    // save new site to database
-                    if (location == null) {
-                    	Toast.makeText(ImagePreviewActivity.this, "Waiting for get location!", Toast.LENGTH_SHORT).show();
-                    	return;
-                    }
-                    double longitude;
-                    double latitude;
-                    // save for first site
-                    if (mBestSite == null) {
-                    	longitude = location.getLongitude();
-                    	latitude = location.getLatitude();
-                    } else {
-                    	longitude = mBestSite.getLng();
-                    	latitude = mBestSite.getLat();
-                    }
-
-                    if(Config.isDemoMode(getActivityContext())) {
-                        Site site = new Site(UUID.randomUUID().toString(), siteName, latitude, longitude, Config.getCurrentProjectId(getActivityContext()));
-                        if (cacheService.insertSite(site)) {
-                            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-                            dialog.dismiss();
-                            dialog = null;
-                            UIUtils.hideKeyboard(ImagePreviewActivity.this, etSiteName);
-                        } else {
-                            UIUtils.buildAlertDialog(ImagePreviewActivity.this, R.string.dialog_title,
-                                    R.string.insert_site_fail, true);
-                            return;
-                        }
-
-                        getSupportActionBar().setTitle(site.getName());
-                        mPhotoName = site.getName();
-                        mSiteId = site.getSiteId();
-                    }else{
-                        dialog.dismiss();
-                        dialog = null;
-                        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
-                        UIUtils.hideKeyboard(ImagePreviewActivity.this, etSiteName);
-                        addNewSite(siteName, String.valueOf(latitude), String.valueOf(longitude));
-                    }
                 }
             }
         });
