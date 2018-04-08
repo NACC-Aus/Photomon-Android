@@ -57,7 +57,9 @@
     <string name="unable_to_upload">To keep uploading your photo. Please check your connection and open NACC app.</string>
     <string name="take_photo">Take a photo</string>
     <string name="choose_direction">Choose a direction</string>
-    
+    <string name="continue_text">Continue</string>
+    <string name="warning">Warning</string>
+
     <string-array name="frequency_array">
         <item>1 year</item>
         <item>6 months</item>
@@ -103,4 +105,5 @@
     <string name="msg_permission_required">Please accept permissions in order to use this app</string>
     <string name="menu_add">Add site</string>
     <string name="msg_error_add_site">Error! Can not add new site. Please try again</string>
+    <string name="msg_site_exist">\'Site\' exists in this location</string>
 </resources>

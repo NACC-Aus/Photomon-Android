@@ -1,5 +1,6 @@
 package com.appiphany.nacc.utils;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.location.Location;
 import android.location.LocationListener;
@@ -21,6 +22,7 @@ public class LocationUtil {
         this.locationMgr = (LocationManager) context.getSystemService(Activity.LOCATION_SERVICE);
     }
     
+    @SuppressLint("MissingPermission")
     public Location getLocation(LocationListener mListener) {
         try {
 

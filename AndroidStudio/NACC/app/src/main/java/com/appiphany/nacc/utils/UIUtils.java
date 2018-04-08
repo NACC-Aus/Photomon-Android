@@ -168,6 +168,26 @@ public class UIUtils {
     	return result;
     }
 
+	public static boolean checkNearestSite(List<Site> sites, Location userLocation) {
+    	if(sites == null || userLocation == null) {
+    		return true;
+		}
+
+		for (Site site : sites) {
+			Location siteLocation = new Location(LocationManager.GPS_PROVIDER);
+			siteLocation.setLatitude(site.getLat());
+			siteLocation.setLongitude(site.getLng());
+
+			double distance = userLocation.distanceTo(siteLocation);
+
+			if (distance <= Config.LOCATION_NEAREST_DISTANCE) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
     public static String getPhotoDate(Date date) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         String result = "";

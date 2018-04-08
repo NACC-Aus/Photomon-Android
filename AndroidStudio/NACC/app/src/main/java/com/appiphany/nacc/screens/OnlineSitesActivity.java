@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 public class OnlineSitesActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<List<Site>> {
     private static final int LOADER_ID = OnlineSitesActivity.class.hashCode();
@@ -69,7 +70,27 @@ public class OnlineSitesActivity extends BaseActivity implements LoaderManager.L
         if (item.getItemId() == android.R.id.home) {
             finish();
         } else if (item.getItemId() == R.id.add_menu) {
-            showAddSiteDialog(GlobalState.getCurrentUserLocation());
+            if(UIUtils.checkNearestSite(siteData, GlobalState.getCurrentUserLocation())){
+                showAddSiteDialog(GlobalState.getCurrentUserLocation());
+            }else{
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivityContext());;
+                builder.setMessage(R.string.msg_site_exist)
+                        .setTitle(R.string.warning)
+                        .setPositiveButton(R.string.continue_text, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss();
+                                showAddSiteDialog(GlobalState.getCurrentUserLocation());
+                            }
+                        })
+                        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.cancel();
+                            }
+                        })
+                        .setIcon(android.R.drawable.ic_dialog_alert)
+                        .show();
+            }
+
         }
 
         return super.onOptionsItemSelected(item);
@@ -177,17 +198,8 @@ public class OnlineSitesActivity extends BaseActivity implements LoaderManager.L
                             Toast.makeText(getActivityContext(), "Waiting for get location!", Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        double longitude;
-                        double latitude;
-                        Site mBestSite = GlobalState.getBestSite();
-                        // save for first site
-                        if (mBestSite == null) {
-                            longitude = location.getLongitude();
-                            latitude = location.getLatitude();
-                        } else {
-                            longitude = mBestSite.getLng();
-                            latitude = mBestSite.getLat();
-                        }
+                        double longitude = location.getLongitude();
+                        double latitude = location.getLatitude();
 
                         dialog.dismiss();
                         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -261,7 +273,7 @@ public class OnlineSitesActivity extends BaseActivity implements LoaderManager.L
             data.put("latitude", lat);
             data.put("longitude", lng);
             CacheService cacheService = weakReference.get().getCacheService();
-            CacheItem cacheItem = new CacheItem(CacheItem.TYPE_SITE, new Gson().toJson(data));
+            CacheItem cacheItem = new CacheItem(UUID.randomUUID().toString(), CacheItem.TYPE_SITE, new Gson().toJson(data));
             cacheService.insertCache(cacheItem);
 
             Site site = NetworkUtils.addNewSite(weakReference.get(), currentProjectId, name, lat, lng);

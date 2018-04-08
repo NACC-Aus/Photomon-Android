@@ -25,6 +25,7 @@ public class Config {
     public static final int HTTP_UPLOAD_IMAGE_TIMEOUT = 1 * 30 * 1000;
 
     public static final int LOCATION_DISTANCE = 50;
+    public static final int LOCATION_NEAREST_DISTANCE = 100;
 
     private static final String USER_INFO_ACCESS_TAG = "user-access-tag";
     private static final String ACCESS_TOKEN_TAG = "access-token";
