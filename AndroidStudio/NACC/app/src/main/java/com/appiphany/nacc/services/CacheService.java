@@ -510,7 +510,7 @@ public class CacheService extends SQLiteOpenHelper {
     public void insertCache(CacheItem cacheItem){
         SQLiteDatabase db = getDatabase();
         ContentValues values = new ContentValues();
-        values.put(CacheItem.ID, UUID.randomUUID().toString());
+        values.put(CacheItem.ID, cacheItem.getId());
         values.put(CacheItem.TYPE, cacheItem.getType());
         values.put(CacheItem.DATA, cacheItem.getData());
         db.insert(CacheItem.TABLE_NAME, null, values);

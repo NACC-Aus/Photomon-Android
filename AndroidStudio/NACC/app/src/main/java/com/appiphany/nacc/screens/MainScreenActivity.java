@@ -216,7 +216,6 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
             if(!cacheItems.isEmpty()) {
                 Intent intentService = new Intent(this, BackgroundService.class);
                 intentService.setAction(BackgroundService.PROCESS_CACHE);
-                intentService.putExtra(BackgroundService.CACHES_DATA_EXTRA, cacheItems);
                 startService(intentService);
             }
 

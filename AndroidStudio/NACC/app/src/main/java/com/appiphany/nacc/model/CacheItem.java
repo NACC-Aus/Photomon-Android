@@ -17,11 +17,6 @@ public class CacheItem implements Serializable{
     public CacheItem() {
     }
 
-    public CacheItem(int type, String data) {
-        this.type = type;
-        this.data = data;
-    }
-
     public CacheItem(String id, int type, String data) {
         this.id = id;
         this.type = type;

@@ -113,7 +113,7 @@ public class BackgroundService extends IntentService {
             }
 
             if (action.equals(PROCESS_CACHE)) {
-                handleCache(intent);
+                handleCache();
             }
 
             if(MARK_GUIDE.equals(action)) {
@@ -374,14 +374,14 @@ public class BackgroundService extends IntentService {
         return result;
     }
 
-    private void handleCache(Intent intent) {
+    private void handleCache() {
         try {
             Gson gson = new Gson();
             Type type = new TypeToken<Map<String, String>>(){}.getType();
             CacheService cacheService = CacheService.getInstance(this,
                     CacheService.createDBNameFromUser(Config.getActiveServer(this), Config.getActiveUser(this)));
 
-            @SuppressWarnings("unchecked") ArrayList<CacheItem> cacheItems = (ArrayList<CacheItem>) intent.getSerializableExtra(BackgroundService.CACHES_DATA_EXTRA);
+           ArrayList<CacheItem> cacheItems = cacheService.getCaches();
             for (CacheItem item: cacheItems) {
                 if(item.getType() == CacheItem.TYPE_SITE) {
                     Map<String, String> params = gson.fromJson(item.getData(), type);
