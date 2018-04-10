@@ -4,6 +4,7 @@ import java.util.List;
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.model.Site;
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,8 +26,9 @@ public class GuideAdapter extends ArrayAdapter<Site> {
 		return sites;
 	}
 	
+	@NonNull
 	@Override
-	public View getView(final int position, View convertView, ViewGroup parent) {
+	public View getView(final int position, View convertView, @NonNull ViewGroup parent) {
 		ViewHolder viewHolder;
 		if(convertView == null){
 			viewHolder = new ViewHolder();
@@ -37,8 +39,18 @@ public class GuideAdapter extends ArrayAdapter<Site> {
 		}else{
 			viewHolder = (ViewHolder) convertView.getTag();
 		}
-		
-		viewHolder.tvSiteName.setText(getItem(position).getName());
+
+		String name = getItem(position).getName();
+		if(name != null){
+			name = name.trim();
+			if(name.length() == 1) {
+				name = name.toLowerCase();
+			}else if(name.length() > 1) {
+				name = name.substring(0, 1).toUpperCase() + name.substring(1);
+			}
+		}
+
+		viewHolder.tvSiteName.setText(name);
 		viewHolder.chkSite.setFocusable(false);
 		viewHolder.chkSite.setChecked(getItem(position).isSelected());
 		viewHolder.chkSite.setOnClickListener(new View.OnClickListener() {

@@ -105,5 +105,5 @@
     <string name="msg_permission_required">Please accept permissions in order to use this app</string>
     <string name="menu_add">Add site</string>
     <string name="msg_error_add_site">Error! Can not add new site. Please try again</string>
-    <string name="msg_site_exist">\'Site\' exists in this location</string>
+    <string name="msg_site_exist">\'%s\' exists in this location</string>
 </resources>

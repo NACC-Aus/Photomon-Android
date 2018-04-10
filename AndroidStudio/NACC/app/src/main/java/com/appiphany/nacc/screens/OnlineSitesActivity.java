@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
@@ -35,6 +34,8 @@ import com.google.gson.Gson;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,11 +71,22 @@ public class OnlineSitesActivity extends BaseActivity implements LoaderManager.L
         if (item.getItemId() == android.R.id.home) {
             finish();
         } else if (item.getItemId() == R.id.add_menu) {
-            if(UIUtils.checkNearestSite(siteData, GlobalState.getCurrentUserLocation())){
+            Site site = UIUtils.findNearestSite(siteData, GlobalState.getCurrentUserLocation());
+            if(site == null){
                 showAddSiteDialog(GlobalState.getCurrentUserLocation());
             }else{
+                String name = site.getName();
+                if(name != null){
+                    name = name.trim();
+                    if(name.length() == 1) {
+                        name = name.toLowerCase();
+                    }else if(name.length() > 1) {
+                        name = name.substring(0, 1).toUpperCase() + name.substring(1);
+                    }
+                }
+
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivityContext());;
-                builder.setMessage(R.string.msg_site_exist)
+                builder.setMessage(getString(R.string.msg_site_exist, name))
                         .setTitle(R.string.warning)
                         .setPositiveButton(R.string.continue_text, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
@@ -121,6 +133,21 @@ public class OnlineSitesActivity extends BaseActivity implements LoaderManager.L
             return;
         }
 
+        Collections.sort(data, new Comparator<Site>() {
+            @Override
+            public int compare(Site o1, Site o2) {
+                if(o1.getName() == null) {
+                    return o2.getName() == null? 0: -1;
+                }
+
+                if(o2.getName() == null) {
+                    return 1;
+                }
+
+                return o1.getName().compareToIgnoreCase(o2.getName());
+            }
+        });
+
         siteData = data;
         List<String> siteNames = getSiteNameData();
 
@@ -135,7 +162,17 @@ public class OnlineSitesActivity extends BaseActivity implements LoaderManager.L
         }
 
         for (Site site : siteData) {
-            result.add(site.getName());
+            String name = site.getName();
+            if(name != null){
+                name = name.trim();
+                if(name.length() == 1) {
+                    name = name.toLowerCase();
+                }else if(name.length() > 1) {
+                    name = name.substring(0, 1).toUpperCase() + name.substring(1);
+                }
+            }
+
+            result.add(name);
         }
 
         return result;

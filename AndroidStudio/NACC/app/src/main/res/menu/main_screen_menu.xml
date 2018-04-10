@@ -13,7 +13,12 @@
         android:id="@+id/menu_info"
         app:showAsAction="never"
         android:title="@string/info_text"/>
-    
+
+    <item
+        android:id="@+id/menu_donation"
+        app:showAsAction="never"
+        android:title="@string/donation"/>
+
     <item
         android:id="@+id/menu_reminder"
         app:showAsAction="never"
@@ -29,10 +34,7 @@
         app:showAsAction="never"
         android:title="@string/guides"/>
      
-    <item
-        android:id="@+id/menu_donation"
-        app:showAsAction="never"
-        android:title="@string/donation"/>
+
     
     <item
         android:id="@+id/menu_logout"

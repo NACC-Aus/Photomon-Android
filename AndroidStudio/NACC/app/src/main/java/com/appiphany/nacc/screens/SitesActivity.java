@@ -155,7 +155,7 @@ public class SitesActivity extends BaseActivity implements LoaderCallbacks<List<
 				Collections.sort(sites, new Comparator<Site>() {
 			        @Override
 			        public int compare(final Site object1, final Site object2) {
-			            return object1.getName().compareTo(object2.getName());
+			            return object1.getName().compareToIgnoreCase(object2.getName());
 			        }
 			       } );
 			}

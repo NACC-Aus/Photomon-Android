@@ -168,9 +168,9 @@ public class UIUtils {
     	return result;
     }
 
-	public static boolean checkNearestSite(List<Site> sites, Location userLocation) {
+	public static Site findNearestSite(List<Site> sites, Location userLocation) {
     	if(sites == null || userLocation == null) {
-    		return true;
+    		return null;
 		}
 
 		for (Site site : sites) {
@@ -181,11 +181,11 @@ public class UIUtils {
 			double distance = userLocation.distanceTo(siteLocation);
 
 			if (distance <= Config.LOCATION_NEAREST_DISTANCE) {
-				return false;
+				return site;
 			}
 		}
 
-		return true;
+		return null;
 	}
 
     public static String getPhotoDate(Date date) {
