@@ -372,7 +372,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        menu.getItem(4).setVisible(!Config.isDemoMode(this));
+        menu.getItem(5).setVisible(!Config.isDemoMode(this));
     	return super.onPrepareOptionsMenu(menu);
     }
     

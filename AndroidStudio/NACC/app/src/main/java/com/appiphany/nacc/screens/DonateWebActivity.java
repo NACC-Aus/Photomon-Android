@@ -63,7 +63,7 @@ public class DonateWebActivity extends BaseActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
         getSupportActionBar().setDisplayUseLogoEnabled(true);
-        getSupportActionBar().setTitle(R.string.donation);
+        getSupportActionBar().setTitle(R.string.donate);
     }
 	
 	 @Override
