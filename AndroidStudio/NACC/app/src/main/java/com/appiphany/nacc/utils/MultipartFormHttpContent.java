@@ -59,6 +59,10 @@ public class MultipartFormHttpContent extends AbstractHttpContent {
         }
     }
 
+    public Map<String, Object> getParamMaps() {
+        return paramMaps;
+    }
+
     @Override
     public void writeTo(OutputStream out) throws IOException {
         Writer writer = new BufferedWriter(new OutputStreamWriter(out, getCharset()));

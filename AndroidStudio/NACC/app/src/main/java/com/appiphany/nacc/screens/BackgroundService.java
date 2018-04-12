@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.UUID;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -18,6 +19,8 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.text.TextUtils;
+
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.model.CacheItem;
 import com.appiphany.nacc.model.Photo;
@@ -118,10 +121,14 @@ public class BackgroundService extends IntentService {
 
             if(MARK_GUIDE.equals(action)) {
                 Photo photoModel = (Photo) intent.getSerializableExtra(BackgroundService.PHOTO_DATA_EXTRA);
-                doUpdateGuide(photoModel.getPhotoServerId(), photoModel.getProjectId(), true);
+                if(!TextUtils.isEmpty(photoModel.getPhotoServerId())) {
+                    doUpdateGuide(photoModel.getPhotoServerId(), photoModel.getProjectId(), true);
+                }
             } else if (REMOVE_GUIDE.equals(action)) {
                 Photo photoModel = (Photo) intent.getSerializableExtra(BackgroundService.PHOTO_DATA_EXTRA);
-                doUpdateGuide(photoModel.getPhotoServerId(), photoModel.getProjectId(), false);
+                if(!TextUtils.isEmpty(photoModel.getPhotoServerId())) {
+                    doUpdateGuide(photoModel.getPhotoServerId(), photoModel.getProjectId(), false);
+                }
             }
         }
     }
@@ -222,9 +229,24 @@ public class BackgroundService extends IntentService {
         intent.putExtra(BackgroundService.PHOTO_ID_EXTRA, photoId);
         intent.putExtra(UPLOAD_STATE_EXTRA, UPLOAD_STATE.UPLOADED.getValue());
         CacheService cacheService = new CacheService(this.getApplicationContext(), dbName);
-        if (cacheService != null) {
-            cacheService.updateState(photoId, UPLOAD_STATE.UPLOADED);
-            cacheService.updatePhotoServerId(photoId, mPhotoServerId);
+        cacheService.updateState(photoId, UPLOAD_STATE.UPLOADED);
+        cacheService.updatePhotoServerId(photoId, mPhotoServerId);
+
+        Ln.d("doUploadSuccess");
+        CacheItem cacheItem = cacheService.getCache(photoId);
+        if(cacheItem != null) {
+            Ln.d("doUploadSuccess has cache %s, type %d, \ndata %s",
+                    cacheItem.getId(), cacheItem.getType(), cacheItem.getData());
+            Photo photo = null;
+            try{
+                photo = new Gson().fromJson(cacheItem.getData(), Photo.class);
+            }catch (Throwable throwable) {
+                throwable.printStackTrace();
+            }
+
+            if(photo != null && doUpdateGuide(mPhotoServerId, photo.getProjectId(), cacheItem.getType() == CacheItem.TYPE_MARK_GUIDE)){
+                cacheService.deleteCache(photoId);
+            }
         }
 
         localBroadcastManager.sendBroadcast(intent);
@@ -234,9 +256,7 @@ public class BackgroundService extends IntentService {
 	private void doUploadFail(String photoId, String dbName) {
         LocalBroadcastManager localBroadcastManager = LocalBroadcastManager.getInstance(this);
         CacheService cacheService = new CacheService(this.getApplicationContext(), dbName);
-        if (cacheService != null) {
-            cacheService.updateState(photoId, UPLOAD_STATE.NOT_UPLOAD);
-        }
+        cacheService.updateState(photoId, UPLOAD_STATE.NOT_UPLOAD);
 
         Intent intent = new Intent(UPLOAD_FINISH_ACTION);
         intent.putExtra(BackgroundService.PHOTO_ID_EXTRA, photoId);
@@ -304,9 +324,9 @@ public class BackgroundService extends IntentService {
                 Ln.d("photo id from server = " + mPhotoServerId);
             }
 
-            Ln.d("HTTP RESPONSE " + httpResponse.getStatusCode() + " " + httpResponse.parseAsString());
+            Ln.d("doUploadPhotos HTTP RESPONSE " + httpResponse.getStatusCode() + " \n" + httpResponse.parseAsString() + "\n\n");
             httpResponse.ignore();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             e.printStackTrace();
             Ln.d("[BackgroundService] upload photo error = " + e.getMessage());
             result = false;
@@ -335,9 +355,9 @@ public class BackgroundService extends IntentService {
                 result = true;
             }
 
-            Ln.d("HTTP RESPONSE " + httpResponse.getStatusCode() + " " + httpResponse.parseAsString());
+            Ln.d("HTTP RESPONSE " + httpResponse.getStatusCode() + " \n" + httpResponse.parseAsString() + "\n\n");
             httpResponse.ignore();
-        } catch (Exception e) {
+        } catch (Throwable e) {
         	Ln.d("[BackgroundService] error = " + e.getMessage());
             result = false;
         }
@@ -345,7 +365,7 @@ public class BackgroundService extends IntentService {
     }
 
     private boolean doUpdateGuide(String photoId, String projectId, boolean isGuide) {
-        Ln.d("upload note to server");
+        Ln.d("doUpdateGuide %s", String.valueOf(isGuide) );
         HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
         MultipartFormHttpContent httpContent = new MultipartFormHttpContent();
         httpContent.addParam("access_token", Config.getAccessToken(this));
@@ -357,6 +377,8 @@ public class BackgroundService extends IntentService {
             HttpRequest httpRequest = httpTransport.createRequestFactory().buildPostRequest(
                     new GenericUrl(Config.getActiveServer(this) + "photos/" + photoId + ".json"),
                     httpContent);
+            Ln.d("url %s & content \n", httpRequest.getUrl().toString());
+            Ln.d(httpContent.getParamMaps());
             httpRequest.setConnectTimeout(Config.HTTP_CONNECT_TIMEOUT);
             httpRequest.setRetryOnExecuteIOException(false);
             httpRequest.setNumberOfRetries(0);
@@ -365,10 +387,10 @@ public class BackgroundService extends IntentService {
                 result = true;
             }
 
-            Ln.d("HTTP RESPONSE " + httpResponse.getStatusCode() + " " + httpResponse.parseAsString());
+            Ln.d("doUpdateGuide HTTP RESPONSE " + httpResponse.getStatusCode() + " \n" + httpResponse.parseAsString() + "\n\n");
             httpResponse.ignore();
-        } catch (Exception e) {
-            Ln.d("[BackgroundService] error = " + e.getMessage());
+        } catch (Throwable e) {
+            e.printStackTrace();
             result = false;
         }
         return result;
@@ -376,19 +398,24 @@ public class BackgroundService extends IntentService {
 
     private void handleCache() {
         try {
+
             Gson gson = new Gson();
             Type type = new TypeToken<Map<String, String>>(){}.getType();
             CacheService cacheService = CacheService.getInstance(this,
                     CacheService.createDBNameFromUser(Config.getActiveServer(this), Config.getActiveUser(this)));
 
            ArrayList<CacheItem> cacheItems = cacheService.getCaches();
+            Ln.d("handleCache %d", cacheItems.size());
             for (CacheItem item: cacheItems) {
-                if(item.getType() == CacheItem.TYPE_SITE) {
-                    Map<String, String> params = gson.fromJson(item.getData(), type);
-                    Site site = NetworkUtils.addNewSite(this, params.get("project_id"),
-                            params.get("name"), params.get("latitude"), params.get("longitude"));
-                    if (site != null) {
-                        cacheService.deleteCache(item);
+                switch (item.getType()) {
+                    case CacheItem.TYPE_SITE: {
+                        Map<String, String> params = gson.fromJson(item.getData(), type);
+                        Site site = NetworkUtils.addNewSite(this, params.get("project_id"),
+                                params.get("name"), params.get("latitude"), params.get("longitude"));
+                        if (site != null) {
+                            cacheService.deleteCache(item);
+                        }
+                        break;
                     }
                 }
             }

@@ -16,6 +16,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,6 +32,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 import com.appiphany.nacc.R;
+import com.appiphany.nacc.model.CacheItem;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Photo.DIRECTION;
 import com.appiphany.nacc.services.CacheService;
@@ -41,6 +43,7 @@ import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.UIUtils;
 import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.io.File;
@@ -146,7 +149,6 @@ public class ImageReviewFragment extends Fragment implements OnClickListener, On
         	seekOpacity.setProgress(0);
         	seekOpacity.setProgress((int)mPhoto.getOpacity());
         	mReviewImageView.setAlpha(mPhoto.getOpacity());
-        	Ln.d("opacity = %d, id = %s", (int)mPhoto.getOpacity(), mPhoto.getPhotoID());
         }
         
         seekOpacity.setOnSeekBarChangeListener(this);
@@ -347,6 +349,14 @@ public class ImageReviewFragment extends Fragment implements OnClickListener, On
                     dialog.dismiss();
 
                     if (!Config.isDemoMode(getContext()) && mPhoto != null) {
+                        if(TextUtils.isEmpty(mPhoto.getPhotoServerId())) {
+                            Ln.d("cache remove photo guide %s", mPhoto.getPhotoID());
+                            cacheService.deleteCache(mPhoto.getPhotoID());
+                            CacheItem cacheItem = new CacheItem(mPhoto.getPhotoID(),
+                                    CacheItem.TYPE_REMOVE_GUIDE, new Gson().toJson(mPhoto));
+                            cacheService.insertCache(cacheItem);
+                        }
+
                         Intent intentService = new Intent(getContext(), BackgroundService.class);
                         intentService.setAction(BackgroundService.REMOVE_GUIDE);
                         intentService.putExtra(BackgroundService.PHOTO_DATA_EXTRA, mPhoto);
@@ -363,6 +373,14 @@ public class ImageReviewFragment extends Fragment implements OnClickListener, On
             isGuidePhoto = true;
 
             if (!Config.isDemoMode(getContext()) && mPhoto != null) {
+                if(TextUtils.isEmpty(mPhoto.getPhotoServerId())) {
+                    Ln.d("cache mark photo guide %s", mPhoto.getPhotoID());
+                    cacheService.deleteCache(mPhoto.getPhotoID());
+                    CacheItem cacheItem = new CacheItem(mPhoto.getPhotoID(),
+                            CacheItem.TYPE_MARK_GUIDE, new Gson().toJson(mPhoto));
+                    cacheService.insertCache(cacheItem);
+                }
+
                 Intent intentService = new Intent(getContext(), BackgroundService.class);
                 intentService.setAction(BackgroundService.MARK_GUIDE);
                 intentService.putExtra(BackgroundService.PHOTO_DATA_EXTRA, mPhoto);

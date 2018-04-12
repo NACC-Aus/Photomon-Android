@@ -89,7 +89,7 @@ public class GlobalState extends Application {
         initLocation();
         initThreadPool();
         initImageLoader();
-        if(GeneralUtil.isDebugMode()){
+        if(BuildConfig.DEBUG){
         	Ln.getConfig().setLoggingLevel(Log.VERBOSE);
         }else{
         	Ln.getConfig().setLoggingLevel(Log.ERROR);

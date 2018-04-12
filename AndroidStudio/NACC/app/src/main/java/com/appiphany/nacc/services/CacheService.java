@@ -470,7 +470,6 @@ public class CacheService extends SQLiteOpenHelper {
     private static Object _lock = new Object();
 
     public static CacheService getInstance(Context context, String dbName) {
-    	Ln.d("get instance cache service for db %s", dbName);
         if (dbName != null
                 && (_instance == null || _instance.getMyDatabaseName() == null || !_instance.getMyDatabaseName()
                         .equals(dbName))) {
@@ -539,10 +538,32 @@ public class CacheService extends SQLiteOpenHelper {
         return results;
     }
 
-    public boolean deleteCache(CacheItem cacheItem){
+    public CacheItem getCache(String id){
         SQLiteDatabase db = getDatabase();
-        int row = db.delete(CacheItem.TABLE_NAME, CacheItem.ID + " = '" + cacheItem.getId() + "'", null);
+        CacheItem result = null;
+        Cursor cur = db.query(CacheItem.TABLE_NAME, null, CacheItem.ID + " = '" + id + "'", null, null, null, null);
+        if (cur != null && cur.getCount() > 0) {
+            cur.moveToFirst();
+            int type = cur.getInt(cur.getColumnIndex(CacheItem.TYPE));
+            String data = cur.getString(cur.getColumnIndex(CacheItem.DATA));
+            result = new CacheItem(id, type, data);
+        }
+
+        if (cur != null) {
+            cur.close();
+        }
+
+        return result;
+    }
+
+    public boolean deleteCache(String cacheId){
+        SQLiteDatabase db = getDatabase();
+        int row = db.delete(CacheItem.TABLE_NAME, CacheItem.ID + " = '" + cacheId + "'", null);
         return row > 0;
+    }
+
+    public boolean deleteCache(CacheItem cacheItem){
+        return deleteCache(cacheItem.getId());
     }
     
     public void insertOrUpdateGuidePhoto(Context context, String photoId, String photoPath, DIRECTION photoDirection, String siteId, String projectId) {

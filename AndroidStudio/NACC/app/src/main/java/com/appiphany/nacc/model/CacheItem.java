@@ -9,6 +9,8 @@ public class CacheItem implements Serializable{
     public static final String DATA = "data";
 
     public static final int TYPE_SITE = 1;
+    public static final int TYPE_MARK_GUIDE = 2;
+    public static final int TYPE_REMOVE_GUIDE = 3;
 
     private String id;
     private int type;
