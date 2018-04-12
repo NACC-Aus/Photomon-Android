@@ -11,6 +11,6 @@
         android:layout_height="wrap_content"
         android:capitalize="words"
         android:hint="@string/site_name_hint_text"
-        android:inputType="textCapWords" />
+        android:inputType="textCapSentences" />
 
 </LinearLayout>
