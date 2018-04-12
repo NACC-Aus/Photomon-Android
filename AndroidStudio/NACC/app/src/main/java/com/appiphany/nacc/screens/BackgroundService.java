@@ -274,7 +274,7 @@ public class BackgroundService extends IntentService {
         MultipartFormHttpContent httpContent = new MultipartFormHttpContent();
         httpContent.addParam("access_token", Config.getAccessToken(this));
         httpContent.addParam("site_id", siteId);
-        httpContent.addParam("direction", direction);
+        httpContent.addParamWithoutEncode("direction", direction);
         httpContent.addParam("project_id", projectId);
         httpContent.addParam("image", "image.jpg", "image/jpg", imageFile);
         httpContent.addParamWithoutEncode("note", note);
