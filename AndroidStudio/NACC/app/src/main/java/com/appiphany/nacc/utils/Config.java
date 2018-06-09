@@ -10,7 +10,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions;
 
 public class Config {
 	public static final String LOG_TAG = "nacc";
-    public static final String DEFAULT_SERVER = "http://photomon.nacc.com.au";
+    public static final String DEFAULT_SERVER = "https://photomon.nacc.com.au";
     public static final long[] VIBRATE_PATTERN = new long[] {
             0, 500, 200, 500, 200, 500, 200
     };
