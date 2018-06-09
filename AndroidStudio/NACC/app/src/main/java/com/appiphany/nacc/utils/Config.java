@@ -37,8 +37,8 @@ public class Config {
     private static final String CURRENT_PROJECT_ID = "current_project_id";
     
     public static final String ZOOZ_KEY = "ZOOZ_KEY";
-    public static final String DONATE_URL = "http://photomon.nacc.com.au/mobile/index.html";
-    public static final String INFO_URL = "http://www.nacc.com.au/photomon";
+    public static final String DONATE_URL = "https://photomon.nacc.com.au/mobile/index.html";
+    public static final String INFO_URL = "https://www.nacc.com.au/photomon";
     
     public static final DisplayImageOptions FULL_OPTIONS;
     static {
