@@ -17,12 +17,12 @@ repositories {
 
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion rootProject.ext.compileSdkVersion
 
     defaultConfig {
         applicationId "com.appiphany.nacc"
-        minSdkVersion 15
-        targetSdkVersion 28
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 7
         versionName "1.05"
     }
@@ -48,6 +48,21 @@ android {
     }
 }
 
+configurations.all {
+    resolutionStrategy {
+        // force to use latest libs
+
+        eachDependency { details ->
+            def requested = details.requested
+            if (requested.group == 'com.android.support') {
+                if (!requested.name.startsWith("multidex")) {
+                    details.useVersion "$supportLibraryVersion"
+                }
+            }
+        }
+    }
+}
+
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     //compile project(':actionbar_sherlock_library')
@@ -55,15 +70,15 @@ dependencies {
         transitive = true
     }
 
-    implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation 'com.android.support:design:28.0.0'
+    implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
+    implementation "com.android.support:design:$supportLibraryVersion"
 
     implementation 'de.greenrobot:eventbus:2.4.0'
 
     implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     implementation 'com.google.code.gson:gson:2.8.5'
 
-    implementation ('com.google.http-client:google-http-client-android:1.22.0'){
+    implementation('com.google.http-client:google-http-client-android:1.22.0') {
         exclude module: 'httpclient' //by artifact name
         exclude group: 'org.apache.httpcomponents' //by group
         exclude group: 'org.apache.httpcomponents', module: 'httpclient' //by both name and group
@@ -71,7 +86,8 @@ dependencies {
 
     implementation 'joda-time:joda-time:2.9.4'
     implementation 'com.otaliastudios:cameraview:1.5.0'
-    implementation 'com.android.support:exifinterface:28.0.0'
+    implementation "com.android.support:exifinterface:$supportLibraryVersion"
 
     implementation 'com.github.bumptech.glide:glide:4.8.0'
+    implementation 'com.google.android.gms:play-services-maps:16.1.0'
 }

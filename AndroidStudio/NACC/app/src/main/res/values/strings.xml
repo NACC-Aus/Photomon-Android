@@ -5,7 +5,7 @@
     <string name="saved_photos_title">Saved photos</string>
     <string name="reminder_title">Reminder</string>
     <string name="site_title">Sites</string>
-    
+
     <string name="server_addr_hint">Server address</string>
     <string name="email_hint">Email</string>
     <string name="password_hint">Password</string>
@@ -14,7 +14,7 @@
     <string name="common_error">Error happens while processing your request. Please try again!</string>
     <string name="connection_error">Upload failed. Please check your connection.</string>
     <string name="login_error">Username or Password is wrong</string>
-    <string name="login_connection_error">There is no network connection to login</string>    
+    <string name="login_connection_error">There is no network connection to login</string>
     <string name="ok_text">Ok</string>
     <string name="cancel_text">Cancel</string>
     <string name="dialog_title">Information</string>
@@ -76,7 +76,7 @@
         <item>4</item>
         <item>5</item>
     </string-array>
-    
+
     <string name="info_text">Info</string>
     <string name="demo_button_text">Demo</string>
     <string name="note">Note</string>
@@ -98,12 +98,13 @@
     <string name="donate">Donate</string>
     <string name="select_amount_to_donate">Select amount to donate:</string>
     <string name="guides">Guide photo</string>
-    
+
     <string name="server_url_title">Error</string>
     <string name="msg_select_direction">Please select the direction</string>
-	<string name="msg_server_url_not_available">The server url is not available. Please try again.</string>
+    <string name="msg_server_url_not_available">The server url is not available. Please try again.</string>
     <string name="msg_permission_required">Please accept permissions in order to use this app</string>
     <string name="menu_add">Add site</string>
     <string name="msg_error_add_site">Error! Can not add new site. Please try again</string>
     <string name="msg_site_exist">\'%s\' exists in this location</string>
+    <string name="title_activity_maps">Map</string>
 </resources>

@@ -27,6 +27,7 @@ import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -36,7 +37,6 @@ import com.appiphany.nacc.events.UpdateProject;
 import com.appiphany.nacc.model.CacheItem;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Project;
-import com.appiphany.nacc.services.BootReceiver;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
 import com.appiphany.nacc.services.PhotoAdapter;
@@ -46,6 +46,13 @@ import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.UIUtils;
 import com.crashlytics.android.Crashlytics;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
 
@@ -57,10 +64,11 @@ import java.util.List;
 
 import de.greenrobot.event.EventBus;
 
-public class MainScreenActivity extends BaseActivity implements OnItemClickListener, View.OnClickListener {
+public class MainScreenActivity extends BaseActivity implements OnItemClickListener, View.OnClickListener, OnMapReadyCallback {
     private ListView mListView;
     private LinearLayout mDemoView;
     private FloatingActionButton mFABAddNew;
+    private ImageView imgLocation;
 
     private PhotoAdapter mAdapter;
     private UploadBroadcaseReceiver mReceiver = new UploadBroadcaseReceiver(this);
@@ -81,6 +89,8 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 	private AlertDialog dialog1;
 	private AlertDialog dialog2;
     private boolean firstLoading;
+    private GoogleMap map;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,9 +100,11 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         setContentView(R.layout.activity_main_screen_layout);
 
         firstLoading = true;
-        mListView = (ListView) findViewById(R.id.list_photos);
-        mDemoView = (LinearLayout) findViewById(R.id.demo_view);
-        mFABAddNew = (FloatingActionButton) findViewById(R.id.fabAddNew);
+        mListView = findViewById(R.id.list_photos);
+        mDemoView = findViewById(R.id.demo_view);
+        mFABAddNew = findViewById(R.id.fabAddNew);
+        imgLocation = findViewById(R.id.imgLocation);
+        imgLocation.setOnClickListener(this);
 
         // just show demo view with demo mode
         if (Config.isDemoMode(this)) {
@@ -173,6 +185,10 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         initActionBar();
         LocationLibrary.forceLocationUpdate(this);
         LocationLibrary.startAlarmAndListener(this);
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 
     private void reloadGuidePhoto(){
@@ -303,7 +319,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
                     convertView = LayoutInflater.from(getContext()).inflate(R.layout.action_bar_spinner_item, null);
                 }
 
-                TextView textView = (TextView) convertView.findViewById(android.R.id.text1);
+                TextView textView = convertView.findViewById(android.R.id.text1);
                 textView.setText(items.get(getSupportActionBar().getSelectedNavigationIndex()));
                 return convertView;
             }
@@ -547,7 +563,27 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
             Intent startTakingPicture = new Intent(this, ImageTakingActivity.class);
             Config.setShowDirectionDialog(this, true);
             startActivity(startTakingPicture);
+        } else if (view == imgLocation) {
+            goToMyLocation();
         }
+    }
+
+    private void goToMyLocation(){
+        if(GlobalState.getCurrentUserLocation() != null) {
+            LatLng latLng = new LatLng(GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 15);
+            map.animateCamera(cameraUpdate);
+        }
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+
+        // Add a marker in Sydney and move the camera
+        LatLng sydney = new LatLng(-34, 151);
+        map.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        map.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
     private static class UploadBroadcaseReceiver extends BroadcastReceiver {
