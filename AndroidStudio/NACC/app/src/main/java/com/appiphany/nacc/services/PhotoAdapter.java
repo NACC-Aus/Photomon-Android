@@ -3,6 +3,8 @@ package com.appiphany.nacc.services;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +18,10 @@ import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.UIUtils;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 
 import java.io.File;
 import java.util.Date;
@@ -51,10 +54,10 @@ public class PhotoAdapter extends SimpleCursorAdapter {
 
     @Override
     public void bindView(View convertView, Context arg1, Cursor cursor) {
-        TextView imageNameTextView = (TextView) convertView.findViewById(R.id.photo_text_view);
-        TextView imageDetailView = (TextView) convertView.findViewById(R.id.photo_detail_view);
-        ImageView thumbnailView = (ImageView) convertView.findViewById(R.id.image_thumbnail_view);
-        final ProgressBar progressBar = (ProgressBar) convertView.findViewById(R.id.photo_upload_progress_view);
+        TextView imageNameTextView = convertView.findViewById(R.id.photo_text_view);
+        TextView imageDetailView = convertView.findViewById(R.id.photo_detail_view);
+        ImageView thumbnailView = convertView.findViewById(R.id.image_thumbnail_view);
+        final ProgressBar progressBar = convertView.findViewById(R.id.photo_upload_progress_view);
         String photoPath = cursor.getString(cursor.getColumnIndex(CacheService.COLUMN_PHOTO_PATH));
         String photoId = cursor.getString(cursor.getColumnIndex(CacheService.COLUMN_ID));
         String photoName = cursor.getString(cursor.getColumnIndex(CacheService.COLUMN_NAME));
@@ -90,18 +93,24 @@ public class PhotoAdapter extends SimpleCursorAdapter {
         }
 
         if (uploadStateVal == UPLOAD_STATE.DOWNLOAD) {
-            GlideDrawableImageViewTarget target = new GlideDrawableImageViewTarget(thumbnailView) {
+            RequestListener<Drawable> listener = new RequestListener<Drawable>() {
                 @Override
-                public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> animation) {
-                    super.onResourceReady(resource, animation);
+                public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
                     progressBar.setVisibility(View.GONE);
+                    return false;
+                }
+
+                @Override
+                public boolean onResourceReady(Drawable resource, Object model, Target<Drawable> target, DataSource dataSource, boolean isFirstResource) {
+                    progressBar.setVisibility(View.GONE);
+                    return false;
                 }
             };
 
             if(photoPath.startsWith("http")) {
-                Glide.with(mContext).load(photoPath).into(target);
+                Glide.with(mContext).load(photoPath).listener(listener).into(thumbnailView);
             }else{
-                Glide.with(mContext).load(new File(photoPath)).into(target);
+                Glide.with(mContext).load(new File(photoPath)).listener(listener).into(thumbnailView);
             }
         }else{
             if(photoPath.startsWith("http")){
