@@ -52,6 +52,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
@@ -579,6 +580,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
+        map.setInfoWindowAdapter(new MapInfoWindow());
 
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
@@ -586,11 +588,29 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         map.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
+    private class MapInfoWindow implements GoogleMap.InfoWindowAdapter {
+        private final View view;
+
+        MapInfoWindow() {
+            view = View.inflate(getActivityContext(), R.layout.item_map_info, null);
+        }
+
+        @Override
+        public View getInfoWindow(Marker marker) {
+            return null;
+        }
+
+        @Override
+        public View getInfoContents(Marker marker) {
+            return view;
+        }
+    }
+
     private static class UploadBroadcaseReceiver extends BroadcastReceiver {
         private WeakReference<MainScreenActivity> mContext;
 
         public UploadBroadcaseReceiver(MainScreenActivity context) {
-            mContext = new WeakReference<MainScreenActivity>(context);
+            mContext = new WeakReference<>(context);
         }
 
         @Override
