@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.ViewConfiguration;
 
@@ -167,6 +168,20 @@ public class GlobalState extends Application {
 
     public static List<Site> getSites() {
         return sSites;
+    }
+
+    public static Site getSite(String siteId){
+        if(sSites == null || TextUtils.isEmpty(siteId)) {
+            return null;
+        }
+
+        for (Site site: sSites) {
+            if(siteId.equals(site.getSiteId())) {
+                return site;
+            }
+        }
+
+        return null;
     }
 
     private static final Object mLock = new Object();

@@ -1,6 +1,8 @@
 package com.appiphany.nacc.screens;
 
 import java.util.List;
+
+import com.appiphany.nacc.events.UpdateSites;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.utils.Config;
@@ -17,6 +19,8 @@ import android.location.LocationManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+
+import de.greenrobot.event.EventBus;
 
 public class LocationService extends Service{
 	public static final String LOCATION_CHANGED = "location_changed";
@@ -179,7 +183,8 @@ public class LocationService extends Service{
 			
 			Site mBestSite = UIUtils.getBestSite(GlobalState.getSites(), currentLocation, context);
 			GlobalState.setBestSite(mBestSite);
-			
+
+            EventBus.getDefault().post(new UpdateSites());
 			Intent intent = new Intent();
 			intent.setAction(UPDATE_SITE_ACTION);
 			sendBroadcast(intent);

@@ -10,6 +10,7 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -34,9 +36,11 @@ import android.widget.TextView;
 
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.events.UpdateProject;
+import com.appiphany.nacc.events.UpdateSites;
 import com.appiphany.nacc.model.CacheItem;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Project;
+import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
 import com.appiphany.nacc.services.PhotoAdapter;
@@ -45,6 +49,7 @@ import com.appiphany.nacc.utils.DialogUtil;
 import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.UIUtils;
+import com.bumptech.glide.Glide;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -57,6 +62,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
 
+import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -515,16 +521,19 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
     }
 
     private void refreshList() {
+        Cursor cursor = cacheService.getPhotos(Config.getCurrentProjectId(getActivityContext()));
         if (mAdapter != null) {
             mAdapter.setGuidePhotoId(mGuidePhotoIds);
-            mAdapter.changeCursor(cacheService.getPhotos(Config.getCurrentProjectId(getActivityContext())));
+            mAdapter.changeCursor(cursor);
             mAdapter.notifyDataSetChanged();
         } else {
-            mAdapter = new PhotoAdapter(this, R.layout.photo_item_layout, cacheService.getPhotos(Config.getCurrentProjectId(getActivityContext())),
+            mAdapter = new PhotoAdapter(this, R.layout.photo_item_layout, cursor,
                     new String[] { CacheService.COLUMN_ID }, null,
                     0, mGuidePhotoIds);
             mListView.setAdapter(mAdapter);
         }
+
+        drawPhotoMarkers();
     }
 
     private void handleDownload(UPLOAD_STATE uploadState, String photoId) {
@@ -569,6 +578,21 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         }
     }
 
+    private void drawPhotoMarkers() {
+        List<Photo> photos = cacheService.getPhotosList(Config.getCurrentProjectId(getActivityContext()));
+        if (map != null) {
+            map.clear();
+            for (Photo photo: photos) {
+                Site site = GlobalState.getSite(photo.getSiteId());
+                if(site != null) {
+                    LatLng latlng = new LatLng(site.getLat(), site.getLng());
+                    Marker marker = map.addMarker(new MarkerOptions().position(latlng));
+                    marker.setTag(photo);
+                }
+            }
+        }
+    }
+
     private void goToMyLocation(){
         if(GlobalState.getCurrentUserLocation() != null) {
             LatLng latLng = new LatLng(GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
@@ -582,17 +606,21 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         map = googleMap;
         map.setInfoWindowAdapter(new MapInfoWindow());
 
+        drawPhotoMarkers();
         // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        map.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        map.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        if (GlobalState.getCurrentUserLocation() != null) {
+            LatLng location = new LatLng(GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
+            map.moveCamera(CameraUpdateFactory.newLatLng(location));
+        }
     }
 
     private class MapInfoWindow implements GoogleMap.InfoWindowAdapter {
         private final View view;
+        private final ImageView imgPhoto;
 
         MapInfoWindow() {
             view = View.inflate(getActivityContext(), R.layout.item_map_info, null);
+            imgPhoto = view.findViewById(R.id.imgPhoto);
         }
 
         @Override
@@ -602,6 +630,18 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 
         @Override
         public View getInfoContents(Marker marker) {
+            if (marker.getTag() instanceof Photo) {
+                Photo photo = (Photo) marker.getTag();
+                String photoPath = photo.getPhotoPath();
+                if(!TextUtils.isEmpty(photoPath)) {
+                    if(photoPath.startsWith("http")) {
+                        Glide.with(getActivityContext()).load(photoPath).into(imgPhoto);
+                    } else {
+                        Glide.with(getActivityContext()).load(new File(photoPath)).into(imgPhoto);
+                    }
+                }
+            }
+
             return view;
         }
     }
@@ -718,6 +758,10 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
     public void onEventMainThread(UpdateProject event){
         initActionBar();
         EventBus.getDefault().removeStickyEvent(event);
+    }
+
+    public void onEventMainThread(UpdateSites event){
+        drawPhotoMarkers();
     }
 
     private final BroadcastReceiver lftBroadcastReceiver = new BroadcastReceiver() {
