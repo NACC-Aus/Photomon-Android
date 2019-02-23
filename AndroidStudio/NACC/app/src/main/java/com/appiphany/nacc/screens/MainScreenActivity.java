@@ -56,6 +56,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -590,6 +591,20 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
                     marker.setTag(photo);
                 }
             }
+
+            if (GlobalState.getCurrentUserLocation() != null) {
+                LatLng location = new LatLng(GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
+                map.addMarker(new MarkerOptions()
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).position(location));
+                map.moveCamera(CameraUpdateFactory.newLatLng(location));
+            }
+
+            map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                @Override
+                public boolean onMarkerClick(Marker marker) {
+                    return !(marker.getTag() instanceof Photo);
+                }
+            });
         }
     }
 
@@ -607,11 +622,6 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         map.setInfoWindowAdapter(new MapInfoWindow());
 
         drawPhotoMarkers();
-        // Add a marker in Sydney and move the camera
-        if (GlobalState.getCurrentUserLocation() != null) {
-            LatLng location = new LatLng(GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
-            map.moveCamera(CameraUpdateFactory.newLatLng(location));
-        }
     }
 
     private class MapInfoWindow implements GoogleMap.InfoWindowAdapter {
