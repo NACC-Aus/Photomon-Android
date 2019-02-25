@@ -302,20 +302,9 @@ public class UIUtils {
 	public static Point getScreenResolution(Context context){
 		WindowManager manager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
 		Display display = manager.getDefaultDisplay();
-
-		int width = 0;
-		int height = 0;
-		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB_MR2 ) {
-			Point size = new Point();
-			display.getSize(size);
-			width = size.x;
-			height = size.y;
-		} else {
-			width = display.getWidth();
-			height = display.getHeight();
-		}
-		
-		return new Point(width, height);
+		Point size = new Point();
+		display.getSize(size);
+		return new Point(size.x, size.y);
 	}
     
     public static Point findBestPreviewSizeValue(Camera.Parameters parameters, Point screenResolution) {

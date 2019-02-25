@@ -26,6 +26,7 @@ public class Config {
 
     public static final int LOCATION_DISTANCE = 50;
     public static final int LOCATION_NEAREST_DISTANCE = 100;
+    public static final int MAP_ZOOM_DISTANCE = 1000; // meters
 
     private static final String USER_INFO_ACCESS_TAG = "user-access-tag";
     private static final String ACCESS_TOKEN_TAG = "access-token";

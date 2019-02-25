@@ -2,26 +2,29 @@ package com.appiphany.nacc.utils;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.provider.Settings;
+import android.util.DisplayMetrics;
 
 import com.appiphany.nacc.R;
 
 public class LocationUtil {
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 1 meters
     private static final long MIN_TIME_BW_UPDATES = 5000; // 1 second
+    private static final double EQUATOR_LENGTH = 6378140;
     private Activity mContext;
     private Location mLocation;
     private LocationManager locationMgr;
     public static boolean hasAskForGps;
-    
+
     public LocationUtil(Activity context) {
         this.mContext = context;
         this.locationMgr = (LocationManager) context.getSystemService(Activity.LOCATION_SERVICE);
     }
-    
+
     @SuppressLint("MissingPermission")
     public Location getLocation(LocationListener mListener) {
         try {
@@ -88,4 +91,11 @@ public class LocationUtil {
         locationMgr = null;
     }
 
+    public static double getZoomForMetersWide(Context context, final double desiredMeters, final double latitude) {
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        float mapWidth = UIUtils.getScreenResolution(context).x / metrics.scaledDensity;
+        final double latitudinalAdjustment = Math.cos(Math.PI * latitude / 180.0);
+        final double arg = EQUATOR_LENGTH * mapWidth * latitudinalAdjustment / (desiredMeters * 256.0);
+        return Math.log(arg) / Math.log(2.0);
+    }
 }

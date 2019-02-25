@@ -1,6 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/tools">
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:title="@string/view_photos"
+        android:id="@+id/menu_gallery"
+        android:icon="@drawable/ic_gallery"
+        app:showAsAction="always"/>
 
     <item
         android:title="@string/take_photo"
@@ -33,8 +39,6 @@
         android:id="@+id/menu_guides"
         app:showAsAction="never"
         android:title="@string/guides"/>
-     
-
     
     <item
         android:id="@+id/menu_logout"

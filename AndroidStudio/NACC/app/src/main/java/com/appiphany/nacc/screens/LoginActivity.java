@@ -246,10 +246,10 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
         }
 
         GlobalState.getInstance().initLocation();
-        Intent showMainScreenIntent = new Intent(this, MainScreenActivity.class);
+        Intent showMainScreenIntent = new Intent(this, MapActivity.class);
         showMainScreenIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        showMainScreenIntent.putExtra(MainScreenActivity.FROM_LOGIN_EXTRA, true);
-        showMainScreenIntent.putExtra(MainScreenActivity.DOWNLOAD_GUIDE_EXTRA, true);
+        showMainScreenIntent.putExtra(MapActivity.FROM_LOGIN_EXTRA, true);
+        showMainScreenIntent.putExtra(MapActivity.DOWNLOAD_GUIDE_EXTRA, true);
 
         finish();
         startActivity(showMainScreenIntent);
