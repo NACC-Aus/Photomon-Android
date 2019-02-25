@@ -18,8 +18,8 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -68,6 +68,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
     public static final String ACTION_LOGOUT = "com.appiphany.nacc.ACTION_LOGOUT";
     public static final String FROM_LOGIN_EXTRA = "from_login_extra";
     public static final String DOWNLOAD_GUIDE_EXTRA = "download_guide";
+    public static final String SITE_ID = "site_id";
     
     private static final int REQUEST_REVIEW = 1;
     private static final int REQUEST_REMINDER = 2;
@@ -80,7 +81,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 	private AlertDialog dialog1;
 	private AlertDialog dialog2;
     private boolean firstLoading;
-
+    private String currentSiteId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +109,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         Intent intent = getIntent();
         Ln.d("[MainScreen] on create ");
 
+        currentSiteId = intent.getStringExtra(SITE_ID);
         String action = intent.getAction();
         if (action != null) {
             if (action.equals(REQUEST_UPLOAD) && !Config.isDemoMode(this)) {
@@ -145,7 +147,8 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
             	
             }
             mGuidePhotoIds = cacheService.getGuidePhotoIds();
-            mAdapter = new PhotoAdapter(this, R.layout.photo_item_layout, cacheService.getPhotos(Config.getCurrentProjectId(getActivityContext())),
+            Cursor cursor = cacheService.getPhotos(Config.getCurrentProjectId(getActivityContext()), currentSiteId);
+            mAdapter = new PhotoAdapter(this, R.layout.photo_item_layout, cursor,
                     new String[] { CacheService.COLUMN_ID }, new int[] { R.id.photo_text_view },
                     0, mGuidePhotoIds);
             mListView.setAdapter(mAdapter);
@@ -262,7 +265,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         getSupportActionBar().setDisplayShowHomeEnabled(false);
         getSupportActionBar().setDisplayUseLogoEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        
+
         final List<Project> projects = getProjects();
         
         if(projects == null || projects.size() == 0 || Config.isDemoMode(getActivityContext())){
@@ -270,17 +273,17 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         	getSupportActionBar().setDisplayShowTitleEnabled(true);
         	return;
         }
-        
+
         if(projects.size() == 1){
         	getSupportActionBar().setTitle(projects.get(0).getName());
         	getSupportActionBar().setDisplayShowTitleEnabled(true);
         	return;
         }
-        
-        getSupportActionBar().setDisplayShowTitleEnabled(false);        
+
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
         getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-        
-        
+
+
         final List<String> items = new ArrayList<String>();
         String currentProjectId = Config.getCurrentProjectId(getActivityContext());
         int currentIndex = -1;
@@ -312,7 +315,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 
         getSupportActionBar()
                 .setListNavigationCallbacks(adapter, new ActionBar.OnNavigationListener() {
-					
+
 					@Override
 					public boolean onNavigationItemSelected(int itemPosition, long itemId) {
                         adapter.notifyDataSetChanged();
@@ -328,7 +331,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 						return false;
 					}
 				});
-        
+
         if(currentIndex != -1){
         	Config.setCurrentProjectId(getActivityContext(), currentProjectId);
         	getSupportActionBar().setSelectedNavigationItem(currentIndex);
@@ -490,7 +493,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
     }
 
     private void refreshList() {
-        Cursor cursor = cacheService.getPhotos(Config.getCurrentProjectId(getActivityContext()));
+        Cursor cursor = cacheService.getPhotos(Config.getCurrentProjectId(getActivityContext()), currentSiteId);
         if (mAdapter != null) {
             mAdapter.setGuidePhotoId(mGuidePhotoIds);
             mAdapter.changeCursor(cursor);
@@ -582,6 +585,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Intent showReviewPage = new Intent(this, ImageReviewActivity.class);
         showReviewPage.putExtra(ImageReviewActivity.CURRENT_IMAGE_ID_EXTRA, position);
+        showReviewPage.putExtra(SITE_ID, currentSiteId);
         startActivityForResult(showReviewPage, REQUEST_REVIEW);
     }
 

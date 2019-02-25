@@ -170,6 +170,21 @@ public class GlobalState extends Application {
         return sSites;
     }
 
+    public static List<Site> getProjectSites(String projectId) {
+        if(sSites == null || sSites.isEmpty() || TextUtils.isEmpty(projectId)) {
+            return null;
+        }
+
+        List<Site> result = new ArrayList<>();
+        for (Site site: sSites) {
+            if(projectId.equals(site.getProjectId())) {
+                result.add(site);
+            }
+        }
+
+        return result;
+    }
+
     public static Site getSite(String siteId){
         if(sSites == null || TextUtils.isEmpty(siteId)) {
             return null;

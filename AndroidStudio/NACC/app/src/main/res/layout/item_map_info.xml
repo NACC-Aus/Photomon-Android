@@ -7,8 +7,8 @@
 
     <ImageView
         android:id="@+id/imgPhoto"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
+        android:layout_width="@dimen/marker_thumb"
+        android:layout_height="@dimen/marker_thumb"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_launcher" />
 </LinearLayout>

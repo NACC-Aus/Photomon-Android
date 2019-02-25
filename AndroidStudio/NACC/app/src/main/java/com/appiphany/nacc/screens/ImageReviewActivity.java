@@ -37,11 +37,13 @@ public class ImageReviewActivity extends BaseActivity implements OnPageChangeLis
     private CacheService cacheService;
     private PhotoReviewAdapter mAdapter;
     public static final String CURRENT_IMAGE_ID_EXTRA = "current_image_id_extra";
+    public static final String SITE_ID = "site_id";
     private UploadListener mReceiver = new UploadListener(this);
     private MenuItem mReuploadMenu;
     private MenuItem mAddNoteMenu;
     private boolean isPhotoUploaded = true;
     private Toast mToast;
+    private String siteId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,12 +56,13 @@ public class ImageReviewActivity extends BaseActivity implements OnPageChangeLis
         Intent intent = getIntent();
         if (intent != null) {
             mCurrentPhotoId = intent.getIntExtra(CURRENT_IMAGE_ID_EXTRA, 0);
+            siteId = intent.getStringExtra(SITE_ID);
         }
         cacheService = CacheService.getInstance(this,
                 CacheService.createDBNameFromUser(Config.getActiveServer(this), Config.getActiveUser(this)));
-        Cursor c = cacheService.getPhotos(Config.getCurrentProjectId(getActivityContext()));
+        Cursor c = cacheService.getPhotos(Config.getCurrentProjectId(getActivityContext()), siteId);
         mAdapter = new PhotoReviewAdapter(this, getSupportFragmentManager(), c);
-        mViewPager = (ViewPager) findViewById(R.id.image_view_pager);
+        mViewPager = findViewById(R.id.image_view_pager);
         initActionBar();
     }
 

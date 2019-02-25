@@ -5,6 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 import android.content.ContentValues;
@@ -345,13 +346,30 @@ public class CacheService extends SQLiteOpenHelper {
     }
 
     public Cursor getPhotos(String projectId) {
-        SQLiteDatabase db = getDatabase();
-        return db.query(TABLE_NAME_PHOTO, null, COLUMN_PROJECT + " = \"" + projectId + "\"", null, null, null, COLUMN_TAKEN_DATE + " desc");
+        return getPhotos(projectId, null);
     }
 
-    public List<Photo> getPhotosList(String projectId) {
+    public Cursor getPhotos(String projectId, String siteId) {
         SQLiteDatabase db = getDatabase();
-        Cursor cursor = db.query(TABLE_NAME_PHOTO, null, COLUMN_PROJECT + " = \"" + projectId + "\"", null, null, null, COLUMN_TAKEN_DATE + " desc");
+        String query;
+        if (!TextUtils.isEmpty(siteId)) {
+            query = String.format(Locale.US, " %s = \"%s\" AND %s = \"%s\" ", COLUMN_PROJECT, projectId, COLUMN_SITE, siteId);
+        } else {
+            query = String.format(Locale.US, " %s = \"%s\" ", COLUMN_PROJECT, projectId);
+        }
+        return db.query(TABLE_NAME_PHOTO, null, query, null, null, null, COLUMN_TAKEN_DATE + " desc");
+    }
+
+    public List<Photo> getPhotosList(String projectId, String siteId) {
+        SQLiteDatabase db = getDatabase();
+        String query;
+        if (!TextUtils.isEmpty(siteId)) {
+            query = String.format(Locale.US, " %s = \"%s\" AND %s = \"%s\" ", COLUMN_PROJECT, projectId, COLUMN_SITE, siteId);
+        } else {
+            query = String.format(Locale.US, " %s = \"%s\" ", COLUMN_PROJECT, projectId);
+        }
+
+        Cursor cursor = db.query(TABLE_NAME_PHOTO, null, query, null, null, null, COLUMN_TAKEN_DATE + " desc");
         List<Photo> result = new ArrayList<>();
         if(cursor != null && cursor.getCount() > 0){
             result = new ArrayList<>();
