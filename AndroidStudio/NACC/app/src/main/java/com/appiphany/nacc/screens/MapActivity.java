@@ -10,7 +10,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.Color;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -57,7 +58,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -561,12 +562,14 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
 
             if (GlobalState.getCurrentUserLocation() != null) {
                 LatLng location = new LatLng(GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
-                map.addCircle(new CircleOptions()
-                        .center(new LatLng(location.latitude, location.longitude))
-                        .radius(1000)
-                        .strokeWidth(10)
-                        .strokeColor(Color.WHITE)
-                        .fillColor(ContextCompat.getColor(this, R.color.location)));
+                Canvas canvas = new Canvas();
+                Drawable circleDrawable = ContextCompat.getDrawable(this, R.drawable.shape_current_location_circle);
+                Bitmap bitmap = Bitmap.createBitmap(circleDrawable.getIntrinsicWidth(), circleDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+                canvas.setBitmap(bitmap);
+                circleDrawable.setBounds(0, 0, circleDrawable.getIntrinsicWidth(), circleDrawable.getIntrinsicHeight());
+                circleDrawable.draw(canvas);
+                map.addMarker(new MarkerOptions().position(location)
+                        .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
                 double zoomLevel = LocationUtil.getZoomForMetersWide(this, Config.MAP_ZOOM_DISTANCE, location.latitude);
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, (float) zoomLevel));
             }

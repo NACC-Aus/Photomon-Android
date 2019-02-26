@@ -13,5 +13,5 @@
     <color name="colorPrimaryDark">@android:color/black</color>
     <color name="colorAccent">#0099cc</color>
     <color name="colorPrimaryDark_v23">#dddddd</color>
-    <color name="location">#660000FF</color>
+    <color name="location">#990000FF</color>
 </resources>
