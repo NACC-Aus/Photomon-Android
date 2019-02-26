@@ -182,7 +182,9 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-        DownloadGuidesJob.scheduleJob();
+        if (!Config.isDemoMode(this)) {
+            DownloadGuidesJob.scheduleJob();
+        }
     }
 
     private void reloadGuidePhoto(){

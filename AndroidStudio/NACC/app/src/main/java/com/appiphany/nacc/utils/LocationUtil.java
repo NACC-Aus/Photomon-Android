@@ -98,4 +98,12 @@ public class LocationUtil {
         final double arg = EQUATOR_LENGTH * mapWidth * latitudinalAdjustment / (desiredMeters * 256.0);
         return Math.log(arg) / Math.log(2.0);
     }
+
+    public static float distanceBetween(double startLatitude, double startLongitude,
+                                       double endLatitude, double endLongitude){
+        float[] resultValue = new float[1];
+        Location.distanceBetween(startLatitude, startLongitude, endLatitude,
+                endLongitude, resultValue);
+        return resultValue[0];
+    }
 }

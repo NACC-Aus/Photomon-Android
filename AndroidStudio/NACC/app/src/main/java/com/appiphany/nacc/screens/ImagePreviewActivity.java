@@ -45,6 +45,7 @@ import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.DialogUtil;
 import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Ln;
+import com.appiphany.nacc.utils.LocationUtil;
 import com.appiphany.nacc.utils.NetworkUtils;
 import com.appiphany.nacc.utils.UIUtils;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
@@ -116,13 +117,13 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
 
         setContentView(R.layout.activity_picture_preview_layout);
 
-        mPreviewView = (ImageView) findViewById(R.id.image_preview_view);
-        mDirectionTextView = (TextView) findViewById(R.id.image_name_text);
-        mDescriptionTextView = (TextView) findViewById(R.id.image_description_text);
-        mInfoLayout = (RelativeLayout) findViewById(R.id.image_info_panel);
-        mBtNote = (Button) findViewById(R.id.add_note_btn);
-        mGuideImageView = (ImageView) findViewById(R.id.guide_image_view);
-        seekOpacityCamera = (SeekBar) findViewById(R.id.seekOpacityCamera);
+        mPreviewView = findViewById(R.id.image_preview_view);
+        mDirectionTextView = findViewById(R.id.image_name_text);
+        mDescriptionTextView = findViewById(R.id.image_description_text);
+        mInfoLayout = findViewById(R.id.image_info_panel);
+        mBtNote = findViewById(R.id.add_note_btn);
+        mGuideImageView = findViewById(R.id.guide_image_view);
+        seekOpacityCamera = findViewById(R.id.seekOpacityCamera);
 
         mPreviewView.setOnClickListener(this);
         mBtNote.setOnClickListener(this);
@@ -327,7 +328,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     	            }
     			}
     		}
-    	};
+    	}
     }
 
     Dialog dialog;
@@ -339,7 +340,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
         }
 
         View contentView = View.inflate(getActivityContext(), R.layout.add_new_site, null);
-        final EditText etSiteName = (EditText) contentView.findViewById(R.id.site_name_edittext);
+        final EditText etSiteName = contentView.findViewById(R.id.site_name_edittext);
     	if(dialog == null){
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivityContext());
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
@@ -625,7 +626,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     // save photo taken to database
     // set guide photo if isMakeGuide variable is true
     // back to main screen
-    private void goBackToMain(String filename) {
+    private void goBackToMain(final String filename) {
         if (clickedItem != null) {
             clickedItem.setEnabled(true);
         }
@@ -639,6 +640,43 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             UIUtils.buildAlertDialog(this, R.string.dialog_title, R.string.no_photo_name_error, false).show();
             return;
         }
+
+        Photo.DIRECTION direction = Photo.DIRECTION.getDirection(mDirection);
+        boolean shouldSaving = true;
+        if(direction == Photo.DIRECTION.POINT) {
+            if(GlobalState.getBestSite() != null && GlobalState.getCurrentUserLocation() != null) {
+                float distance = LocationUtil.distanceBetween(GlobalState.getBestSite().getLat(), GlobalState.getBestSite().getLng(),
+                        GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
+                if (distance > Config.LOCATION_NEAREST_DISTANCE) {
+                    shouldSaving = false;
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivityContext());
+                    builder.setTitle(null).setMessage(getString(R.string.msg_photo_out_of_range, (int)distance));
+                    builder.setCancelable(true);
+                    builder.setPositiveButton(R.string.ok_text, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            savePhoto(filename);
+                        }
+                    });
+
+                    builder.setNegativeButton(R.string.cancel_text, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+
+                        }
+                    });
+
+                    builder.create().show();
+                }
+            }
+        }
+
+        if(shouldSaving) {
+            savePhoto(filename);
+        }
+    }
+
+    private void savePhoto(String filename) {
         if (filename != null) {
         	updateSiteName(GlobalState.getSites());
         	final int version = android.os.Build.VERSION.SDK_INT;
@@ -648,15 +686,15 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             }else{
             	opacity = 10.0f;
             }
-            
+
             Photo photoModel = new Photo(mPhotoId, "", filename, mPhotoName, mSiteId, mDirection,
                     UPLOAD_STATE.NOT_UPLOAD,
-                    new Date(), mNoteString, opacity, Config.getCurrentProjectId(getActivityContext()));            
+                    new Date(), mNoteString, opacity, Config.getCurrentProjectId(getActivityContext()));
             CacheService cacheService = CacheService.getInstance(this,
                     CacheService.createDBNameFromUser(Config.getActiveServer(this), Config.getActiveUser(this)));
             if (cacheService.addNewPhoto(photoModel)) {
-                Intent backToMainIntent = new Intent(this, MainScreenActivity.class);
-                backToMainIntent.setAction(MainScreenActivity.REQUEST_UPLOAD);
+                Intent backToMainIntent = new Intent(this, MapActivity.class);
+                backToMainIntent.setAction(MapActivity.REQUEST_UPLOAD);
                 backToMainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 backToMainIntent.putExtra(BackgroundService.PHOTO_DATA_EXTRA, photoModel);
                 startActivity(backToMainIntent);
@@ -667,7 +705,8 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
 
         }
     }
-    
+
+
     private LocationListener locationListener = new LocationListener() {
 
         @Override

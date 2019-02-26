@@ -107,5 +107,6 @@
     <string name="menu_add">Add site</string>
     <string name="msg_error_add_site">Error! Can not add new site. Please try again</string>
     <string name="msg_site_exist">\'%s\' exists in this location</string>
+    <string name="msg_photo_out_of_range">You are %dm from the photo point, are you sure this is the correct point?</string>
     <string name="title_activity_maps">Map</string>
 </resources>
