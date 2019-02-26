@@ -28,11 +28,13 @@ import com.appiphany.nacc.BuildConfig;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
+import com.appiphany.nacc.services.jobs.AppJobCreator;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Ln;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
+import com.evernote.android.job.JobManager;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.nostra13.universalimageloader.cache.disc.impl.LimitedAgeDiskCache;
 import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
@@ -73,7 +75,7 @@ public class GlobalState extends Application {
         Fabric.with(this, new Crashlytics.Builder().core(core).build());
         
         context = getApplicationContext();
-        
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             try {
                 ViewConfiguration config = ViewConfiguration.get(this);
@@ -86,7 +88,8 @@ public class GlobalState extends Application {
                 // Ignore
             }
         }
-        
+
+        JobManager.create(this).addJobCreator(new AppJobCreator());
         initLocation();
         initThreadPool();
         initImageLoader();

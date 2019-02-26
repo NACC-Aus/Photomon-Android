@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -26,6 +27,7 @@ import android.graphics.Matrix;
 import android.location.Location;
 import android.media.ExifInterface;
 import android.os.Environment;
+import android.support.annotation.Nullable;
 
 public class GeneralUtil {
 	public static final String SIMPLE_DATE_PATTERN = "HH:mm dd/MM/yyyy";
@@ -295,4 +297,8 @@ public class GeneralUtil {
 			return 0;
 		}
 	}
+
+    public static boolean isNullOrEmpty(@Nullable Collection<?> var0) {
+        return var0 == null || var0.isEmpty();
+    }
 }

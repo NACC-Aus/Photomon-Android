@@ -116,7 +116,7 @@ public class SitesActivity extends BaseActivity implements LoaderCallbacks<List<
 
 		@Override
 		protected List<Site> buildList() {
-			List<Site> sites = GlobalState.getSites();
+			List<Site> sites = GlobalState.getProjectSites(Config.getCurrentProjectId(context));
 			
 			if (sites == null || sites.size() == 0) {
 				sites = NetworkUtils.getAllSite(getContext(), Config.getCurrentProjectId(context));

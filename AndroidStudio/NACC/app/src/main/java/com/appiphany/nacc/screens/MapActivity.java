@@ -40,6 +40,7 @@ import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Project;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
+import com.appiphany.nacc.services.jobs.DownloadGuidesJob;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.DialogUtil;
 import com.appiphany.nacc.utils.GeneralUtil;
@@ -180,6 +181,8 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        DownloadGuidesJob.scheduleJob();
     }
 
     private void reloadGuidePhoto(){
