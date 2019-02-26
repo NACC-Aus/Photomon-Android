@@ -111,19 +111,19 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_taking_picture_layout);
 
-        cameraView = (CameraView) findViewById(R.id.camera);
-        mSurfaceViewLayout = (FrameLayout) findViewById(R.id.surface_view_layout);
-        mCameraPanel = (LinearLayout) findViewById(R.id.taking_picture_layout);
-        mTakingPictureBtn = (ImageButton) findViewById(R.id.taking_picture_btn);
-        mChangeCamBtn = (ImageButton) findViewById(R.id.change_cam_btn);
-        mChangeFlashBtn = (ImageButton) findViewById(R.id.flash_btn);
-        mGuideButton = (Button) findViewById(R.id.guide_btn);
-        seekOpacityCamera = (SeekBar) findViewById(R.id.seekOpacityCamera);
-        mRlConfigPanel = (RelativeLayout) findViewById(R.id.config_panel);
+        cameraView = findViewById(R.id.camera);
+        mSurfaceViewLayout = findViewById(R.id.surface_view_layout);
+        mCameraPanel = findViewById(R.id.taking_picture_layout);
+        mTakingPictureBtn = findViewById(R.id.taking_picture_btn);
+        mChangeCamBtn = findViewById(R.id.change_cam_btn);
+        mChangeFlashBtn = findViewById(R.id.flash_btn);
+        mGuideButton = findViewById(R.id.guide_btn);
+        seekOpacityCamera = findViewById(R.id.seekOpacityCamera);
+        mRlConfigPanel = findViewById(R.id.config_panel);
 
-        mTakingPictureBtn = (ImageButton) findViewById(R.id.taking_picture_btn);
+        mTakingPictureBtn = findViewById(R.id.taking_picture_btn);
         mTakingPictureBtn.setOnClickListener(this);
-        mGuideImageView = (ImageView) findViewById(R.id.guide_image_view);
+        mGuideImageView = findViewById(R.id.guide_image_view);
         
         seekOpacityCamera.setIndeterminate(false);
         seekOpacityCamera.setOnSeekBarChangeListener(this);
@@ -245,14 +245,9 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
                               
                               
                 seekOpacityCamera.setVisibility(View.VISIBLE);
-                if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB){
-                	seekOpacityCamera.setMax(255);
-           			mGuideImageView.setAlpha((int)currentAlpha);
-           		}else{
-           			seekOpacityCamera.setMax(10);
-           			mGuideImageView.setAlpha(currentAlpha);
-           		}
-                
+                seekOpacityCamera.setMax(10);
+                mGuideImageView.setAlpha(currentAlpha);
+
                 FrameLayout.LayoutParams params = new LayoutParams(guideWidth, guideHeight, Gravity.CENTER);
                 mGuideImageView.setLayoutParams(params);
                 mGuideButton.setText(R.string.guide_on);
@@ -581,11 +576,11 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
         }
 
         dialog.getWindow().setGravity(Gravity.CENTER);
-        Button btnNorth = (Button) dialog.findViewById(R.id.btnNorth);
-        Button btnSouth = (Button) dialog.findViewById(R.id.btnSouth);
-        Button btnEast = (Button) dialog.findViewById(R.id.btnEast);
-        Button btnWest = (Button) dialog.findViewById(R.id.btnWest);        
-        Button btnPoint = (Button)dialog.findViewById(R.id.btnPoint);
+        Button btnNorth = dialog.findViewById(R.id.btnNorth);
+        Button btnSouth = dialog.findViewById(R.id.btnSouth);
+        Button btnEast = dialog.findViewById(R.id.btnEast);
+        Button btnWest = dialog.findViewById(R.id.btnWest);
+        Button btnPoint = dialog.findViewById(R.id.btnPoint);
 
         int guideBackground = ContextCompat.getColor(this,
                 R.color.guide_dark_color_bgr);
@@ -849,14 +844,9 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
 	@Override
 	public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 		if(fromUser){
-			if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB){
-				mGuideImageView.setAlpha(progress);
-				currentAlpha = progress;
-			}else{
-				mGuideImageView.setAlpha(progress/10.0f);
-				currentAlpha = progress/10.0f;
-			}
-		}
+            mGuideImageView.setAlpha(progress/10.0f);
+            currentAlpha = progress/10.0f;
+        }
 		
 	}
 

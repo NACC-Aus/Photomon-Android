@@ -9,10 +9,12 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
@@ -44,7 +46,11 @@ import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.LocationUtil;
 import com.appiphany.nacc.utils.UIUtils;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.Target;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -88,6 +94,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
     private AlertDialog dialog2;
     private boolean firstLoading;
     private GoogleMap map;
+    private List<Marker> markers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -541,6 +548,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         List<Site> sites = GlobalState.getProjectSites(projectId);
         if (map != null && sites != null && !sites.isEmpty()) {
             map.clear();
+            markers.clear();
             for (Site site: sites) {
                 LatLng latlng = new LatLng(site.getLat(), site.getLng());
                 Marker marker = map.addMarker(new MarkerOptions().position(latlng));
@@ -548,6 +556,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
                 if (!photos.isEmpty()) {
                     marker.setTag(photos.get(0));
                 }
+                markers.add(marker);
             }
 
             if (GlobalState.getCurrentUserLocation() != null) {
@@ -613,7 +622,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         }
 
         @Override
-        public View getInfoContents(Marker marker) {
+        public View getInfoContents(final Marker marker) {
             if (marker.getTag() instanceof Photo) {
                 Photo photo = (Photo) marker.getTag();
                 String photoPath = photo.getPhotoPath();
@@ -622,10 +631,24 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
                     RequestOptions options = new RequestOptions()
                             .placeholder(R.drawable.ic_launcher)
                             .override(size, size).centerCrop();
+                    RequestListener<Bitmap> listener = new RequestListener<Bitmap>() {
+                        @Override
+                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                            return true;
+                        }
+
+                        @Override
+                        public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                            if(!dataSource.equals(DataSource.MEMORY_CACHE)) marker.showInfoWindow();
+                            imgPhoto.setImageBitmap(resource);
+                            return true;
+                        }
+                    };
+
                     if(photoPath.startsWith("http")) {
-                        Glide.with(getActivityContext()).load(photoPath).apply(options).into(imgPhoto);
+                        Glide.with(getActivityContext()).asBitmap().load(photoPath).apply(options).listener(listener).submit();
                     } else {
-                        Glide.with(getActivityContext()).load(new File(photoPath)).apply(options).into(imgPhoto);
+                        Glide.with(getActivityContext()).asBitmap().load(new File(photoPath)).apply(options).listener(listener).submit();
                     }
                 }
             }
@@ -740,9 +763,10 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         EventBus.getDefault().removeStickyEvent(event);
     }
 
-    public void onEventMainThread(UpdateSites event){
-        drawPhotoMarkers();
-        EventBus.getDefault().cancelEventDelivery(event);
+    public void onEventMainThread(UpdateSites event) {
+        if(markers.isEmpty()) {
+            drawPhotoMarkers();
+        }
     }
 
     private final BroadcastReceiver lftBroadcastReceiver = new BroadcastReceiver() {
