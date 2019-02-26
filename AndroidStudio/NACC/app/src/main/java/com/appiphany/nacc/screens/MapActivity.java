@@ -579,13 +579,6 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
                 map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, (float) zoomLevel));
             }
 
-            map.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-                @Override
-                public boolean onMarkerClick(Marker marker) {
-                    return !(marker.getTag() instanceof Photo);
-                }
-            });
-
             map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                 @Override
                 public void onInfoWindowClick(Marker marker) {
