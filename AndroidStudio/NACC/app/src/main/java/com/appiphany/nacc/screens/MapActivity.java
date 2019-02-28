@@ -37,6 +37,7 @@ import com.appiphany.nacc.events.UpdateProject;
 import com.appiphany.nacc.events.UpdateSites;
 import com.appiphany.nacc.model.CacheItem;
 import com.appiphany.nacc.model.GuidePhoto;
+import com.appiphany.nacc.model.MarkerInfo;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Project;
 import com.appiphany.nacc.model.Site;
@@ -564,32 +565,32 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
                 LatLng latlng = new LatLng(site.getLat(), site.getLng());
                 Marker marker = map.addMarker(new MarkerOptions().position(latlng));
                 GuidePhoto guidePhoto = cacheService.getGuidePhotoByDirection(projectId, site.getSiteId(), Photo.DIRECTION.POINT);
+                MarkerInfo info = new MarkerInfo();
                 if(guidePhoto != null) {
-                    marker.setTag(guidePhoto.getPhotoPath());
+                    info.setImageUrl(guidePhoto.getPhotoPath());
                     markers.put(marker,guidePhoto);
                 } else {
                     List<Photo> photos = cacheService.getPhotosList(projectId, site.getSiteId());
                     if (!photos.isEmpty()) {
-                        marker.setTag(photos.get(0).getPhotoPath());
+                        info.setImageUrl(photos.get(0).getPhotoPath());
                         markers.put(marker,photos.get(0));
                     }
                 }
+
+                info.setSiteId(site.getSiteId());
+
+                marker.setTag(info);
             }
 
             drawCurrentLocation();
 
             map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-                @SuppressWarnings("ConstantConditions")
                 @Override
                 public void onInfoWindowClick(Marker marker) {
                     String siteId = null;
-                    if (markers.get(marker) instanceof Photo) {
-                        Photo photo = (Photo) markers.get(marker);
-                        siteId = photo.getSiteId();
-
-                    } else if (markers.get(marker) instanceof GuidePhoto) {
-                        GuidePhoto photo = (GuidePhoto) markers.get(marker);
-                        siteId = photo.getSiteId();
+                    if(marker.getTag() instanceof MarkerInfo) {
+                        MarkerInfo info = (MarkerInfo) marker.getTag();
+                        siteId = info.getSiteId();
                     }
 
                     Intent intent = new Intent(getActivityContext(), MainScreenActivity.class);
@@ -702,9 +703,10 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
 
         @Override
         public View getInfoContents(final Marker marker) {
-            if (marker.getTag() instanceof String && !TextUtils.isEmpty(marker.getTag().toString())) {
+            if (marker.getTag() instanceof MarkerInfo && !TextUtils.isEmpty(((MarkerInfo) marker.getTag()).getImageUrl())) {
                 Bitmap image = images.get(marker);
-                String photoPath = marker.getTag().toString();
+                MarkerInfo info = (MarkerInfo) marker.getTag();
+                String photoPath = info.getImageUrl();
                 if (image == null) {
                     RequestOptions options = new RequestOptions()
                             .placeholder(R.drawable.ic_launcher)

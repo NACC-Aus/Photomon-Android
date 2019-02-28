@@ -14,28 +14,23 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.events.UpdateProject;
 import com.appiphany.nacc.model.CacheItem;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Project;
+import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
 import com.appiphany.nacc.services.PhotoAdapter;
@@ -267,6 +262,12 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setTitle(R.string.app_name);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
+
+        Site site = GlobalState.getSite(currentSiteId);
+        if(site != null && !TextUtils.isEmpty(site.getName())) {
+            getSupportActionBar().setTitle(site.getName());
+            return;
+        }
 
         final List<Project> projects = getProjects();
         String projectId = Config.getCurrentProjectId(getActivityContext());
