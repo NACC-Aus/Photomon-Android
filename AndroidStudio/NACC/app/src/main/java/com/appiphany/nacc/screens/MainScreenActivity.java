@@ -265,76 +265,20 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         getSupportActionBar().setDisplayShowHomeEnabled(false);
         getSupportActionBar().setDisplayUseLogoEnabled(false);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(R.string.app_name);
+        getSupportActionBar().setDisplayShowTitleEnabled(true);
 
         final List<Project> projects = getProjects();
-        
-        if(projects == null || projects.size() == 0 || Config.isDemoMode(getActivityContext())){
-        	getSupportActionBar().setTitle(R.string.app_name);
-        	getSupportActionBar().setDisplayShowTitleEnabled(true);
+        String projectId = Config.getCurrentProjectId(getActivityContext());
+        if(GeneralUtil.isNullOrEmpty(projects) || Config.isDemoMode(getActivityContext()) || TextUtils.isEmpty(projectId)){
         	return;
         }
 
-        if(projects.size() == 1){
-        	getSupportActionBar().setTitle(projects.get(0).getName());
-        	getSupportActionBar().setDisplayShowTitleEnabled(true);
-        	return;
-        }
-
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-
-
-        final List<String> items = new ArrayList<String>();
-        String currentProjectId = Config.getCurrentProjectId(getActivityContext());
-        int currentIndex = -1;
-        for (Project project : projects) {
-        	items.add(project.getName());
-        	if(currentProjectId.equals(project.getUid())){
-        		currentIndex = projects.indexOf(project);
-        	}
-		}
-
-
-//        ArrayAdapter<String> adapter = new ArrayAdapter<>(getSupportActionBar().getThemedContext(),
-//                android.R.layout.simple_list_item_1, items);
-        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainScreenActivity.this
-                , R.layout.action_bar_dropdown_item,
-                android.R.id.text1, items){
-            @NonNull
-            @Override
-            public View getView(int position, View convertView, @NonNull ViewGroup parent) {
-                if (convertView == null) {
-                    convertView = LayoutInflater.from(getContext()).inflate(R.layout.action_bar_spinner_item, null);
-                }
-
-                TextView textView = convertView.findViewById(android.R.id.text1);
-                textView.setText(items.get(getSupportActionBar().getSelectedNavigationIndex()));
-                return convertView;
+        for (Project project: projects) {
+            if(projectId.equals(project.getUid())) {
+                getSupportActionBar().setTitle(project.getName());
+                break;
             }
-        };
-
-        getSupportActionBar()
-                .setListNavigationCallbacks(adapter, new ActionBar.OnNavigationListener() {
-
-					@Override
-					public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-                        adapter.notifyDataSetChanged();
-						Config.setCurrentProjectId(getActivityContext(), projects.get(itemPosition).getUid());
-						refreshList();
-						if(!firstLoading) {
-                            GlobalState.clearBestSite();
-                            GlobalState.clearSites();
-                        }
-
-                        firstLoading = false;
-                        reloadCurrentSite();
-						return false;
-					}
-				});
-
-        if(currentIndex != -1){
-        	Config.setCurrentProjectId(getActivityContext(), currentProjectId);
-        	getSupportActionBar().setSelectedNavigationItem(currentIndex);
         }
     }
 
