@@ -699,15 +699,17 @@ public class CacheService extends SQLiteOpenHelper {
 		return ret;
     }
 
-    public GuidePhoto getGuidePhotoByDirection(DIRECTION direction) {
-        if (direction == null) {
+    public GuidePhoto getGuidePhotoByDirection(String projectId, String siteId, DIRECTION direction) {
+        if (direction == null || TextUtils.isEmpty(projectId) || TextUtils.isEmpty(siteId)) {
             return null;
         }
 
+        String query = String.format(Locale.US, " %s = \"%s\" AND %s = \"%s\" AND %s = \"%s\" ",
+                GuidePhoto.PROJECT_ID, projectId, GuidePhoto.SITE_ID, siteId, GuidePhoto.GUIDE_PHOTO_DIRECTION, direction.getValue());
         SQLiteDatabase db = getDatabase();
         GuidePhoto photo = null;
         Cursor cur = db.query(GuidePhoto.TABLE_NAME, null,
-                GuidePhoto.GUIDE_PHOTO_DIRECTION + " = '" + direction.getValue() + "'", null, null, null, null);
+                query, null, null, null, null);
         if (cur != null && cur.getCount() > 0) {
             cur.moveToFirst();
             photo = new GuidePhoto(cur);

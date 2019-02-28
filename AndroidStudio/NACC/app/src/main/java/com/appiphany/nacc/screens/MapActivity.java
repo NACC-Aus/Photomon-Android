@@ -36,6 +36,7 @@ import com.appiphany.nacc.R;
 import com.appiphany.nacc.events.UpdateProject;
 import com.appiphany.nacc.events.UpdateSites;
 import com.appiphany.nacc.model.CacheItem;
+import com.appiphany.nacc.model.GuidePhoto;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Project;
 import com.appiphany.nacc.model.Site;
@@ -48,9 +49,6 @@ import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.LocationUtil;
 import com.appiphany.nacc.utils.UIUtils;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.DataSource;
-import com.bumptech.glide.load.engine.GlideException;
-import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
@@ -100,7 +98,8 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
     private AlertDialog dialog2;
     private boolean firstLoading;
     private GoogleMap map;
-    private List<Marker> markers = new ArrayList<>();
+    private Map<Marker, Object> markers = new HashMap<>();
+    private boolean canDrawMarkers = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -329,6 +328,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
 
                     @Override
                     public boolean onNavigationItemSelected(int itemPosition, long itemId) {
+                        canDrawMarkers = true;
                         adapter.notifyDataSetChanged();
                         Config.setCurrentProjectId(getActivityContext(), projects.get(itemPosition).getUid());
                         refreshList();
@@ -559,27 +559,42 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         if (map != null && sites != null && !sites.isEmpty()) {
             map.clear();
             markers.clear();
+            canDrawMarkers = false;
             for (Site site: sites) {
                 LatLng latlng = new LatLng(site.getLat(), site.getLng());
                 Marker marker = map.addMarker(new MarkerOptions().position(latlng));
-                List<Photo> photos = cacheService.getPhotosList(projectId, site.getSiteId());
-                if (!photos.isEmpty()) {
-                    marker.setTag(photos.get(0));
+                GuidePhoto guidePhoto = cacheService.getGuidePhotoByDirection(projectId, site.getSiteId(), Photo.DIRECTION.POINT);
+                if(guidePhoto != null) {
+                    marker.setTag(guidePhoto.getPhotoPath());
+                    markers.put(marker,guidePhoto);
+                } else {
+                    List<Photo> photos = cacheService.getPhotosList(projectId, site.getSiteId());
+                    if (!photos.isEmpty()) {
+                        marker.setTag(photos.get(0).getPhotoPath());
+                        markers.put(marker,photos.get(0));
+                    }
                 }
-                markers.add(marker);
             }
 
             drawCurrentLocation();
 
             map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                @SuppressWarnings("ConstantConditions")
                 @Override
                 public void onInfoWindowClick(Marker marker) {
-                    if (marker.getTag() instanceof Photo) {
-                        Photo photo = (Photo) marker.getTag();
-                        Intent intent = new Intent(getActivityContext(), MainScreenActivity.class);
-                        intent.putExtra(MainScreenActivity.SITE_ID, photo.getSiteId());
-                        startActivity(intent);
+                    String siteId = null;
+                    if (markers.get(marker) instanceof Photo) {
+                        Photo photo = (Photo) markers.get(marker);
+                        siteId = photo.getSiteId();
+
+                    } else if (markers.get(marker) instanceof GuidePhoto) {
+                        GuidePhoto photo = (GuidePhoto) markers.get(marker);
+                        siteId = photo.getSiteId();
                     }
+
+                    Intent intent = new Intent(getActivityContext(), MainScreenActivity.class);
+                    intent.putExtra(MainScreenActivity.SITE_ID, siteId);
+                    startActivity(intent);
                 }
             });
         } else if (map != null) {
@@ -687,10 +702,9 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
 
         @Override
         public View getInfoContents(final Marker marker) {
-            if (marker.getTag() instanceof Photo && !TextUtils.isEmpty(((Photo) marker.getTag()).getPhotoPath())) {
+            if (marker.getTag() instanceof String && !TextUtils.isEmpty(marker.getTag().toString())) {
                 Bitmap image = images.get(marker);
-                Photo photo = (Photo) marker.getTag();
-                String photoPath = photo.getPhotoPath();
+                String photoPath = marker.getTag().toString();
                 if (image == null) {
                     RequestOptions options = new RequestOptions()
                             .placeholder(R.drawable.ic_launcher)
@@ -821,7 +835,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
     }
 
     public void onEventMainThread(UpdateSites event) {
-        if(markers.isEmpty()) {
+        if(canDrawMarkers) {
             drawPhotoMarkers();
         }
     }
