@@ -52,7 +52,9 @@ import com.bumptech.glide.load.DataSource;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -71,7 +73,9 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import de.greenrobot.event.EventBus;
 
@@ -565,19 +569,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
                 markers.add(marker);
             }
 
-            if (GlobalState.getCurrentUserLocation() != null) {
-                LatLng location = new LatLng(GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
-                Canvas canvas = new Canvas();
-                Drawable circleDrawable = ContextCompat.getDrawable(this, R.drawable.shape_current_location_circle);
-                Bitmap bitmap = Bitmap.createBitmap(circleDrawable.getIntrinsicWidth(), circleDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-                canvas.setBitmap(bitmap);
-                circleDrawable.setBounds(0, 0, circleDrawable.getIntrinsicWidth(), circleDrawable.getIntrinsicHeight());
-                circleDrawable.draw(canvas);
-                map.addMarker(new MarkerOptions().position(location)
-                        .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
-                double zoomLevel = LocationUtil.getZoomForMetersWide(this, Config.MAP_ZOOM_DISTANCE, location.latitude);
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, (float) zoomLevel));
-            }
+            drawCurrentLocation();
 
             map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                 @Override
@@ -590,6 +582,25 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
                     }
                 }
             });
+        } else if (map != null) {
+            map.clear();
+            drawCurrentLocation();
+        }
+    }
+
+    private void drawCurrentLocation() {
+        if (GlobalState.getCurrentUserLocation() != null) {
+            LatLng location = new LatLng(GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
+            Canvas canvas = new Canvas();
+            Drawable circleDrawable = ContextCompat.getDrawable(this, R.drawable.shape_current_location_circle);
+            Bitmap bitmap = Bitmap.createBitmap(circleDrawable.getIntrinsicWidth(), circleDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            canvas.setBitmap(bitmap);
+            circleDrawable.setBounds(0, 0, circleDrawable.getIntrinsicWidth(), circleDrawable.getIntrinsicHeight());
+            circleDrawable.draw(canvas);
+            map.addMarker(new MarkerOptions().position(location)
+                    .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
+            double zoomLevel = LocationUtil.getZoomForMetersWide(this, Config.MAP_ZOOM_DISTANCE, location.latitude);
+            map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, (float) zoomLevel));
         }
     }
 
@@ -605,16 +616,39 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
     @Override
     public void onMapReady(GoogleMap googleMap) {
         map = googleMap;
-        map.setInfoWindowAdapter(new MapActivity.MapInfoWindow());
+        map.setInfoWindowAdapter(new MapActivity.MapInfoWindow(this));
     }
 
-    private class MapInfoWindow implements GoogleMap.InfoWindowAdapter {
+    private static class MapInfoWindow implements GoogleMap.InfoWindowAdapter {
+        private final Map<Marker, Bitmap> images = new HashMap<>();
+        private final Map<Marker, Target<Bitmap>> targets = new HashMap<>();
         private final View view;
         private final ImageView imgPhoto;
+        private WeakReference<Context> context;
+        private int size;
 
-        MapInfoWindow() {
-            view = View.inflate(getActivityContext(), R.layout.item_map_info, null);
+        MapInfoWindow(Context context) {
+            this.context = new WeakReference<>(context);
+            size = (int) context.getResources().getDimension(R.dimen.marker_thumb);
+            view = View.inflate(context, R.layout.item_map_info, null);
             imgPhoto = view.findViewById(R.id.imgPhoto);
+        }
+
+        public void showInfoWindow(Marker marker) {
+            if (context.get() != null) {
+                Glide.with(context.get()).clear(targets.get(marker)); // will do images.remove(marker) too
+            }
+
+            marker.showInfoWindow(); // indirectly calls getInfoContents which will return null and start Glide load
+        }
+
+        public void remove(Marker marker) {
+            images.remove(marker);
+            if (context.get() != null) {
+                Glide.with(context.get()).clear(targets.remove(marker));
+            }
+
+            marker.remove();
         }
 
         @Override
@@ -622,36 +656,58 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
             return null;
         }
 
+        private Target<Bitmap> getTarget(Marker marker) {
+            Target<Bitmap> target = targets.get(marker);
+            if (target == null) {
+                target = new InfoTarget(marker);
+                targets.put(marker, target); // missing in original (fixed 2018 August)
+            }
+            return target;
+        }
+
+        private class InfoTarget extends SimpleTarget<Bitmap> {
+            Marker marker;
+            InfoTarget(Marker marker) {
+                super(size, size); // otherwise Glide will load original sized bitmap which is huge
+                this.marker = marker;
+            }
+
+            @Override
+            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                images.put(marker, resource);
+                marker.showInfoWindow();
+            }
+
+            @Override // Target
+            public void onLoadCleared(Drawable placeholder) {
+                images.remove(marker); // clean up previous image, it became invalid
+                // don't call marker.showInfoWindow() to update because this is most likely called from Glide.into()
+            }
+        }
+
         @Override
         public View getInfoContents(final Marker marker) {
-            if (marker.getTag() instanceof Photo) {
+            if (marker.getTag() instanceof Photo && !TextUtils.isEmpty(((Photo) marker.getTag()).getPhotoPath())) {
+                Bitmap image = images.get(marker);
                 Photo photo = (Photo) marker.getTag();
                 String photoPath = photo.getPhotoPath();
-                if(!TextUtils.isEmpty(photoPath)) {
-                    int size = (int) getResources().getDimension(R.dimen.marker_thumb);
+                if (image == null) {
                     RequestOptions options = new RequestOptions()
                             .placeholder(R.drawable.ic_launcher)
                             .override(size, size).centerCrop();
-                    RequestListener<Bitmap> listener = new RequestListener<Bitmap>() {
-                        @Override
-                        public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
-                            return true;
-                        }
-
-                        @Override
-                        public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
-                            if(!dataSource.equals(DataSource.MEMORY_CACHE)) marker.showInfoWindow();
-                            imgPhoto.setImageBitmap(resource);
-                            return true;
-                        }
-                    };
-
                     if(photoPath.startsWith("http")) {
-                        Glide.with(getActivityContext()).asBitmap().load(photoPath).apply(options).listener(listener).submit();
+                        Glide.with(context.get()).asBitmap().load(photoPath).apply(options).into(getTarget(marker));
                     } else {
-                        Glide.with(getActivityContext()).asBitmap().load(new File(photoPath)).apply(options).listener(listener).submit();
+                        Glide.with(context.get()).asBitmap().load(new File(photoPath)).apply(options).into(getTarget(marker));
                     }
+
+                    return view;
+                } else {
+                    imgPhoto.setImageBitmap(image);
+                    return view;
                 }
+            } else {
+                imgPhoto.setImageResource(R.drawable.ic_launcher);
             }
 
             return view;
