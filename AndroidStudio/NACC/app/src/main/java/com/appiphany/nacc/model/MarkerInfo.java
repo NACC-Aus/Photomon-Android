@@ -2,7 +2,7 @@ package com.appiphany.nacc.model;
 
 public class MarkerInfo {
     private String imageUrl;
-    private String siteId;
+    private Site site;
 
     public String getImageUrl() {
         return imageUrl;
@@ -12,11 +12,11 @@ public class MarkerInfo {
         this.imageUrl = imageUrl;
     }
 
-    public String getSiteId() {
-        return siteId;
+    public Site getSite() {
+        return site;
     }
 
-    public void setSiteId(String siteId) {
-        this.siteId = siteId;
+    public void setSite(Site site) {
+        this.site = site;
     }
 }

@@ -37,6 +37,7 @@ import com.appiphany.nacc.services.PhotoAdapter;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.DialogUtil;
 import com.appiphany.nacc.utils.GeneralUtil;
+import com.appiphany.nacc.utils.Intents;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.UIUtils;
 import com.crashlytics.android.Crashlytics;
@@ -63,8 +64,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
     public static final String ACTION_LOGOUT = "com.appiphany.nacc.ACTION_LOGOUT";
     public static final String FROM_LOGIN_EXTRA = "from_login_extra";
     public static final String DOWNLOAD_GUIDE_EXTRA = "download_guide";
-    public static final String SITE_ID = "site_id";
-    
+
     private static final int REQUEST_REVIEW = 1;
     private static final int REQUEST_REMINDER = 2;
     private static final int REQUEST_MANAGE_SITE = 3;
@@ -76,7 +76,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 	private AlertDialog dialog1;
 	private AlertDialog dialog2;
     private boolean firstLoading;
-    private String currentSiteId;
+    private Site currentSite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +104,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         Intent intent = getIntent();
         Ln.d("[MainScreen] on create ");
 
-        currentSiteId = intent.getStringExtra(SITE_ID);
+        currentSite = (Site) intent.getSerializableExtra(Intents.SELECTED_SITE);
         String action = intent.getAction();
         if (action != null) {
             if (action.equals(REQUEST_UPLOAD) && !Config.isDemoMode(this)) {
@@ -142,7 +142,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
             	
             }
             mGuidePhotoIds = cacheService.getGuidePhotoIds();
-            Cursor cursor = cacheService.getPhotos(Config.getCurrentProjectId(getActivityContext()), currentSiteId);
+            Cursor cursor = cacheService.getPhotos(Config.getCurrentProjectId(getActivityContext()), currentSite);
             mAdapter = new PhotoAdapter(this, R.layout.photo_item_layout, cursor,
                     new String[] { CacheService.COLUMN_ID }, new int[] { R.id.photo_text_view },
                     0, mGuidePhotoIds);
@@ -263,9 +263,8 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         getSupportActionBar().setTitle(R.string.app_name);
         getSupportActionBar().setDisplayShowTitleEnabled(true);
 
-        Site site = GlobalState.getSite(currentSiteId);
-        if(site != null && !TextUtils.isEmpty(site.getName())) {
-            getSupportActionBar().setTitle(site.getName());
+        if(currentSite != null && !TextUtils.isEmpty(currentSite.getName())) {
+            getSupportActionBar().setTitle(currentSite.getName());
             return;
         }
 
@@ -438,7 +437,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
     }
 
     private void refreshList() {
-        Cursor cursor = cacheService.getPhotos(Config.getCurrentProjectId(getActivityContext()), currentSiteId);
+        Cursor cursor = cacheService.getPhotos(Config.getCurrentProjectId(getActivityContext()), currentSite);
         if (mAdapter != null) {
             mAdapter.setGuidePhotoId(mGuidePhotoIds);
             mAdapter.changeCursor(cursor);
@@ -487,6 +486,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         if(view == mFABAddNew){
             Intent startTakingPicture = new Intent(this, ImageTakingActivity.class);
             Config.setShowDirectionDialog(this, true);
+            startTakingPicture.putExtra(Intents.SELECTED_SITE, currentSite);
             startActivity(startTakingPicture);
         }
     }
@@ -530,7 +530,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Intent showReviewPage = new Intent(this, ImageReviewActivity.class);
         showReviewPage.putExtra(ImageReviewActivity.CURRENT_IMAGE_ID_EXTRA, position);
-        showReviewPage.putExtra(SITE_ID, currentSiteId);
+        showReviewPage.putExtra(Intents.SELECTED_SITE, currentSite);
         startActivityForResult(showReviewPage, REQUEST_REVIEW);
     }
 

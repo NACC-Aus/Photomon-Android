@@ -349,11 +349,11 @@ public class CacheService extends SQLiteOpenHelper {
         return getPhotos(projectId, null);
     }
 
-    public Cursor getPhotos(String projectId, String siteId) {
+    public Cursor getPhotos(String projectId, Site site) {
         SQLiteDatabase db = getDatabase();
         String query;
-        if (!TextUtils.isEmpty(siteId)) {
-            query = String.format(Locale.US, " %s = \"%s\" AND %s = \"%s\" ", COLUMN_PROJECT, projectId, COLUMN_SITE, siteId);
+        if (site != null && !TextUtils.isEmpty(site.getSiteId())) {
+            query = String.format(Locale.US, " %s = \"%s\" AND %s = \"%s\" ", COLUMN_PROJECT, projectId, COLUMN_SITE, site.getSiteId());
         } else {
             query = String.format(Locale.US, " %s = \"%s\" ", COLUMN_PROJECT, projectId);
         }

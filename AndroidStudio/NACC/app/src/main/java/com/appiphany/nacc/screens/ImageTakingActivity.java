@@ -26,6 +26,7 @@ import android.os.StatFs;
 import android.provider.MediaStore;
 import android.support.media.ExifInterface;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -46,6 +47,7 @@ import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.GeneralUtil;
+import com.appiphany.nacc.utils.Intents;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.LocationUtil;
 import com.appiphany.nacc.utils.UIUtils;
@@ -70,6 +72,7 @@ import java.util.Map;
 
 public class ImageTakingActivity extends BaseActivity implements OnClickListener, OnSeekBarChangeListener {
 	private static final String ALPHA_KEY = "alpha_key";
+    public static final String SITE_ID = "site_id";
     private FrameLayout mSurfaceViewLayout;
     private LinearLayout mCameraPanel;
     private ImageButton mTakingPictureBtn;
@@ -103,6 +106,7 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
     private Map<DIRECTION, GuidePhoto> allGuidePhotos = new HashMap<>();
 
     private CameraView cameraView;
+    private Site selectedSite;
 
     @SuppressWarnings("deprecation")
 	@SuppressLint("NewApi")
@@ -127,7 +131,10 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
         
         seekOpacityCamera.setIndeterminate(false);
         seekOpacityCamera.setOnSeekBarChangeListener(this);
-        
+
+        if(getIntent().hasExtra(Intents.SELECTED_SITE)) {
+            selectedSite = (Site) getIntent().getSerializableExtra(Intents.SELECTED_SITE);
+        }
         currentAlpha = savedInstanceState != null ? savedInstanceState.getFloat(ALPHA_KEY, 0.0f) : 0.0f;
         
         if(currentAlpha == 0){
@@ -553,6 +560,7 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
             showPreviewIntent.putExtra(BackgroundService.PHOTO_ID_EXTRA, photoId);
             showPreviewIntent.putExtra(BackgroundService.FROM_GALLERY, isSelectFromGallery);
             showPreviewIntent.putExtra(BackgroundService.BEST_SITE, mBestSite);
+            showPreviewIntent.putExtra(Intents.SELECTED_SITE, selectedSite);
             showPreviewIntent.putExtra(BackgroundService.GUIDE_PHOTO, mGuidePhotoPath);
             showPreviewIntent.putExtra(BackgroundService.GUIDE_PHOTO_ALPHA, currentAlpha);
             startActivity(showPreviewIntent);
@@ -638,7 +646,8 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
     			doDirectionChanged(mCurrentDirection);
     			v.setSelected(true);
     			dialog.dismiss();
-    			Config.setShowDirectionDialog(ImageTakingActivity.this, false);    
+    			Config.setShowDirectionDialog(ImageTakingActivity.this, false);
+                showOutOfRangePoint();
     		}
     	};
     	
@@ -656,6 +665,39 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
         btnWest.setOnClickListener(directionClickListener);
         btnPoint.setOnClickListener(directionClickListener);
         dialog.show();
+    }
+
+    private void showOutOfRangePoint() {
+        Site site = selectedSite;
+        if(site == null) {
+            site = GlobalState.getBestSite();
+        }
+
+        if(site != null && GlobalState.getCurrentUserLocation() != null) {
+            float distance = LocationUtil.distanceBetween(selectedSite.getLat(), selectedSite.getLng(),
+                    GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
+            if (distance > Config.LOCATION_NEAREST_DISTANCE) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivityContext());
+                builder.setTitle(null).setMessage(getString(R.string.msg_photo_out_of_range, (int)distance));
+                builder.setCancelable(true);
+                builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+
+                builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        finish();
+                    }
+                });
+
+                builder.create().show();
+            }
+        }
     }
 
     private class CopyImageTask extends AsyncTask<String, Void, String> {
@@ -777,23 +819,28 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
     	}  
     	
     	Ln.d("getAndShowGuidePhoto ");
-		mBestSite = GlobalState.getBestSite();
-		if (mBestSite == null) {
-		    // try get best site again
-			Ln.d("best site is null, try get again");
-		    mBestSite = UIUtils.getBestSite(GlobalState.getSites(), mLocationUtil.getLocation(locationListener), context);
-		}
-		
-		if (mBestSite == null) {
-			Ln.d("best site still null");
-		    showNoGuide();
-		    isLoadingGuide = false;
-		    return;
-		}
+    	Site site = selectedSite;
+    	if(site == null) {
+            mBestSite = GlobalState.getBestSite();
+            if (mBestSite == null) {
+                // try get best site again
+                Ln.d("best site is null, try get again");
+                mBestSite = UIUtils.getBestSite(GlobalState.getSites(), mLocationUtil.getLocation(locationListener), context);
+            }
+
+            if (mBestSite == null) {
+                Ln.d("best site still null");
+                showNoGuide();
+                isLoadingGuide = false;
+                return;
+            }
+
+            site = mBestSite;
+        }
 		
 		CacheService mCacheService = CacheService.getInstance(
 				context, CacheService.createDBNameFromUser(Config.getActiveServer(context), Config.getActiveUser(context)));
-		GuidePhoto guidePhoto = mCacheService.getGuidePhotoBySiteId(mBestSite.getSiteId(), mCurrentDirection);
+		GuidePhoto guidePhoto = mCacheService.getGuidePhotoBySiteId(site.getSiteId(), mCurrentDirection);
 		if (guidePhoto != null) {
 		    mGuidePhotoPath = guidePhoto.getPhotoPath();
 		    mGuidePhotoDirection = DIRECTION.getDirection(guidePhoto.getPhotoDirection());

@@ -46,6 +46,7 @@ import com.appiphany.nacc.services.jobs.DownloadGuidesJob;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.DialogUtil;
 import com.appiphany.nacc.utils.GeneralUtil;
+import com.appiphany.nacc.utils.Intents;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.LocationUtil;
 import com.appiphany.nacc.utils.UIUtils;
@@ -577,8 +578,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
                     }
                 }
 
-                info.setSiteId(site.getSiteId());
-
+                info.setSite(site);
                 marker.setTag(info);
             }
 
@@ -587,14 +587,14 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
             map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
                 @Override
                 public void onInfoWindowClick(Marker marker) {
-                    String siteId = null;
+                    Site site = null;
                     if(marker.getTag() instanceof MarkerInfo) {
                         MarkerInfo info = (MarkerInfo) marker.getTag();
-                        siteId = info.getSiteId();
+                        site = info.getSite();
                     }
 
                     Intent intent = new Intent(getActivityContext(), MainScreenActivity.class);
-                    intent.putExtra(MainScreenActivity.SITE_ID, siteId);
+                    intent.putExtra(Intents.SELECTED_SITE, site);
                     startActivity(intent);
                 }
             });

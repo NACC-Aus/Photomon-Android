@@ -22,11 +22,13 @@ import android.widget.Toast;
 
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.model.Photo;
+import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
 import com.appiphany.nacc.services.CursorFragmentPagerAdapter;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.GeneralUtil;
+import com.appiphany.nacc.utils.Intents;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.UncaughtExceptionHandler;
 
@@ -37,13 +39,12 @@ public class ImageReviewActivity extends BaseActivity implements OnPageChangeLis
     private CacheService cacheService;
     private PhotoReviewAdapter mAdapter;
     public static final String CURRENT_IMAGE_ID_EXTRA = "current_image_id_extra";
-    public static final String SITE_ID = "site_id";
     private UploadListener mReceiver = new UploadListener(this);
     private MenuItem mReuploadMenu;
     private MenuItem mAddNoteMenu;
     private boolean isPhotoUploaded = true;
     private Toast mToast;
-    private String siteId;
+    private Site currentSite;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,11 +57,12 @@ public class ImageReviewActivity extends BaseActivity implements OnPageChangeLis
         Intent intent = getIntent();
         if (intent != null) {
             mCurrentPhotoId = intent.getIntExtra(CURRENT_IMAGE_ID_EXTRA, 0);
-            siteId = intent.getStringExtra(SITE_ID);
+            currentSite = (Site) intent.getSerializableExtra(Intents.SELECTED_SITE);
         }
+
         cacheService = CacheService.getInstance(this,
                 CacheService.createDBNameFromUser(Config.getActiveServer(this), Config.getActiveUser(this)));
-        Cursor c = cacheService.getPhotos(Config.getCurrentProjectId(getActivityContext()), siteId);
+        Cursor c = cacheService.getPhotos(Config.getCurrentProjectId(getActivityContext()), currentSite);
         mAdapter = new PhotoReviewAdapter(this, getSupportFragmentManager(), c);
         mViewPager = findViewById(R.id.image_view_pager);
         initActionBar();

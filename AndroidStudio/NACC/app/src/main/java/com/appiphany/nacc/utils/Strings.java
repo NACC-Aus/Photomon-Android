@@ -25,6 +25,7 @@ public final class Strings {
     private static final int DEFAULT_BUFFER_SIZE = 1024 * 4;
     
     /** The Constant UTF8_CHARSET. */
+    @SuppressWarnings("InjectedReferences")
     private static final String UTF8_CHARSET = "UTF_8";
     
     /**

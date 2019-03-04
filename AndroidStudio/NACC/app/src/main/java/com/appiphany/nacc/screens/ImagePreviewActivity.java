@@ -44,6 +44,7 @@ import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.DialogUtil;
 import com.appiphany.nacc.utils.GeneralUtil;
+import com.appiphany.nacc.utils.Intents;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.LocationUtil;
 import com.appiphany.nacc.utils.NetworkUtils;
@@ -105,6 +106,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     private CacheService cacheService;
     private Handler mHandler = new Handler();
     private float currentAlpha;
+    private Site selectedSite;
 
     private boolean hasCancel;
 
@@ -140,7 +142,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             mBestSite = (Site) intent.getSerializableExtra(BackgroundService.BEST_SITE);
             mUserLocation = GlobalState.getCurrentUserLocation();
             mGuidePhotoPath = intent.getStringExtra(BackgroundService.GUIDE_PHOTO);
-
+            selectedSite = (Site) intent.getSerializableExtra(Intents.SELECTED_SITE);
             mDirectionTextView.setText(mDirection);
             mDescriptionTextView.setText(UIUtils.getPhotoDate(new Date()));
             if (mFilename != null && mPhotoId != null) {
@@ -156,8 +158,11 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
 
         if(!Config.isDemoMode(this)) {
             mBestSite = GlobalState.getBestSite();
-
-            if (mBestSite != null ) {
+            if(selectedSite != null) {
+                getSupportActionBar().setTitle(selectedSite.getName());
+                mPhotoName = selectedSite.getName();
+                mSiteId = selectedSite.getSiteId();
+            } else if (mBestSite != null) {
                 getSupportActionBar().setTitle(mBestSite.getName());
                 mPhotoName = mBestSite.getName();
                 mSiteId = mBestSite.getSiteId();
@@ -167,17 +172,10 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
         seekOpacityCamera.setIndeterminate(false);
         seekOpacityCamera.setOnSeekBarChangeListener(this);
 
-        if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB){
-            seekOpacityCamera.setMax(255);
-            seekOpacityCamera.setProgress(0);
-            mGuideImageView.setAlpha(0);
-            currentAlpha = 0;
-        }else{
-            seekOpacityCamera.setMax(10);
-            seekOpacityCamera.setProgress(0);
-            mGuideImageView.setAlpha(0f);
-            currentAlpha = 0f;
-        }
+        seekOpacityCamera.setMax(10);
+        seekOpacityCamera.setProgress(0);
+        mGuideImageView.setAlpha(0f);
+        currentAlpha = 0f;
 
         if(TextUtils.isEmpty(mGuidePhotoPath)){
             seekOpacityCamera.setVisibility(View.INVISIBLE);
@@ -641,39 +639,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             return;
         }
 
-        Photo.DIRECTION direction = Photo.DIRECTION.getDirection(mDirection);
-        boolean shouldSaving = true;
-        if(direction == Photo.DIRECTION.POINT) {
-            if(GlobalState.getBestSite() != null && GlobalState.getCurrentUserLocation() != null) {
-                float distance = LocationUtil.distanceBetween(GlobalState.getBestSite().getLat(), GlobalState.getBestSite().getLng(),
-                        GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
-                if (distance > Config.LOCATION_NEAREST_DISTANCE) {
-                    shouldSaving = false;
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivityContext());
-                    builder.setTitle(null).setMessage(getString(R.string.msg_photo_out_of_range, (int)distance));
-                    builder.setCancelable(true);
-                    builder.setPositiveButton(R.string.ok_text, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            savePhoto(filename);
-                        }
-                    });
-
-                    builder.setNegativeButton(R.string.cancel_text, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-
-                        }
-                    });
-
-                    builder.create().show();
-                }
-            }
-        }
-
-        if(shouldSaving) {
-            savePhoto(filename);
-        }
+        savePhoto(filename);
     }
 
     private void savePhoto(String filename) {
@@ -687,7 +653,14 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             	opacity = 10.0f;
             }
 
-            Photo photoModel = new Photo(mPhotoId, "", filename, mPhotoName, mSiteId, mDirection,
+            String siteId;
+            if(selectedSite != null && !TextUtils.isEmpty(selectedSite.getSiteId())) {
+                siteId = selectedSite.getSiteId();
+            } else {
+                siteId = mSiteId;
+            }
+
+            Photo photoModel = new Photo(mPhotoId, "", filename, mPhotoName, siteId, mDirection,
                     UPLOAD_STATE.NOT_UPLOAD,
                     new Date(), mNoteString, opacity, Config.getCurrentProjectId(getActivityContext()));
             CacheService cacheService = CacheService.getInstance(this,
@@ -757,8 +730,12 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
         	if (mBestSite == null) {
         		mBestSite = UIUtils.getBestSite(sites, mUserLocation, this);
         	}
-        	            	
-            if (mBestSite != null ) {
+
+        	if(selectedSite != null) {
+                getSupportActionBar().setTitle(selectedSite.getName());
+                mPhotoName = selectedSite.getName();
+                mSiteId = selectedSite.getSiteId();
+            } else  if (mBestSite != null ) {
                 getSupportActionBar().setTitle(mBestSite.getName());
                 mPhotoName = mBestSite.getName();
                 mSiteId = mBestSite.getSiteId();
@@ -796,13 +773,8 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
 
 
                 seekOpacityCamera.setVisibility(View.VISIBLE);
-                if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB){
-                    seekOpacityCamera.setMax(255);
-                    mGuideImageView.setAlpha((int)currentAlpha);
-                }else{
-                    seekOpacityCamera.setMax(10);
-                    mGuideImageView.setAlpha(currentAlpha);
-                }
+                seekOpacityCamera.setMax(10);
+                mGuideImageView.setAlpha(currentAlpha);
 
                 mGuideImageView.setVisibility(View.VISIBLE);
             } else {

@@ -15,7 +15,7 @@
     <string name="connection_error">Upload failed. Please check your connection.</string>
     <string name="login_error">Username or Password is wrong</string>
     <string name="login_connection_error">There is no network connection to login</string>
-    <string name="ok_text">Ok</string>
+    <string name="ok_text">OK</string>
     <string name="cancel_text">Cancel</string>
     <string name="dialog_title">Information</string>
     <string name="server_required">Please give a valid server address.</string>
