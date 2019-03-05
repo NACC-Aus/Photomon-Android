@@ -1,5 +1,6 @@
 package com.appiphany.nacc.utils;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
@@ -105,6 +106,7 @@ public class NetworkUtils {
 			return null;
 		}
 
+		HttpResponse httpResponse = null;
 		try {
             String url = Uri.parse(Config.getActiveServer(context) + "sites.json").buildUpon().
                     appendQueryParameter("project_id", project)
@@ -114,7 +116,7 @@ public class NetworkUtils {
 			httpRequest.setConnectTimeout(Config.HTTP_CONNECT_TIMEOUT);
 			httpRequest.setNumberOfRetries(10);
 			httpRequest.setRetryOnExecuteIOException(true);
-			HttpResponse httpResponse = httpRequest.execute();
+			httpResponse = httpRequest.execute();
 			if (httpResponse != null && httpResponse.getStatusCode() == 200) {
 				InputStream is = httpResponse.getContent();
 				InputStreamReader reader = new InputStreamReader(is);
@@ -139,7 +141,14 @@ public class NetworkUtils {
 			Ln.e(ex);
             Crashlytics.setString("getAllSite project id", project);
 			Crashlytics.logException(ex);
-
+		} finally {
+			if(httpResponse != null) {
+				try {
+					httpResponse.disconnect();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 
 		return null;
@@ -147,6 +156,7 @@ public class NetworkUtils {
 	}
     
 	public static List<Photo> getGuidePhotos(Context context, String project) {
+		HttpResponse httpResponse = null;
 		try {
 			HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
 			String url = Uri.parse(Config.getActiveServer(context) + "photos.json").buildUpon().
@@ -156,7 +166,7 @@ public class NetworkUtils {
 
 			Ln.d("server url: %s, access_token = %s", url, Config.getAccessToken(context));
 			httpRequest.setConnectTimeout(30000);
-			HttpResponse httpResponse = httpRequest.execute();
+			httpResponse = httpRequest.execute();
 			if (httpResponse != null && httpResponse.getStatusCode() == 200) {
 				InputStream is = httpResponse.getContent();
 				InputStreamReader reader = new InputStreamReader(is);
@@ -176,14 +186,20 @@ public class NetworkUtils {
 				});
 
 				Gson gson = gsonBuilder.create();
-
-				List<Photo> result = gson.fromJson(reader, listType);
-				return result;
+				return gson.fromJson(reader, listType);
 			}
 		} catch (Exception ex) {
 			Ln.e(ex);
             Crashlytics.setString("getGuidePhotos project id", project);
             Crashlytics.logException(ex);
+		} finally {
+			if(httpResponse != null) {
+				try {
+					httpResponse.disconnect();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		
 		return null;
@@ -199,6 +215,7 @@ public class NetworkUtils {
 			com.appiphany.nacc.utils.HttpRequest request = com.appiphany.nacc.utils.HttpRequest.get(serverUrl + "projects?access_token=" + accessToken);
 			String json = request.body();
 			ProjectResult result = new Gson().fromJson(json, ProjectResult.class);
+			request.disconnect();
 			return result.getProjects();			
 		}catch(Exception ex){
 			ex.printStackTrace();

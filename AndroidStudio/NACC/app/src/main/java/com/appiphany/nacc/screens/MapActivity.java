@@ -568,6 +568,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
             return;
         }
 
+        Ln.d("draw markers");
         String projectId = Config.getCurrentProjectId(getActivityContext());
         List<Site> sites = GlobalState.getProjectSites(projectId);
         if (sites != null && !sites.isEmpty()) {
@@ -618,13 +619,14 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
     private void drawCurrentLocation() {
         if (GlobalState.getCurrentUserLocation() != null) {
             LatLng location = new LatLng(GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
+            Ln.d("draw current location (lat,lng) = (%f %f)", location.latitude, location.longitude);
             Canvas canvas = new Canvas();
             Drawable circleDrawable = ContextCompat.getDrawable(this, R.drawable.shape_current_location_circle);
             Bitmap bitmap = Bitmap.createBitmap(circleDrawable.getIntrinsicWidth(), circleDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
             canvas.setBitmap(bitmap);
             circleDrawable.setBounds(0, 0, circleDrawable.getIntrinsicWidth(), circleDrawable.getIntrinsicHeight());
             circleDrawable.draw(canvas);
-            map.addMarker(new MarkerOptions().position(location).title("This is you")
+            map.addMarker(new MarkerOptions().position(location).title(getString(R.string.current_location_title))
                     .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
         }
     }
@@ -638,7 +640,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
     }
 
     private void goToMyLocation() {
-        if (GlobalState.getCurrentUserLocation() != null) {
+        if (GlobalState.getCurrentUserLocation() != null && map != null) {
             LatLng latLng = new LatLng(GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
             double zoomLevel = LocationUtil.getZoomForMetersWide(this, Config.MAP_ZOOM_DISTANCE, latLng.latitude);
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, (float) zoomLevel);
@@ -842,7 +844,6 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
     @Override
     protected void onResume() {
         EventBus.getDefault().register(this);
-        zoomCurrentLocation();
         super.onResume();
     }
 

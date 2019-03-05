@@ -99,6 +99,7 @@
     <string name="donate">Donate</string>
     <string name="select_amount_to_donate">Select amount to donate:</string>
     <string name="guides">Guide photo</string>
+    <string name="current_location_title">This is you</string>
 
     <string name="server_url_title">Error</string>
     <string name="msg_select_direction">Please select the direction</string>
