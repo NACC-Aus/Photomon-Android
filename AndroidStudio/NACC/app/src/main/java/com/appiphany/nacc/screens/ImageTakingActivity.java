@@ -72,7 +72,8 @@ import java.util.Map;
 
 public class ImageTakingActivity extends BaseActivity implements OnClickListener, OnSeekBarChangeListener {
 	private static final String ALPHA_KEY = "alpha_key";
-    public static final String SITE_ID = "site_id";
+    private static final int SELECT_IMAGE = 0;
+    private static final int PREVIEW_IMAGE = 1;
     private FrameLayout mSurfaceViewLayout;
     private LinearLayout mCameraPanel;
     private ImageButton mTakingPictureBtn;
@@ -332,8 +333,6 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
 
     }
 
-    private static final int SELECT_IMAGE = 0;
-
     public void onGoToLibrary(View v) {
         Intent i = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI);
@@ -385,6 +384,9 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
                     }
 
                 }
+            } else if (requestCode == PREVIEW_IMAGE) {
+                setResult(RESULT_OK);
+                finish();
             }
         }
     }
@@ -563,7 +565,7 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
             showPreviewIntent.putExtra(Intents.SELECTED_SITE, selectedSite);
             showPreviewIntent.putExtra(BackgroundService.GUIDE_PHOTO, mGuidePhotoPath);
             showPreviewIntent.putExtra(BackgroundService.GUIDE_PHOTO_ALPHA, currentAlpha);
-            startActivity(showPreviewIntent);
+            startActivityForResult(showPreviewIntent, PREVIEW_IMAGE);
             
         }
     }    

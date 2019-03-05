@@ -69,6 +69,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
     private static final int REQUEST_REMINDER = 2;
     private static final int REQUEST_MANAGE_SITE = 3;
     private static final int REQUEST_SEND_EMAIL = 4;
+    private static final int REQUEST_TAKING_PHOTO = 5;
     
     CacheService cacheService;
 
@@ -101,13 +102,26 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         		CacheService.createDBNameFromUser(Config.getActiveServer(this), Config.getActiveUser(this)));
         
         mListView.setOnItemClickListener(this);
+        loadData();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mListView.setNestedScrollingEnabled(true);
+        }
+
+        mFABAddNew.setOnClickListener(this);
+        initActionBar();
+        LocationLibrary.forceLocationUpdate(this);
+        LocationLibrary.startAlarmAndListener(this);
+    }
+
+    private void loadData(){
         Intent intent = getIntent();
         Ln.d("[MainScreen] on create ");
 
         currentSite = (Site) intent.getSerializableExtra(Intents.SELECTED_SITE);
         String action = intent.getAction();
         if (action != null) {
-            if (action.equals(REQUEST_UPLOAD) && !Config.isDemoMode(this)) {
+            if (action.equals(REQUEST_UPLOAD) && !Config.isDemoMode(this) && intent.hasExtra(BackgroundService.PHOTO_DATA_EXTRA)) {
                 Intent intentService = new Intent(this, BackgroundService.class);
                 Photo photoData = (Photo) intent.getSerializableExtra(BackgroundService.PHOTO_DATA_EXTRA);
                 cacheService.updateState(photoData.getPhotoID(), UPLOAD_STATE.UPLOADING);
@@ -125,21 +139,21 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 
         if(intent.getBooleanExtra(DOWNLOAD_GUIDE_EXTRA, false) && !Config.isDemoMode(this)){
         }
-        
+
         if (cacheService != null) {
             if (intent.getBooleanExtra(FROM_LOGIN_EXTRA, false)) {
-            	if (dialog1 == null) {
-            		dialog1 = UIUtils.showAlertDialog(this, R.string.dialog_title, R.string.main_screen_alert, false, dialogListener);
-            		dialog1.show();
-            	} else {
-            		dialog1 .dismiss();
-            	}
-            	if (dialog2 == null) {
-            		dialog2 = UIUtils.showAlertDialog(this, R.string.dialog_title, R.string.main_screen_alert_2, false, dialogListener);
-            	} else {
-            		dialog2.dismiss();
-            	}
-            	
+                if (dialog1 == null) {
+                    dialog1 = UIUtils.showAlertDialog(this, R.string.dialog_title, R.string.main_screen_alert, false, dialogListener);
+                    dialog1.show();
+                } else {
+                    dialog1 .dismiss();
+                }
+                if (dialog2 == null) {
+                    dialog2 = UIUtils.showAlertDialog(this, R.string.dialog_title, R.string.main_screen_alert_2, false, dialogListener);
+                } else {
+                    dialog2.dismiss();
+                }
+
             }
             mGuidePhotoIds = cacheService.getGuidePhotoIds();
             Cursor cursor = cacheService.getPhotos(Config.getCurrentProjectId(getActivityContext()), currentSite);
@@ -162,15 +176,6 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
             });
             builder.show();
         }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mListView.setNestedScrollingEnabled(true);
-        }
-
-        mFABAddNew.setOnClickListener(this);
-        initActionBar();
-        LocationLibrary.forceLocationUpdate(this);
-        LocationLibrary.startAlarmAndListener(this);
     }
 
     private void reloadGuidePhoto(){
@@ -476,6 +481,9 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         	refreshList();
         }else if(requestCode == REQUEST_SEND_EMAIL){
         	GeneralUtil.deleteLogFile(this);
+        } else if(requestCode == REQUEST_TAKING_PHOTO && resultCode == RESULT_OK){
+            setResult(RESULT_OK);
+            loadData();
         }
         
         super.onActivityResult(requestCode, resultCode, data);
@@ -487,7 +495,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
             Intent startTakingPicture = new Intent(this, ImageTakingActivity.class);
             Config.setShowDirectionDialog(this, true);
             startTakingPicture.putExtra(Intents.SELECTED_SITE, currentSite);
-            startActivity(startTakingPicture);
+            startActivityForResult(startTakingPicture, REQUEST_TAKING_PHOTO);
         }
     }
 

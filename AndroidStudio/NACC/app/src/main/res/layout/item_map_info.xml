@@ -3,6 +3,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@color/white"
+    android:gravity="center_horizontal"
     android:orientation="vertical">
 
     <ImageView
@@ -11,4 +12,15 @@
         android:layout_height="@dimen/marker_thumb"
         android:scaleType="centerCrop"
         android:src="@drawable/ic_launcher" />
+
+    <TextView
+        android:textSize="13sp"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:maxWidth="@dimen/marker_thumb"
+        android:layout_marginTop="3dp"
+        android:textColor="@android:color/black"
+        android:id="@+id/tvSiteName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 </LinearLayout>

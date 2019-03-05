@@ -666,11 +666,8 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             CacheService cacheService = CacheService.getInstance(this,
                     CacheService.createDBNameFromUser(Config.getActiveServer(this), Config.getActiveUser(this)));
             if (cacheService.addNewPhoto(photoModel)) {
-                Intent backToMainIntent = new Intent(this, MapActivity.class);
-                backToMainIntent.setAction(MapActivity.REQUEST_UPLOAD);
-                backToMainIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                backToMainIntent.putExtra(BackgroundService.PHOTO_DATA_EXTRA, photoModel);
-                startActivity(backToMainIntent);
+                setResult(RESULT_OK);
+                finish();
 
             } else {
                 UIUtils.buildAlertDialog(this, R.string.dialog_title, R.string.common_error, false).show();

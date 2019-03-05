@@ -94,6 +94,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
     private static final int REQUEST_REMINDER = 2;
     private static final int REQUEST_MANAGE_SITE = 3;
     private static final int REQUEST_SEND_EMAIL = 4;
+    private static final int REQUEST_MAIN_LIST = 5;
 
     private CacheService cacheService;
     private AlertDialog dialog1;
@@ -101,7 +102,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
     private boolean firstLoading;
     private GoogleMap map;
     private Map<Marker, Object> markers = new HashMap<>();
-    private boolean canDrawMarkers = true;
+    private boolean canZoomMap = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,6 +126,22 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         cacheService = new CacheService(this,
                 CacheService.createDBNameFromUser(Config.getActiveServer(this), Config.getActiveUser(this)));
 
+        loadData();
+
+        initActionBar();
+        LocationLibrary.forceLocationUpdate(this);
+        LocationLibrary.startAlarmAndListener(this);
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        if (!Config.isDemoMode(this)) {
+            DownloadGuidesJob.scheduleJob();
+        }
+    }
+
+    private void loadData() {
         Intent intent = getIntent();
         Ln.d("[MainScreen] on create ");
 
@@ -145,7 +162,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
             refreshList();
         }
 
-        if(intent.getBooleanExtra(DOWNLOAD_GUIDE_EXTRA, false) && !Config.isDemoMode(this)){
+        if (intent.getBooleanExtra(DOWNLOAD_GUIDE_EXTRA, false) && !Config.isDemoMode(this)) {
         }
 
         if (cacheService != null) {
@@ -154,7 +171,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
                     dialog1 = UIUtils.showAlertDialog(this, R.string.dialog_title, R.string.main_screen_alert, false, dialogListener);
                     dialog1.show();
                 } else {
-                    dialog1 .dismiss();
+                    dialog1.dismiss();
                 }
                 if (dialog2 == null) {
                     dialog2 = UIUtils.showAlertDialog(this, R.string.dialog_title, R.string.main_screen_alert_2, false, dialogListener);
@@ -178,21 +195,9 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
             });
             builder.show();
         }
-
-        initActionBar();
-        LocationLibrary.forceLocationUpdate(this);
-        LocationLibrary.startAlarmAndListener(this);
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-        if (!Config.isDemoMode(this)) {
-            DownloadGuidesJob.scheduleJob();
-        }
     }
 
-    private void reloadGuidePhoto(){
+    private void reloadGuidePhoto() {
     }
 
     private DialogInterface.OnClickListener dialogListener = new DialogInterface.OnClickListener() {
@@ -211,6 +216,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
 
         }
     };
+
     /**
      * get list photos not upload yet and send to background service to upload
      */
@@ -229,13 +235,13 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
             }
 
             ArrayList<CacheItem> cacheItems = cacheService.getCaches();
-            if(!cacheItems.isEmpty()) {
+            if (!cacheItems.isEmpty()) {
                 Intent intentService = new Intent(this, BackgroundService.class);
                 intentService.setAction(BackgroundService.PROCESS_CACHE);
                 startService(intentService);
             }
 
-        }catch (Throwable throwable) {
+        } catch (Throwable throwable) {
             Crashlytics.logException(throwable);
             throwable.printStackTrace();
         }
@@ -280,13 +286,13 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
 
         final List<Project> projects = getProjects();
 
-        if(projects == null || projects.size() == 0 || Config.isDemoMode(getActivityContext())){
+        if (projects == null || projects.size() == 0 || Config.isDemoMode(getActivityContext())) {
             getSupportActionBar().setTitle(R.string.app_name);
             getSupportActionBar().setDisplayShowTitleEnabled(true);
             return;
         }
 
-        if(projects.size() == 1){
+        if (projects.size() == 1) {
             getSupportActionBar().setTitle(projects.get(0).getName());
             getSupportActionBar().setDisplayShowTitleEnabled(true);
             return;
@@ -301,7 +307,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         int currentIndex = -1;
         for (Project project : projects) {
             items.add(project.getName());
-            if(currentProjectId.equals(project.getUid())){
+            if (currentProjectId.equals(project.getUid())) {
                 currentIndex = projects.indexOf(project);
             }
         }
@@ -311,7 +317,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
 //                android.R.layout.simple_list_item_1, items);
         final ArrayAdapter<String> adapter = new ArrayAdapter<String>(MapActivity.this
                 , R.layout.action_bar_dropdown_item,
-                android.R.id.text1, items){
+                android.R.id.text1, items) {
             @NonNull
             @Override
             public View getView(int position, View convertView, @NonNull ViewGroup parent) {
@@ -330,11 +336,11 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
 
                     @Override
                     public boolean onNavigationItemSelected(int itemPosition, long itemId) {
-                        canDrawMarkers = true;
+                        canZoomMap = true;
                         adapter.notifyDataSetChanged();
                         Config.setCurrentProjectId(getActivityContext(), projects.get(itemPosition).getUid());
                         refreshList();
-                        if(!firstLoading) {
+                        if (!firstLoading) {
                             GlobalState.clearBestSite();
                             GlobalState.clearSites();
                         }
@@ -345,7 +351,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
                     }
                 });
 
-        if(currentIndex != -1){
+        if (currentIndex != -1) {
             Config.setCurrentProjectId(getActivityContext(), currentProjectId);
             getSupportActionBar().setSelectedNavigationItem(currentIndex);
         }
@@ -358,20 +364,20 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         startService(locationIntent);
     }
 
-    private List<Project> getProjects(){
+    private List<Project> getProjects() {
         final List<Project> ret = cacheService.getProjects();
         Collections.sort(ret, new Comparator<Project>() {
             @Override
             public int compare(Project o1, Project o2) {
-                if(o1.getName() == null && o2.getName() == null) {
+                if (o1.getName() == null && o2.getName() == null) {
                     return 0;
                 }
 
-                if(o1.getName() == null) {
-                    return  -1;
+                if (o1.getName() == null) {
+                    return -1;
                 }
 
-                if(o2.getName() == null) {
+                if (o2.getName() == null) {
                     return 1;
                 }
 
@@ -432,9 +438,9 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
                 break;
             case R.id.menu_manage_sites:
                 Intent siteIntent;
-                if(Config.isDemoMode(this)) {
+                if (Config.isDemoMode(this)) {
                     siteIntent = new Intent(this, SiteManagementActivity.class);
-                }else{
+                } else {
                     siteIntent = new Intent(this, OnlineSitesActivity.class);
                 }
 
@@ -444,9 +450,9 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
                 Intent guide = new Intent(this, SitesActivity.class);
                 startActivity(guide);
                 break;
-            case  R.id.menu_gallery:
+            case R.id.menu_gallery:
                 Intent gallery = new Intent(this, MainScreenActivity.class);
-                startActivity(gallery);
+                startActivityForResult(gallery, REQUEST_MAIN_LIST);
                 break;
         }
 
@@ -458,7 +464,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         // stop location service
         stopLocationService();
         stopDownloadGuideService();
-        if(cacheService != null){
+        if (cacheService != null) {
             cacheService.closeDatabase();
             cacheService.cleanUp();
             cacheService = null;
@@ -467,9 +473,9 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         CacheService.tearDown();
         Intent startLoginActivityIntent = new Intent(this, LoginActivity.class);
         startLoginActivityIntent.setAction(ACTION_LOGOUT);
-        if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB ){
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
             startLoginActivityIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        }else{
+        } else {
             startLoginActivityIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         }
 
@@ -524,7 +530,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
 
     private void handleDownload(CacheService.UPLOAD_STATE uploadState, String photoId) {
         if (uploadState == CacheService.UPLOAD_STATE.NOT_UPLOAD) {
-            if(!Config.isDemoMode(this)){
+            if (!Config.isDemoMode(this)) {
                 UIUtils.buildAlertDialog(this, R.string.dialog_title, R.string.connection_error, false).show();
             }
         }
@@ -539,10 +545,12 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         } else if (requestCode == REQUEST_REMINDER) {
             UIUtils.registerReminder(this);
 
-        }else if(requestCode == REQUEST_MANAGE_SITE){
+        } else if (requestCode == REQUEST_MANAGE_SITE) {
             refreshList();
-        }else if(requestCode == REQUEST_SEND_EMAIL){
+        } else if (requestCode == REQUEST_SEND_EMAIL) {
             GeneralUtil.deleteLogFile(this);
+        } else if (requestCode == REQUEST_MAIN_LIST && resultCode == RESULT_OK) {
+            loadData();
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -556,25 +564,28 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
     }
 
     private void drawPhotoMarkers() {
+        if(map == null) {
+            return;
+        }
+
         String projectId = Config.getCurrentProjectId(getActivityContext());
         List<Site> sites = GlobalState.getProjectSites(projectId);
-        if (map != null && sites != null && !sites.isEmpty()) {
+        if (sites != null && !sites.isEmpty()) {
             map.clear();
             markers.clear();
-            canDrawMarkers = false;
-            for (Site site: sites) {
+            for (Site site : sites) {
                 LatLng latlng = new LatLng(site.getLat(), site.getLng());
                 Marker marker = map.addMarker(new MarkerOptions().position(latlng));
                 GuidePhoto guidePhoto = cacheService.getGuidePhotoByDirection(projectId, site.getSiteId(), Photo.DIRECTION.POINT);
                 MarkerInfo info = new MarkerInfo();
-                if(guidePhoto != null) {
+                if (guidePhoto != null) {
                     info.setImageUrl(guidePhoto.getPhotoPath());
-                    markers.put(marker,guidePhoto);
+                    markers.put(marker, guidePhoto);
                 } else {
                     List<Photo> photos = cacheService.getPhotosList(projectId, site.getSiteId());
                     if (!photos.isEmpty()) {
                         info.setImageUrl(photos.get(0).getPhotoPath());
-                        markers.put(marker,photos.get(0));
+                        markers.put(marker, photos.get(0));
                     }
                 }
 
@@ -588,17 +599,17 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
                 @Override
                 public void onInfoWindowClick(Marker marker) {
                     Site site = null;
-                    if(marker.getTag() instanceof MarkerInfo) {
+                    if (marker.getTag() instanceof MarkerInfo) {
                         MarkerInfo info = (MarkerInfo) marker.getTag();
                         site = info.getSite();
                     }
 
                     Intent intent = new Intent(getActivityContext(), MainScreenActivity.class);
                     intent.putExtra(Intents.SELECTED_SITE, site);
-                    startActivity(intent);
+                    startActivityForResult(intent, REQUEST_MAIN_LIST);
                 }
             });
-        } else if (map != null) {
+        } else {
             map.clear();
             drawCurrentLocation();
         }
@@ -613,15 +624,21 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
             canvas.setBitmap(bitmap);
             circleDrawable.setBounds(0, 0, circleDrawable.getIntrinsicWidth(), circleDrawable.getIntrinsicHeight());
             circleDrawable.draw(canvas);
-            map.addMarker(new MarkerOptions().position(location)
+            map.addMarker(new MarkerOptions().position(location).title("This is you")
                     .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
+        }
+    }
+
+    private void zoomCurrentLocation() {
+        if (GlobalState.getCurrentUserLocation() != null && map != null) {
+            LatLng location = new LatLng(GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
             double zoomLevel = LocationUtil.getZoomForMetersWide(this, Config.MAP_ZOOM_DISTANCE, location.latitude);
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, (float) zoomLevel));
         }
     }
 
-    private void goToMyLocation(){
-        if(GlobalState.getCurrentUserLocation() != null) {
+    private void goToMyLocation() {
+        if (GlobalState.getCurrentUserLocation() != null) {
             LatLng latLng = new LatLng(GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
             double zoomLevel = LocationUtil.getZoomForMetersWide(this, Config.MAP_ZOOM_DISTANCE, latLng.latitude);
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, (float) zoomLevel);
@@ -640,6 +657,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         private final Map<Marker, Target<Bitmap>> targets = new HashMap<>();
         private final View view;
         private final ImageView imgPhoto;
+        private final TextView tvSiteName;
         private WeakReference<Context> context;
         private int size;
 
@@ -648,6 +666,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
             size = (int) context.getResources().getDimension(R.dimen.marker_thumb);
             view = View.inflate(context, R.layout.item_map_info, null);
             imgPhoto = view.findViewById(R.id.imgPhoto);
+            tvSiteName = view.findViewById(R.id.tvSiteName);
         }
 
         public void showInfoWindow(Marker marker) {
@@ -683,6 +702,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
 
         private class InfoTarget extends SimpleTarget<Bitmap> {
             Marker marker;
+
             InfoTarget(Marker marker) {
                 super(size, size); // otherwise Glide will load original sized bitmap which is huge
                 this.marker = marker;
@@ -703,30 +723,38 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
 
         @Override
         public View getInfoContents(final Marker marker) {
-            if (marker.getTag() instanceof MarkerInfo && !TextUtils.isEmpty(((MarkerInfo) marker.getTag()).getImageUrl())) {
-                Bitmap image = images.get(marker);
+            if (marker.getTag() instanceof MarkerInfo) {
                 MarkerInfo info = (MarkerInfo) marker.getTag();
-                String photoPath = info.getImageUrl();
-                if (image == null) {
-                    RequestOptions options = new RequestOptions()
-                            .placeholder(R.drawable.ic_launcher)
-                            .override(size, size).centerCrop();
-                    if(photoPath.startsWith("http")) {
-                        Glide.with(context.get()).asBitmap().load(photoPath).apply(options).into(getTarget(marker));
-                    } else {
-                        Glide.with(context.get()).asBitmap().load(new File(photoPath)).apply(options).into(getTarget(marker));
-                    }
-
-                    return view;
+                if (info.getSite() != null && !TextUtils.isEmpty(info.getSite().getName())) {
+                    tvSiteName.setVisibility(View.VISIBLE);
+                    tvSiteName.setText(info.getSite().getName());
                 } else {
-                    imgPhoto.setImageBitmap(image);
-                    return view;
+                    tvSiteName.setVisibility(View.GONE);
                 }
-            } else {
-                imgPhoto.setImageResource(R.drawable.ic_launcher);
+
+                if (!TextUtils.isEmpty(info.getImageUrl())) {
+                    Bitmap image = images.get(marker);
+                    String photoPath = info.getImageUrl();
+                    if (image == null) {
+                        RequestOptions options = new RequestOptions()
+                                .placeholder(R.drawable.ic_launcher)
+                                .override(size, size).centerCrop();
+                        if (photoPath.startsWith("http")) {
+                            Glide.with(context.get()).asBitmap().load(photoPath).apply(options).into(getTarget(marker));
+                        } else {
+                            Glide.with(context.get()).asBitmap().load(new File(photoPath)).apply(options).into(getTarget(marker));
+                        }
+                    } else {
+                        imgPhoto.setImageBitmap(image);
+                    }
+                } else {
+                    imgPhoto.setImageResource(R.drawable.ic_launcher);
+                }
+
+                return view;
             }
 
-            return view;
+            return null;
         }
     }
 
@@ -799,7 +827,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         startService(locationIntent);
     }
 
-    private void stopDownloadGuideService(){
+    private void stopDownloadGuideService() {
         Intent locationIntent = new Intent(this, DownloadService.class);
         stopService(locationIntent);
     }
@@ -814,6 +842,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
     @Override
     protected void onResume() {
         EventBus.getDefault().register(this);
+        zoomCurrentLocation();
         super.onResume();
     }
 
@@ -831,14 +860,16 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         EventBus.getDefault().unregister(this);
     }
 
-    public void onEventMainThread(UpdateProject event){
+    public void onEventMainThread(UpdateProject event) {
         initActionBar();
         EventBus.getDefault().removeStickyEvent(event);
     }
 
     public void onEventMainThread(UpdateSites event) {
-        if(canDrawMarkers) {
-            drawPhotoMarkers();
+        drawPhotoMarkers();
+        if (canZoomMap) {
+            zoomCurrentLocation();
+            canZoomMap = false;
         }
     }
 
