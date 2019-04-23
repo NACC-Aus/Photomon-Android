@@ -12,8 +12,10 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -42,6 +44,7 @@ import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Project;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
+import com.appiphany.nacc.services.LocationUpdateReceiver;
 import com.appiphany.nacc.services.jobs.DownloadGuidesJob;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.DialogUtil;
@@ -65,6 +68,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.littlefluffytoys.littlefluffylocationlibrary.LocationInfo;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
 
@@ -103,6 +107,9 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
     private GoogleMap map;
     private Map<Marker, Object> markers = new HashMap<>();
     private boolean canZoomMap = true;
+    private long lastTimeUpdateLocation = 0;
+    private Marker currentMarker;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -626,7 +633,11 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
             canvas.setBitmap(bitmap);
             circleDrawable.setBounds(0, 0, circleDrawable.getIntrinsicWidth(), circleDrawable.getIntrinsicHeight());
             circleDrawable.draw(canvas);
-            map.addMarker(new MarkerOptions().position(location).title(getString(R.string.current_location_title))
+            if (currentMarker != null) {
+                currentMarker.remove();
+            }
+
+            currentMarker = map.addMarker(new MarkerOptions().position(location).title(getString(R.string.current_location_title))
                     .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
         }
     }
@@ -874,15 +885,16 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         }
     }
 
-    private final BroadcastReceiver lftBroadcastReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver lftBroadcastReceiver = new LocationUpdateReceiver() {
         @Override
-        public void onReceive(Context context, Intent intent) {
-            // extract the location info in the broadcast
-            Intent locationIntent = new Intent(getActivityContext(), LocationService.class);
-            locationIntent.addCategory(LocationService.SERVICE_TAG);
-            locationIntent.setAction(LocationService.LOCATION_CHANGED);
-            locationIntent.putExtra(LocationService.LOCATION_DATA, intent.getSerializableExtra(LocationLibraryConstants.LOCATION_BROADCAST_EXTRA_LOCATIONINFO));
-            startService(locationIntent);
+        public void onRefreshLocation(Intent intent) {
+            LocationInfo locInfo = (LocationInfo) intent.getSerializableExtra(LocationLibraryConstants.LOCATION_BROADCAST_EXTRA_LOCATIONINFO);
+            Location loc = new Location(locInfo.lastProvider);
+            loc.setLatitude(locInfo.lastLat);
+            loc.setLongitude(locInfo.lastLong);
+            loc.setAccuracy(locInfo.lastAccuracy);
+            GlobalState.setCurrentUserLocation(loc);
+            drawCurrentLocation();
         }
     };
 }

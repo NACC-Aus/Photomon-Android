@@ -107,8 +107,8 @@ public class GlobalState extends Application {
                 return;
             }
 
-			LocationLibrary.showDebugOutput(GeneralUtil.isDebugMode());			
-            LocationLibrary.initialiseLibrary(getBaseContext(), 3 * 60 * 1000, 5 * 60 * 1000, "com.appiphany.nacc");
+			LocationLibrary.showDebugOutput(GeneralUtil.isDebugMode());
+            LocationLibrary.initialiseLibrary(getBaseContext(), Config.LOCATION_FREQUENCY, Config.LOCATION_MAX_AGE, "com.appiphany.nacc");
         }
         catch (Exception ex) {
             Ln.d("UnsupportedOperationException thrown - the device doesn't have any location providers");

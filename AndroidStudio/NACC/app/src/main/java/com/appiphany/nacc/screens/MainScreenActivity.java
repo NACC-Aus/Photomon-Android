@@ -33,6 +33,7 @@ import com.appiphany.nacc.model.Project;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
+import com.appiphany.nacc.services.LocationUpdateReceiver;
 import com.appiphany.nacc.services.PhotoAdapter;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.DialogUtil;
@@ -604,15 +605,5 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         EventBus.getDefault().removeStickyEvent(event);
     }
 
-    private final BroadcastReceiver lftBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // extract the location info in the broadcast
-            Intent locationIntent = new Intent(MainScreenActivity.this, LocationService.class);
-            locationIntent.addCategory(LocationService.SERVICE_TAG);
-            locationIntent.setAction(LocationService.LOCATION_CHANGED);
-            locationIntent.putExtra(LocationService.LOCATION_DATA, intent.getSerializableExtra(LocationLibraryConstants.LOCATION_BROADCAST_EXTRA_LOCATIONINFO));
-            startService(locationIntent);
-        }
-    };
+    private final BroadcastReceiver lftBroadcastReceiver = new LocationUpdateReceiver();
 }

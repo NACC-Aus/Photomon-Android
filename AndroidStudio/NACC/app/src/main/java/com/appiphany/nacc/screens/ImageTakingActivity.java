@@ -45,6 +45,7 @@ import com.appiphany.nacc.model.GuidePhoto;
 import com.appiphany.nacc.model.Photo.DIRECTION;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
+import com.appiphany.nacc.services.LocationUpdateReceiver;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Intents;
@@ -907,17 +908,5 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
 	public void onStopTrackingTouch(SeekBar seekBar) {
 	}    	
 	
-	private final BroadcastReceiver lftBroadcastReceiver = new BroadcastReceiver() {		
-		
-
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			// extract the location info in the broadcast
-			Intent locationIntent = new Intent(ImageTakingActivity.this, LocationService.class);
-			locationIntent.addCategory(LocationService.SERVICE_TAG);
-			locationIntent.setAction(LocationService.LOCATION_CHANGED);
-			locationIntent.putExtra(LocationService.LOCATION_DATA, intent.getSerializableExtra(LocationLibraryConstants.LOCATION_BROADCAST_EXTRA_LOCATIONINFO));
-			startService(locationIntent);
-		}
-	};
+	private final BroadcastReceiver lftBroadcastReceiver = new LocationUpdateReceiver();
 }
