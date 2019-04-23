@@ -22,6 +22,7 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.appiphany.nacc.R;
+import com.appiphany.nacc.events.UpdateProject;
 import com.appiphany.nacc.model.CacheItem;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
@@ -40,6 +41,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import de.greenrobot.event.EventBus;
 
 public class OnlineSitesActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<List<Site>> {
     private static final int LOADER_ID = OnlineSitesActivity.class.hashCode();
@@ -133,6 +136,7 @@ public class OnlineSitesActivity extends BaseActivity implements LoaderManager.L
             return;
         }
 
+        GlobalState.setSites(data);
         Collections.sort(data, new Comparator<Site>() {
             @Override
             public int compare(Site o1, Site o2) {
@@ -334,6 +338,7 @@ public class OnlineSitesActivity extends BaseActivity implements LoaderManager.L
             }
 
             weakReference.get().reloadSites();
+            EventBus.getDefault().postSticky(new UpdateProject());
         }
     }
 }

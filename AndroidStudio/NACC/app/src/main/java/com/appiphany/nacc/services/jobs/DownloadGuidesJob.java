@@ -47,7 +47,7 @@ public class DownloadGuidesJob extends Job {
             Intent sendingintent = new Intent(DOWNLOAD_GUIDE_FINISH_ACTION);
             LocalBroadcastManager.getInstance(context).sendBroadcast(sendingintent);
         }catch (Throwable throwable) {
-            throwable.printStackTrace();
+            Ln.d(throwable);
             return Result.FAILURE;
         }
 
