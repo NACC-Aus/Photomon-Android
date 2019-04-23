@@ -44,7 +44,6 @@ import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Project;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
-import com.appiphany.nacc.services.LocationUpdateReceiver;
 import com.appiphany.nacc.services.jobs.DownloadGuidesJob;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.DialogUtil;
@@ -68,9 +67,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.littlefluffytoys.littlefluffylocationlibrary.LocationInfo;
-import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
-import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -82,6 +78,9 @@ import java.util.List;
 import java.util.Map;
 
 import de.greenrobot.event.EventBus;
+import io.nlopez.smartlocation.OnLocationUpdatedListener;
+import io.nlopez.smartlocation.SmartLocation;
+import io.nlopez.smartlocation.location.config.LocationParams;
 
 public class MapActivity extends BaseActivity implements View.OnClickListener, OnMapReadyCallback {
     private LinearLayout mDemoView;
@@ -107,9 +106,9 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
     private GoogleMap map;
     private Map<Marker, Object> markers = new HashMap<>();
     private boolean canZoomMap = true;
+    private boolean alreadyZoomMap = false;
     private long lastTimeUpdateLocation = 0;
     private Marker currentMarker;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,8 +135,33 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         loadData();
 
         initActionBar();
-        LocationLibrary.forceLocationUpdate(this);
-        LocationLibrary.startAlarmAndListener(this);
+        SmartLocation.with(this).location().config(LocationParams.NAVIGATION).start(new OnLocationUpdatedListener() {
+            @Override
+            public void onLocationUpdated(Location location) {
+                if (location == null) {
+                    return;
+                }
+
+                Ln.d("location update %s, %s", location.getLatitude(), location.getLongitude());
+                if (SystemClock.elapsedRealtime() - lastTimeUpdateLocation < Config.LOCATION_REFRESH_TIME) {
+                    Ln.d("not enough time, draw current location");
+                    GlobalState.setCurrentUserLocation(location);
+                    drawCurrentLocation();
+                    if (!alreadyZoomMap) {
+                        zoomCurrentLocation();
+                    }
+
+                    return;
+                }
+
+                lastTimeUpdateLocation = SystemClock.elapsedRealtime();
+                Intent locationIntent = new Intent(getActivityContext(), LocationService.class);
+                locationIntent.addCategory(LocationService.SERVICE_TAG);
+                locationIntent.setAction(LocationService.LOCATION_CHANGED);
+                locationIntent.putExtra(LocationService.LOCATION_DATA, location);
+                startService(locationIntent);
+            }
+        });
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -266,10 +290,6 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         intentFilter.addAction(BackgroundService.CONNECTED_ACTION);
         intentFilter.addAction(DownloadService.DOWNLOAD_GUIDE_FINISH_ACTION);
         localMgr.registerReceiver(mReceiver, intentFilter);
-
-        final IntentFilter lftIntentFilter = new IntentFilter(LocationLibraryConstants.getLocationChangedPeriodicBroadcastAction());
-        registerReceiver(lftBroadcastReceiver, lftIntentFilter);
-
         IntentFilter networkFilter = new IntentFilter();
         networkFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
     }
@@ -280,7 +300,6 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         Ln.d("on stop");
         LocalBroadcastManager localMgr = LocalBroadcastManager.getInstance(this);
         localMgr.unregisterReceiver(mReceiver);
-        unregisterReceiver(lftBroadcastReceiver);
     }
 
 
@@ -647,6 +666,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
             LatLng location = new LatLng(GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
             double zoomLevel = LocationUtil.getZoomForMetersWide(this, Config.MAP_ZOOM_DISTANCE, location.latitude);
             map.moveCamera(CameraUpdateFactory.newLatLngZoom(location, (float) zoomLevel));
+            alreadyZoomMap = true;
         }
     }
 
@@ -847,6 +867,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
 
     @Override
     protected void onDestroy() {
+        SmartLocation.with(this).location().stop();
         stopLocationService();
         stopDownloadGuideService();
         super.onDestroy();
@@ -884,17 +905,4 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
             canZoomMap = false;
         }
     }
-
-    private final BroadcastReceiver lftBroadcastReceiver = new LocationUpdateReceiver() {
-        @Override
-        public void onRefreshLocation(Intent intent) {
-            LocationInfo locInfo = (LocationInfo) intent.getSerializableExtra(LocationLibraryConstants.LOCATION_BROADCAST_EXTRA_LOCATIONINFO);
-            Location loc = new Location(locInfo.lastProvider);
-            loc.setLatitude(locInfo.lastLat);
-            loc.setLongitude(locInfo.lastLong);
-            loc.setAccuracy(locInfo.lastAccuracy);
-            GlobalState.setCurrentUserLocation(loc);
-            drawCurrentLocation();
-        }
-    };
 }

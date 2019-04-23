@@ -1,25 +1,10 @@
 package com.appiphany.nacc.screens;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import android.Manifest;
-import android.app.AlarmManager;
 import android.app.Application;
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Build;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ViewConfiguration;
@@ -35,7 +20,6 @@ import com.appiphany.nacc.utils.Ln;
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
 import com.evernote.android.job.JobManager;
-import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
 import com.nostra13.universalimageloader.cache.disc.impl.LimitedAgeDiskCache;
 import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
 import com.nostra13.universalimageloader.cache.memory.impl.UsingFreqLimitedMemoryCache;
@@ -45,6 +29,17 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
 import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
 import com.nostra13.universalimageloader.utils.StorageUtils;
+
+import java.io.File;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -90,7 +85,6 @@ public class GlobalState extends Application {
         }
 
         JobManager.create(this).addJobCreator(new AppJobCreator());
-        initLocation();
         initThreadPool();
         initImageLoader();
         if(BuildConfig.DEBUG){
@@ -99,22 +93,7 @@ public class GlobalState extends Application {
         	Ln.getConfig().setLoggingLevel(Log.ERROR);
         }
     }
-    
-    public void initLocation(){
-		try {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
 
-			LocationLibrary.showDebugOutput(GeneralUtil.isDebugMode());
-            LocationLibrary.initialiseLibrary(getBaseContext(), Config.LOCATION_FREQUENCY, Config.LOCATION_MAX_AGE, "com.appiphany.nacc");
-        }
-        catch (Exception ex) {
-            Ln.d("UnsupportedOperationException thrown - the device doesn't have any location providers");
-        }
-	}
-    
     public static Context getAppContext() {
         return context;
     }

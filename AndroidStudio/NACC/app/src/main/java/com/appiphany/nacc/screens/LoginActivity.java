@@ -245,7 +245,6 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
             return;
         }
 
-        GlobalState.getInstance().initLocation();
         Intent showMainScreenIntent = new Intent(this, MapActivity.class);
         showMainScreenIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         showMainScreenIntent.putExtra(MapActivity.FROM_LOGIN_EXTRA, true);

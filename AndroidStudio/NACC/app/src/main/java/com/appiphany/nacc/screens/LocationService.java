@@ -10,7 +10,6 @@ import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.NetworkUtils;
 import com.appiphany.nacc.utils.UIUtils;
 import com.crashlytics.android.Crashlytics;
-import com.littlefluffytoys.littlefluffylocationlibrary.LocationInfo;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -199,13 +198,9 @@ public class LocationService extends Service{
 			return;
 		}
 		
-		LocationInfo locInfo = (LocationInfo) intent.getSerializableExtra(LOCATION_DATA);
-		
+
 		Ln.i("Location changed");
-		Location loc = new Location(locInfo.lastProvider);
-		loc.setLatitude(locInfo.lastLat);
-		loc.setLongitude(locInfo.lastLong);
-		loc.setAccuracy(locInfo.lastAccuracy);
+		Location loc = (Location) intent.getSerializableExtra(LOCATION_DATA);
 		GlobalState.setCurrentUserLocation(loc);
 		
 		if(null != updateSitesTask && updateSitesTask.isRunning){

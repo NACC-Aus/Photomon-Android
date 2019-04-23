@@ -33,7 +33,6 @@ import com.appiphany.nacc.model.Project;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
-import com.appiphany.nacc.services.LocationUpdateReceiver;
 import com.appiphany.nacc.services.PhotoAdapter;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.DialogUtil;
@@ -42,8 +41,6 @@ import com.appiphany.nacc.utils.Intents;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.UIUtils;
 import com.crashlytics.android.Crashlytics;
-import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
-import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -111,8 +108,6 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 
         mFABAddNew.setOnClickListener(this);
         initActionBar();
-        LocationLibrary.forceLocationUpdate(this);
-        LocationLibrary.startAlarmAndListener(this);
     }
 
     private void loadData(){
@@ -241,10 +236,6 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         intentFilter.addAction(BackgroundService.CONNECTED_ACTION);
         intentFilter.addAction(DownloadService.DOWNLOAD_GUIDE_FINISH_ACTION);
         localMgr.registerReceiver(mReceiver, intentFilter);
-
-        final IntentFilter lftIntentFilter = new IntentFilter(LocationLibraryConstants.getLocationChangedPeriodicBroadcastAction());
-        registerReceiver(lftBroadcastReceiver, lftIntentFilter);
-
         IntentFilter networkFilter = new IntentFilter();
         networkFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
     }
@@ -255,7 +246,6 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         Ln.d("on stop");
         LocalBroadcastManager localMgr = LocalBroadcastManager.getInstance(this);
         localMgr.unregisterReceiver(mReceiver);
-        unregisterReceiver(lftBroadcastReceiver);
     }
 
 
@@ -604,6 +594,4 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         initActionBar();
         EventBus.getDefault().removeStickyEvent(event);
     }
-
-    private final BroadcastReceiver lftBroadcastReceiver = new LocationUpdateReceiver();
 }

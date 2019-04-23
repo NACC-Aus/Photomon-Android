@@ -18,8 +18,6 @@ public class Config {
     public static final long INTERVAL_DAY = 24 * 3600;
     public static final long INTERVAL_WEEK = INTERVAL_DAY * 7;
     public static final long INTERVAL_FORTNIGHTLY = INTERVAL_WEEK * 2;
-    public static final long LOCATION_FREQUENCY = 6 * 1000; // 6s
-    public static final int LOCATION_MAX_AGE = 10 * 1000; // 10s
     public static final int LOCATION_REFRESH_TIME = 3 * 60 * 1000; // 3 minutes
 
 

@@ -41,23 +41,18 @@ import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
-import com.appiphany.nacc.services.LocationUpdateReceiver;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.DialogUtil;
 import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Intents;
 import com.appiphany.nacc.utils.Ln;
-import com.appiphany.nacc.utils.LocationUtil;
 import com.appiphany.nacc.utils.NetworkUtils;
 import com.appiphany.nacc.utils.UIUtils;
-import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
-import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -132,8 +127,6 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
         mBtNote.setOnClickListener(this);
 
         hasCancel = false;
-        LocationLibrary.forceLocationUpdate(this);
-        LocationLibrary.startAlarmAndListener(this);
 
         Intent intent = getIntent();
         if (intent != null) {
@@ -876,9 +869,6 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
 	
 	private void registerLocationReceiver() {
 		if(!hasRegisterReceiver){	        
-	        final IntentFilter lftIntentFilter = new IntentFilter(LocationLibraryConstants.getLocationChangedPeriodicBroadcastAction());
-	        registerReceiver(lftBroadcastReceiver, lftIntentFilter);
-	        
 	    	updateSiteReceiver = new UpdateSiteReceiver(this);
 	        IntentFilter intentFilter = new IntentFilter(LocationService.UPDATE_SITE_ACTION);
 	        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
@@ -890,10 +880,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
 	private void unRegisterLocationReceiver() {
 		if(hasRegisterReceiver){
         	unregisterReceiver(updateSiteReceiver);
-        	unregisterReceiver(lftBroadcastReceiver);
         	hasRegisterReceiver = false;
         }
 	}
-	
-	private final BroadcastReceiver lftBroadcastReceiver = new LocationUpdateReceiver();
 }

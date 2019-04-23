@@ -45,15 +45,12 @@ import com.appiphany.nacc.model.GuidePhoto;
 import com.appiphany.nacc.model.Photo.DIRECTION;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
-import com.appiphany.nacc.services.LocationUpdateReceiver;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Intents;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.LocationUtil;
 import com.appiphany.nacc.utils.UIUtils;
-import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibrary;
-import com.littlefluffytoys.littlefluffylocationlibrary.LocationLibraryConstants;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.otaliastudios.cameraview.CameraListener;
@@ -180,9 +177,6 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
         if(Config.shouldShowDirectionDialog(this)){
         	showChangeDirectionDialog();
         }        
-        
-        LocationLibrary.forceLocationUpdate(this);
-        LocationLibrary.startAlarmAndListener(this);
 
         cameraView.mapGesture(Gesture.PINCH, GestureAction.ZOOM); // Pinch to zoom!
         cameraView.mapGesture(Gesture.TAP, GestureAction.FOCUS_WITH_MARKER);
@@ -300,8 +294,6 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
 	        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
 	        registerReceiver(updateSiteReceiver, intentFilter);
 	        
-	        final IntentFilter lftIntentFilter = new IntentFilter(LocationLibraryConstants.getLocationChangedPeriodicBroadcastAction());
-	        registerReceiver(lftBroadcastReceiver, lftIntentFilter);
 	        hasRegisterReceiver = true;
         }
 	}
@@ -404,7 +396,6 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
 	private void unRegisterLocationReceiver() {
 		if(hasRegisterReceiver){
         	unregisterReceiver(updateSiteReceiver);
-        	unregisterReceiver(lftBroadcastReceiver);
         	hasRegisterReceiver = false;
         }
 	}
@@ -677,7 +668,7 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
         }
 
         if(site != null && GlobalState.getCurrentUserLocation() != null) {
-            float distance = LocationUtil.distanceBetween(selectedSite.getLat(), selectedSite.getLng(),
+            float distance = LocationUtil.distanceBetween(site.getLat(), site.getLng(),
                     GlobalState.getCurrentUserLocation().getLatitude(), GlobalState.getCurrentUserLocation().getLongitude());
             if (distance > Config.LOCATION_NEAREST_DISTANCE) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivityContext());
@@ -907,6 +898,4 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
 	@Override
 	public void onStopTrackingTouch(SeekBar seekBar) {
 	}    	
-	
-	private final BroadcastReceiver lftBroadcastReceiver = new LocationUpdateReceiver();
 }
