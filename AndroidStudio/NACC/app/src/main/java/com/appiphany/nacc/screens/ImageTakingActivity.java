@@ -229,11 +229,13 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
 					
 					@Override
 					public void run() {
-						if(!mGuidePhotoPath.startsWith("http")){
-                            Glide.with(getActivityContext()).load(new File(mGuidePhotoPath)).into(mGuideImageView);
-						}else{
-                            Glide.with(getActivityContext()).load(mGuidePhotoPath).into(mGuideImageView);
-						}
+					    if (!getActivityContext().isDestroyed()) {
+                            if(!mGuidePhotoPath.startsWith("http")){
+                                Glide.with(getActivityContext()).load(new File(mGuidePhotoPath)).into(mGuideImageView);
+                            }else{
+                                Glide.with(getActivityContext()).load(mGuidePhotoPath).into(mGuideImageView);
+                            }
+                        }
 					}
 				}, 700);
                               

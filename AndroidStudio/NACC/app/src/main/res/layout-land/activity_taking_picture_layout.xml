@@ -114,8 +114,7 @@
             android:id="@+id/guide_image_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:tag="1" />
+            android:scaleType="centerCrop"/>
 
         <RelativeLayout
             android:id="@+id/config_panel"

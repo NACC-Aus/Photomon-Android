@@ -14,6 +14,7 @@ import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
@@ -553,9 +554,19 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
 	}
 
 	private void startLocationService() {
-		Intent locationIntent = new Intent(this, LocationService.class);
-		locationIntent.addCategory(LocationService.SERVICE_TAG);
-		startService(locationIntent);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Intent locationIntent = new Intent(getActivityContext(), LocationService.class);
+                    locationIntent.addCategory(LocationService.SERVICE_TAG);
+                    startService(locationIntent);
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                    Crashlytics.logException(throwable);
+                }
+            }
+        }, 200);
 	}
 	
 	private void stopDownloadGuideService(){

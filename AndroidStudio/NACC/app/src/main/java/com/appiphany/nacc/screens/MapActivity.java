@@ -15,6 +15,7 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -137,7 +138,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         initActionBar();
         SmartLocation.with(this).location().config(LocationParams.NAVIGATION).start(new OnLocationUpdatedListener() {
             @Override
-            public void onLocationUpdated(Location location) {
+            public void onLocationUpdated(final Location location) {
                 if (location == null) {
                     return;
                 }
@@ -155,11 +156,21 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
                 }
 
                 lastTimeUpdateLocation = SystemClock.elapsedRealtime();
-                Intent locationIntent = new Intent(getActivityContext(), LocationService.class);
-                locationIntent.addCategory(LocationService.SERVICE_TAG);
-                locationIntent.setAction(LocationService.LOCATION_CHANGED);
-                locationIntent.putExtra(LocationService.LOCATION_DATA, location);
-                startService(locationIntent);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            Intent locationIntent = new Intent(getActivityContext(), LocationService.class);
+                            locationIntent.addCategory(LocationService.SERVICE_TAG);
+                            locationIntent.setAction(LocationService.LOCATION_CHANGED);
+                            locationIntent.putExtra(LocationService.LOCATION_DATA, location);
+                            startService(locationIntent);
+                        } catch (Throwable throwable) {
+                            throwable.printStackTrace();
+                            Crashlytics.logException(throwable);
+                        }
+                    }
+                }, 200);
             }
         });
 
@@ -855,9 +866,19 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
     }
 
     private void startLocationService() {
-        Intent locationIntent = new Intent(this, LocationService.class);
-        locationIntent.addCategory(LocationService.SERVICE_TAG);
-        startService(locationIntent);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Intent locationIntent = new Intent(getActivityContext(), LocationService.class);
+                    locationIntent.addCategory(LocationService.SERVICE_TAG);
+                    startService(locationIntent);
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                    Crashlytics.logException(throwable);
+                }
+            }
+        }, 200);
     }
 
     private void stopDownloadGuideService() {
