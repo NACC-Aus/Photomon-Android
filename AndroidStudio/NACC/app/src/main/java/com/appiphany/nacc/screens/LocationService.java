@@ -200,7 +200,7 @@ public class LocationService extends Service{
 		
 
 		Ln.i("Location changed");
-		Location loc = (Location) intent.getSerializableExtra(LOCATION_DATA);
+		Location loc = intent.getParcelableExtra(LOCATION_DATA);
 		GlobalState.setCurrentUserLocation(loc);
 		
 		if(null != updateSitesTask && updateSitesTask.isRunning){

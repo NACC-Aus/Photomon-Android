@@ -51,6 +51,7 @@ import com.appiphany.nacc.utils.Intents;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.LocationUtil;
 import com.appiphany.nacc.utils.UIUtils;
+import com.bumptech.glide.Glide;
 import com.nostra13.universalimageloader.core.ImageLoader;
 import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.otaliastudios.cameraview.CameraListener;
@@ -229,19 +230,9 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
 					@Override
 					public void run() {
 						if(!mGuidePhotoPath.startsWith("http")){
-							ImageLoader.getInstance().displayImage("file://" +  mGuidePhotoPath, mGuideImageView, GeneralUtil.getNewScaleOption(), new SimpleImageLoadingListener() {
-								@Override
-								public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-
-								}
-							});	
+                            Glide.with(getActivityContext()).load(new File(mGuidePhotoPath)).into(mGuideImageView);
 						}else{
-							ImageLoader.getInstance().displayImage(mGuidePhotoPath, mGuideImageView, GeneralUtil.getNewScaleOption(),new SimpleImageLoadingListener() {
-								@Override
-								public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-
-								}
-							});
+                            Glide.with(getActivityContext()).load(mGuidePhotoPath).into(mGuideImageView);
 						}
 					}
 				}, 700);
@@ -862,12 +853,13 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
 	}
 
     private void getAllGuidePhotos(Context context){
-        if(GlobalState.getBestSite() != null){
+        Site site = selectedSite != null? selectedSite : GlobalState.getBestSite();
+        if (site != null) {
             CacheService mCacheService = CacheService.getInstance(
                     context, CacheService.createDBNameFromUser(Config.getActiveServer(context), Config.getActiveUser(context)));
 
             for (DIRECTION dir : DIRECTION.values()) {
-                GuidePhoto guidePhoto = mCacheService.getGuidePhotoBySiteId(GlobalState.getBestSite().getSiteId(), dir);
+                GuidePhoto guidePhoto = mCacheService.getGuidePhotoBySiteId(site.getSiteId(), dir);
                 allGuidePhotos.put(dir, guidePhoto);
             }
         }
