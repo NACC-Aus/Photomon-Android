@@ -25,9 +25,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.location.Location;
-import android.media.ExifInterface;
 import android.os.Environment;
-import android.support.annotation.Nullable;
+
+import androidx.annotation.Nullable;
+import androidx.exifinterface.media.ExifInterface;
 
 public class GeneralUtil {
 	public static final String SIMPLE_DATE_PATTERN = "HH:mm dd/MM/yyyy";

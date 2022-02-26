@@ -1,7 +1,8 @@
 package com.appiphany.nacc.utils;
 import java.util.List;
 import android.content.Context;
-import android.support.v4.content.AsyncTaskLoader;
+
+import androidx.loader.content.AsyncTaskLoader;
 
 public abstract class AbstractDataLoader<E extends List<?>> extends
 		AsyncTaskLoader<E> {

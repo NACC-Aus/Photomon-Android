@@ -9,7 +9,8 @@ import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.NetworkUtils;
 import com.appiphany.nacc.utils.UIUtils;
-import com.crashlytics.android.Crashlytics;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -66,7 +67,7 @@ public class LocationService extends Service{
 
         }catch (Exception ex){
             ex.printStackTrace();
-            Crashlytics.logException(ex);
+            FirebaseCrashlytics.getInstance().recordException(ex);
         }
 
 		return START_STICKY;

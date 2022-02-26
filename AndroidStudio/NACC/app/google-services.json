@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "790801716572",
+    "project_id": "nacc-1550723436685",
+    "storage_bucket": "nacc-1550723436685.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:790801716572:android:2bca1f4e336f53df6e1d99",
+        "android_client_info": {
+          "package_name": "com.appiphany.nacc"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "790801716572-r7fdlfaim1dui83dpert2kd8sarv32js.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQBYe42JRBuwFqaPZXKV0SqdxANYW1Qm0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "790801716572-r7fdlfaim1dui83dpert2kd8sarv32js.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

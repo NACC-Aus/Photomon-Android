@@ -1,16 +1,18 @@
 package com.appiphany.nacc.services;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.support.annotation.Nullable;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import androidx.annotation.Nullable;
+import androidx.cursoradapter.widget.SimpleCursorAdapter;
 
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.model.Photo.DIRECTION;
@@ -52,6 +54,7 @@ public class PhotoAdapter extends SimpleCursorAdapter {
         return View.inflate(context, R.layout.photo_item_layout, null);
     }
 
+    @SuppressLint("Range")
     @Override
     public void bindView(View convertView, Context arg1, Cursor cursor) {
         TextView imageNameTextView = convertView.findViewById(R.id.photo_text_view);

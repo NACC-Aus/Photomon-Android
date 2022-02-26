@@ -17,11 +17,6 @@ import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.ActionBar;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -34,6 +29,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.core.content.ContextCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.events.UpdateProject;
@@ -58,7 +59,6 @@ import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
-import com.crashlytics.android.Crashlytics;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -68,6 +68,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -136,42 +137,39 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         loadData();
 
         initActionBar();
-        SmartLocation.with(this).location().config(LocationParams.NAVIGATION).start(new OnLocationUpdatedListener() {
-            @Override
-            public void onLocationUpdated(final Location location) {
-                if (location == null) {
-                    return;
-                }
-
-                Ln.d("location update %s, %s", location.getLatitude(), location.getLongitude());
-                if (SystemClock.elapsedRealtime() - lastTimeUpdateLocation < Config.LOCATION_REFRESH_TIME) {
-                    Ln.d("not enough time, draw current location");
-                    GlobalState.setCurrentUserLocation(location);
-                    drawCurrentLocation();
-                    if (!alreadyZoomMap) {
-                        zoomCurrentLocation();
-                    }
-
-                    return;
-                }
-
-                lastTimeUpdateLocation = SystemClock.elapsedRealtime();
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            Intent locationIntent = new Intent(getActivityContext(), LocationService.class);
-                            locationIntent.addCategory(LocationService.SERVICE_TAG);
-                            locationIntent.setAction(LocationService.LOCATION_CHANGED);
-                            locationIntent.putExtra(LocationService.LOCATION_DATA, location);
-                            startService(locationIntent);
-                        } catch (Throwable throwable) {
-                            throwable.printStackTrace();
-                            Crashlytics.logException(throwable);
-                        }
-                    }
-                }, 200);
+        SmartLocation.with(this).location().config(LocationParams.NAVIGATION).start(location -> {
+            if (location == null) {
+                return;
             }
+
+            Ln.d("location update %s, %s", location.getLatitude(), location.getLongitude());
+            if (SystemClock.elapsedRealtime() - lastTimeUpdateLocation < Config.LOCATION_REFRESH_TIME) {
+                Ln.d("not enough time, draw current location");
+                GlobalState.setCurrentUserLocation(location);
+                drawCurrentLocation();
+                if (!alreadyZoomMap) {
+                    zoomCurrentLocation();
+                }
+
+                return;
+            }
+
+            lastTimeUpdateLocation = SystemClock.elapsedRealtime();
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Intent locationIntent = new Intent(getActivityContext(), LocationService.class);
+                        locationIntent.addCategory(LocationService.SERVICE_TAG);
+                        locationIntent.setAction(LocationService.LOCATION_CHANGED);
+                        locationIntent.putExtra(LocationService.LOCATION_DATA, location);
+                        startService(locationIntent);
+                    } catch (Throwable throwable) {
+                        throwable.printStackTrace();
+                        FirebaseCrashlytics.getInstance().recordException(throwable);
+                    }
+                }
+            }, 200);
         });
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -179,7 +177,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         mapFragment.getMapAsync(this);
 
         if (!Config.isDemoMode(this)) {
-            DownloadGuidesJob.scheduleJob();
+            DownloadGuidesJob.scheduleJob(this.getActivityContext());
         }
     }
 
@@ -284,7 +282,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
             }
 
         } catch (Throwable throwable) {
-            Crashlytics.logException(throwable);
+            FirebaseCrashlytics.getInstance().recordException(throwable);
             throwable.printStackTrace();
         }
     }
@@ -875,7 +873,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
                     startService(locationIntent);
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
-                    Crashlytics.logException(throwable);
+                    FirebaseCrashlytics.getInstance().recordException(throwable);
                 }
             }
         }, 200);

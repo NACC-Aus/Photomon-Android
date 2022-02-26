@@ -13,20 +13,21 @@ import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
 import android.hardware.Camera;
 import android.location.Location;
 import android.location.LocationListener;
+import android.media.ExifInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.StatFs;
 import android.provider.MediaStore;
-import android.support.media.ExifInterface;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AlertDialog;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -52,13 +53,12 @@ import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.LocationUtil;
 import com.appiphany.nacc.utils.UIUtils;
 import com.bumptech.glide.Glide;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
 import com.otaliastudios.cameraview.CameraListener;
 import com.otaliastudios.cameraview.CameraView;
-import com.otaliastudios.cameraview.Flash;
-import com.otaliastudios.cameraview.Gesture;
-import com.otaliastudios.cameraview.GestureAction;
+import com.otaliastudios.cameraview.PictureResult;
+import com.otaliastudios.cameraview.controls.Flash;
+import com.otaliastudios.cameraview.gesture.Gesture;
+import com.otaliastudios.cameraview.gesture.GestureAction;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -180,12 +180,12 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
         }        
 
         cameraView.mapGesture(Gesture.PINCH, GestureAction.ZOOM); // Pinch to zoom!
-        cameraView.mapGesture(Gesture.TAP, GestureAction.FOCUS_WITH_MARKER);
+        cameraView.mapGesture(Gesture.TAP, GestureAction.AUTO_FOCUS);
 
         cameraView.addCameraListener(new CameraListener() {
             @Override
-            public void onPictureTaken(byte[] jpeg) {
-                ImageTakingActivity.this.onPictureTaken(jpeg);
+            public void onPictureTaken(@NonNull PictureResult result) {
+                ImageTakingActivity.this.onPictureTaken(result.getData());
             }
         });
     }
@@ -274,7 +274,7 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
         
         registerLocationReceiver();
 
-        cameraView.start();
+        cameraView.open();
         isFlashOn = false;
         mChangeFlashBtn.setImageResource(R.drawable.ic_device_access_flash_off);
         changeFlashMode(false);
@@ -345,7 +345,7 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
                 if (data != null) {
                     String picturePath = null;
                     if (ContentResolver.SCHEME_CONTENT.equals(data.getData().getScheme())) {
-                        String[] filePathColumn = { MediaStore.Images.Media.DATA };
+                        String[] filePathColumn = {MediaStore.Images.Media.DATA};
 
                         Cursor cursor = getContentResolver().query(data.getData(),
                                 filePathColumn, null, null, null);
@@ -375,13 +375,13 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
                 finish();
             }
         }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-
-        cameraView.stop();
+        cameraView.close();
         // stop listen location change
         hideLoadingDialog();
     }
@@ -423,7 +423,7 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
 
     @Override
     public void onClick(View v) {
-        cameraView.capturePicture();
+        cameraView.takePicture();
     }
 
     @Override

@@ -98,15 +98,15 @@
         android:layout_above="@id/taking_picture_layout"
         android:layout_alignParentTop="true">
 
-        <com.otaliastudios.cameraview.ExCameraView
+        <com.otaliastudios.cameraview.CameraView
             android:id="@+id/camera"
             android:keepScreenOn="true"
-            app:cameraJpegQuality="80"
-            app:cameraGestureTap="focusWithMarker"
+            app:cameraGestureTap="autoFocus"
             app:cameraGestureLongTap="none"
             app:cameraGesturePinch="zoom"
-            app:cameraSessionType="picture"
+            app:cameraMode="picture"
             app:cameraPictureSizeBiggest="true"
+            app:cameraAudio="off"
             android:layout_gravity="center"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />

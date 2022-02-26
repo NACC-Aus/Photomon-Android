@@ -10,15 +10,12 @@ import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 
 import com.appiphany.nacc.R;
-import com.crashlytics.android.Crashlytics;
-import io.fabric.sdk.android.Fabric;
 public class SplashActivity extends Activity {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
     	requestWindowFeature(Window.FEATURE_NO_TITLE);
         super.onCreate(savedInstanceState);
-		Fabric.with(this, new Crashlytics());
 
         setContentView(R.layout.activity_splash);
         Animation animation = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);

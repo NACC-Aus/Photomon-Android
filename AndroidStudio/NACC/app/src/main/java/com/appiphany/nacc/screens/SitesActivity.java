@@ -7,8 +7,6 @@ import java.util.List;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager.LoaderCallbacks;
-import android.support.v4.content.Loader;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,6 +15,10 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
+
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
+
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Site;
@@ -26,7 +28,7 @@ import com.appiphany.nacc.utils.AbstractDataLoader;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.NetworkUtils;
 
-public class SitesActivity extends BaseActivity implements LoaderCallbacks<List<Site>>, OnItemClickListener {
+public class SitesActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<List<Site>>, OnItemClickListener {
 	private static final int LOADER_ID = SitesActivity.class.hashCode();
 	private GuideAdapter guideAdapter;
 	private ListView lvSites;

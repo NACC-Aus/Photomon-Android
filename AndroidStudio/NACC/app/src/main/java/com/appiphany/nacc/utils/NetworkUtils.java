@@ -14,12 +14,12 @@ import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Project;
 import com.appiphany.nacc.model.ProjectResult;
 import com.appiphany.nacc.model.Site;
-import com.crashlytics.android.Crashlytics;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpTransport;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -139,8 +139,8 @@ public class NetworkUtils {
 			}
 		} catch (Exception ex) {
 			Ln.e(ex);
-            Crashlytics.setString("getAllSite project id", project);
-			Crashlytics.logException(ex);
+			FirebaseCrashlytics.getInstance().setCustomKey("getAllSite project id", project);
+			FirebaseCrashlytics.getInstance().recordException(ex);
 		} finally {
 			if(httpResponse != null) {
 				try {
@@ -190,8 +190,8 @@ public class NetworkUtils {
 			}
 		} catch (Exception ex) {
 			Ln.e(ex);
-            Crashlytics.setString("getGuidePhotos project id", project);
-            Crashlytics.logException(ex);
+			FirebaseCrashlytics.getInstance().setCustomKey("getGuidePhotos project id", project);
+			FirebaseCrashlytics.getInstance().recordException(ex);
 		} finally {
 			if(httpResponse != null) {
 				try {
@@ -219,8 +219,8 @@ public class NetworkUtils {
 			return result.getProjects();			
 		}catch(Exception ex){
 			ex.printStackTrace();
-            Crashlytics.setString("getProjects serverUrl", serverUrl);
-            Crashlytics.logException(ex);
+			FirebaseCrashlytics.getInstance().setCustomKey("getProjects serverUrl", serverUrl);
+			FirebaseCrashlytics.getInstance().recordException(ex);
 		}
 		
 		return new ArrayList<>();

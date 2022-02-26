@@ -15,7 +15,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -31,13 +30,14 @@ import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
+import androidx.fragment.app.Fragment;
+
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.model.CacheItem;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Photo.DIRECTION;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
-import com.appiphany.nacc.utils.BitmapUtil;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Ln;

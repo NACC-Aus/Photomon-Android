@@ -5,9 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.net.ConnectivityManagerCompat;
-import android.util.Log;
+import androidx.core.net.ConnectivityManagerCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.appiphany.nacc.screens.BackgroundService;
 import com.appiphany.nacc.utils.Ln;

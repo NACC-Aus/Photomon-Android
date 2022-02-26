@@ -3,6 +3,7 @@ package com.appiphany.nacc.screens;
 import java.lang.ref.WeakReference;
 import java.util.Date;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -10,15 +11,15 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v4.view.ViewPager;
-import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Toast;
+
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.viewpager.widget.ViewPager;
 
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.model.Photo;
@@ -32,7 +33,7 @@ import com.appiphany.nacc.utils.Intents;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.UncaughtExceptionHandler;
 
-public class ImageReviewActivity extends BaseActivity implements OnPageChangeListener {
+public class ImageReviewActivity extends BaseActivity implements ViewPager.OnPageChangeListener {
     private static final int SHOW_NOTE_CODE = 222;
     private ViewPager mViewPager;
     private int mCurrentPhotoId;
@@ -183,6 +184,7 @@ public class ImageReviewActivity extends BaseActivity implements OnPageChangeLis
             super(context, fm, c);
         }
 
+        @SuppressLint("Range")
         @Override
         public Fragment getItem(Context context, Cursor cursor) {
             Fragment result = null;

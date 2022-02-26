@@ -15,8 +15,6 @@ import android.net.ConnectivityManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +23,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.events.UpdateProject;
@@ -41,7 +41,8 @@ import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Intents;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.UIUtils;
-import com.crashlytics.android.Crashlytics;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -220,7 +221,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
             }
 
         }catch (Throwable throwable) {
-            Crashlytics.logException(throwable);
+            FirebaseCrashlytics.getInstance().recordException(throwable);
             throwable.printStackTrace();
         }
     }
@@ -563,7 +564,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
                     startService(locationIntent);
                 } catch (Throwable throwable) {
                     throwable.printStackTrace();
-                    Crashlytics.logException(throwable);
+                    FirebaseCrashlytics.getInstance().recordException(throwable);
                 }
             }
         }, 200);

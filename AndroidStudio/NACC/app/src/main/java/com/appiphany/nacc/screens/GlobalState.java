@@ -1,25 +1,23 @@
 package com.appiphany.nacc.screens;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.location.Location;
-import android.os.Build;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ViewConfiguration;
+
+import androidx.multidex.MultiDex;
 
 import com.appiphany.nacc.BuildConfig;
 import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
-import com.appiphany.nacc.services.jobs.AppJobCreator;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Ln;
-import com.crashlytics.android.Crashlytics;
-import com.crashlytics.android.core.CrashlyticsCore;
-import com.evernote.android.job.JobManager;
 import com.nostra13.universalimageloader.cache.disc.impl.LimitedAgeDiskCache;
 import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
 import com.nostra13.universalimageloader.cache.memory.impl.UsingFreqLimitedMemoryCache;
@@ -41,8 +39,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import io.fabric.sdk.android.Fabric;
-
 public class GlobalState extends Application {
     private static GlobalState instance;
     private static ThreadPoolExecutor mThreadPool;
@@ -61,30 +57,31 @@ public class GlobalState extends Application {
     private TimerTask mActivityTransitionTimerTask;
     public boolean wasInBackground;
     private static final long MAX_ACTIVITY_TRANSITION_TIME_MS = 3000;
-    
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         instance = this;
-        CrashlyticsCore core = new CrashlyticsCore.Builder().disabled(BuildConfig.DEBUG).build();
-        Fabric.with(this, new Crashlytics.Builder().core(core).build());
         
         context = getApplicationContext();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            try {
-                ViewConfiguration config = ViewConfiguration.get(this);
-                Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
-                if (menuKeyField != null) {
-                    menuKeyField.setAccessible(true);
-                    menuKeyField.setBoolean(config, false);
-                }
-            } catch (Exception ex) {
-                // Ignore
+        try {
+            ViewConfiguration config = ViewConfiguration.get(this);
+            @SuppressLint("SoonBlockedPrivateApi") Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
+            if (menuKeyField != null) {
+                menuKeyField.setAccessible(true);
+                menuKeyField.setBoolean(config, false);
             }
+        } catch (Exception ex) {
+            // Ignore
         }
 
-        JobManager.create(this).addJobCreator(new AppJobCreator());
         initThreadPool();
         initImageLoader();
         if(BuildConfig.DEBUG){

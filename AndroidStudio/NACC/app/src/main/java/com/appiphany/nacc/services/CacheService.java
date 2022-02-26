@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -47,7 +48,7 @@ public class CacheService extends SQLiteOpenHelper {
             + COLUMN_SITE + " text not null, "
             + COLUMN_TAKEN_DATE + " long not null, "
             + COLUMN_DIRECTION + " text not null, "
-            + COLUMN_NOTE + " text not null, "
+            + COLUMN_NOTE + " text, "
             + COLUMN_STATE + " int not null, "
             + COLUMN_PROJECT + " text, "
             + COLUMN_OPACITY + " real not null "
@@ -326,6 +327,7 @@ public class CacheService extends SQLiteOpenHelper {
         return rows;
     }
 
+    @SuppressLint("Range")
     public UPLOAD_STATE getState(String photoId) {
         int resultState = -1;
         SQLiteDatabase db = getDatabase();
@@ -408,6 +410,7 @@ public class CacheService extends SQLiteOpenHelper {
         return result;
     }
 
+    @SuppressLint("Range")
     public List<Photo> getNotUploadedPhotos() {
         SQLiteDatabase db = getDatabase();
         Cursor cursor = db.query(TABLE_NAME_PHOTO, null, COLUMN_STATE + " != \"" + UPLOAD_STATE.UPLOADED.getValue() + "\"",
@@ -523,6 +526,7 @@ public class CacheService extends SQLiteOpenHelper {
         return mMyDatabaseName;
     }
 
+    @SuppressLint("Range")
     public List<String> getAllSiteIdInGuide() {
     	SQLiteDatabase db = getDatabase();
         List<String> siteIds = new ArrayList<String>();
@@ -553,6 +557,7 @@ public class CacheService extends SQLiteOpenHelper {
         db.insert(CacheItem.TABLE_NAME, null, values);
     }
 
+    @SuppressLint("Range")
     public ArrayList<CacheItem> getCaches(){
         SQLiteDatabase db = getDatabase();
         ArrayList<CacheItem> results = new ArrayList<>();
@@ -576,6 +581,7 @@ public class CacheService extends SQLiteOpenHelper {
         return results;
     }
 
+    @SuppressLint("Range")
     public CacheItem getCache(String id){
         SQLiteDatabase db = getDatabase();
         CacheItem result = null;
@@ -641,6 +647,7 @@ public class CacheService extends SQLiteOpenHelper {
         return row > 0;
     }
 
+    @SuppressLint("Range")
     public List<String> getGuidePhotoIds() {
         SQLiteDatabase db = getDatabase();
         List<String> photoIds = new ArrayList<String>();
@@ -739,6 +746,7 @@ public class CacheService extends SQLiteOpenHelper {
         return photo;
     }
 
+    @SuppressLint("Range")
     public String getNoteForPhoto(String photoId) {
         SQLiteDatabase db = getDatabase();
         String note = "";

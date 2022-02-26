@@ -6,9 +6,10 @@ import android.content.DialogInterface;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
-import android.support.v7.app.AlertDialog;
+
+import androidx.appcompat.app.AlertDialog;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
