@@ -130,8 +130,8 @@ public class NetworkUtils {
 					JsonObject siteObject = element.getAsJsonObject();
 					String siteId = siteObject.get("ID").getAsString();
 					String siteName = siteObject.get("Name").getAsString();
-					double lat = siteObject.get("Latitude").getAsDouble();
-					double lng = siteObject.get("Longitude").getAsDouble();
+					double lat = parseDouble(siteObject.get("Latitude"));
+					double lng = parseDouble(siteObject.get("Longitude"));
 					String projectId = siteObject.get("ProjectId").getAsString();
 					Site site = new Site(siteId, siteName, lat, lng, projectId);
 					result.add(site);
@@ -155,7 +155,19 @@ public class NetworkUtils {
 		}
 
 		return null;
+	}
 
+	private static double parseDouble(JsonElement je) {
+    	try {
+    		return je.getAsDouble();
+		}catch (Throwable th) {
+    		try{
+    			return Double.parseDouble(je.getAsString());
+			}catch (Throwable th2) {
+			}
+		}
+
+		return 0.0;
 	}
     
 	public static List<Photo> getGuidePhotos(Context context, String project) {
