@@ -40,8 +40,8 @@ public class SitesActivity extends BaseActivity implements LoaderManager.LoaderC
 		setContentView(R.layout.activity_site_list);
 		initActionBar();
 		getSupportLoaderManager().initLoader(LOADER_ID, null, this);
-		lvSites = (ListView) findViewById(R.id.lvSites);
-		progressLoadSites = (ProgressBar) findViewById(R.id.progressLoadSites);
+		lvSites = findViewById(R.id.lvSites);
+		progressLoadSites = findViewById(R.id.progressLoadSites);
 		progressLoadSites.setVisibility(View.VISIBLE);
 	}
 
@@ -154,12 +154,7 @@ public class SitesActivity extends BaseActivity implements LoaderManager.LoaderC
 					}
 				}
 				
-				Collections.sort(sites, new Comparator<Site>() {
-			        @Override
-			        public int compare(final Site object1, final Site object2) {
-			            return object1.getName().compareToIgnoreCase(object2.getName());
-			        }
-			       } );
+				Collections.sort(sites, (object1, object2) -> object1.getName().compareToIgnoreCase(object2.getName()));
 			}
 			
 			return sites;

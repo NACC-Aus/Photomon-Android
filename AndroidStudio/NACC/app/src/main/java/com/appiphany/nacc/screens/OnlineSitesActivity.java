@@ -7,6 +7,7 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.loader.app.LoaderManager;
 import androidx.loader.content.Loader;
@@ -37,7 +38,6 @@ import com.google.gson.Gson;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,7 +61,7 @@ public class OnlineSitesActivity extends BaseActivity implements LoaderManager.L
         progressLoadSites = findViewById(R.id.progressLoadSites);
         initActionBar();
         getSupportLoaderManager().initLoader(LOADER_ID, null, this);
-        lvSites = (ListView) findViewById(R.id.listSites);
+        lvSites = findViewById(R.id.listSites);
     }
 
     @Override
@@ -125,22 +125,17 @@ public class OnlineSitesActivity extends BaseActivity implements LoaderManager.L
         getSupportActionBar().setTitle(R.string.site_title);
     }
 
+    @NonNull
     @Override
     public Loader<List<Site>> onCreateLoader(int id, Bundle args) {
         return new GetSiteLoader(this);
     }
 
     @Override
-    public void onLoadFinished(Loader<List<Site>> loader, List<Site> data) {
+    public void onLoadFinished(@NonNull Loader<List<Site>> loader, List<Site> data) {
         progressLoadSites.setVisibility(View.GONE);
-        if(data == null) {
-            return;
-        }
-
-        GlobalState.setSites(data);
-        Collections.sort(data, new Comparator<Site>() {
-            @Override
-            public int compare(Site o1, Site o2) {
+        if(data != null) {
+            Collections.sort(data, (o1, o2) -> {
                 if(o1.getName() == null) {
                     return o2.getName() == null? 0: -1;
                 }
@@ -150,18 +145,22 @@ public class OnlineSitesActivity extends BaseActivity implements LoaderManager.L
                 }
 
                 return o1.getName().compareToIgnoreCase(o2.getName());
-            }
-        });
+            });
 
-        siteData = data;
+            GlobalState.setSites(data);
+        }
+
+        siteData = GlobalState.getSites();
+        if(siteData == null) {
+            siteData = new ArrayList<>();
+        }
         List<String> siteNames = getSiteNameData();
-
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, siteNames);
         lvSites.setAdapter(adapter);
     }
 
     private List<String> getSiteNameData() {
-        List<String> result = new ArrayList<String>();
+        List<String> result = new ArrayList<>();
         if (siteData == null || siteData.size() == 0) {
             return result;
         }

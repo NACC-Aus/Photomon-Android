@@ -834,10 +834,10 @@ public class CacheService extends SQLiteOpenHelper {
             values.put(Project.ID, project.getUid());
             values.put(Project.NAME, project.getName());
 
-            long rowId = db.insert(Project.TABLE_NAME, null, values);
+            long rowId = db.insertOrThrow(Project.TABLE_NAME, null, values);
             return rowId != -1;
         }catch (Throwable throwable){
-            //Ln.d(throwable);
+            Ln.d(throwable);
             return false;
         }
     }

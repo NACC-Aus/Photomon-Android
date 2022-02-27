@@ -55,16 +55,23 @@ public class UIUtils {
 	private static final int MIN_PREVIEW_PIXELS = 480 * 320; // normal screen
 	private static final int MAX_PREVIEW_PIXELS = 800 * 600; // more than large/HD
 	
-    public static void registerReminder(Context context) {
+    @SuppressLint("UnspecifiedImmutableFlag")
+	public static void registerReminder(Context context) {
         SharedPreferences sharedPrefs = PreferenceManager
                 .getDefaultSharedPreferences(context);
         boolean isReminderEnable = sharedPrefs.getBoolean("reminder_enable", false);
         AlarmManager alarmMgr = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent alarmIntent = new Intent(context, BackgroundService.class);
         alarmIntent.setAction(BackgroundService.REMINDER_ACTION);
-        PendingIntent alarmPendingIntent = PendingIntent.getService(context,
-                4, alarmIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        if (isReminderEnable) {
+		PendingIntent alarmPendingIntent = null;
+		if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+			alarmPendingIntent = PendingIntent.getService(context,
+					4, alarmIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+		} else {
+			alarmPendingIntent = PendingIntent.getService(context,
+					4, alarmIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+		}
+		if (isReminderEnable) {
             Calendar reminderDate = DatePreference.getDateFor(sharedPrefs, "reminder_date");
             Calendar reminderTime = TimePreference.getTimeFor(sharedPrefs, "reminder_time");
             String reminderFreq = sharedPrefs.getString("reminder_frequency", null);

@@ -12,7 +12,6 @@ import android.view.ViewConfiguration;
 import androidx.multidex.MultiDex;
 
 import com.appiphany.nacc.BuildConfig;
-import com.appiphany.nacc.model.Photo;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.utils.Config;
@@ -31,6 +30,7 @@ import com.nostra13.universalimageloader.utils.StorageUtils;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -43,15 +43,12 @@ public class GlobalState extends Application {
     private static GlobalState instance;
     private static ThreadPoolExecutor mThreadPool;
     private static List<Site> sSites;
-    private static BlockingQueue<Runnable> mQueues = new LinkedBlockingQueue<Runnable>();
+    private static BlockingQueue<Runnable> mQueues = new LinkedBlockingQueue<>();
     private static final int CORE_POOL_SIZE = 5;
     private static final int MAX_POOL_SIZE = 15;
     private static final int KEEP_ALIVE_TIME = 1000;
-
-    private static Context context;
     private static Site mBestSite;
     private static Location currentUserLocation;
-    private static List<Photo> guidePhotos;
 
     private Timer mActivityTransitionTimer;
     private TimerTask mActivityTransitionTimerTask;
@@ -68,16 +65,12 @@ public class GlobalState extends Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
-        
-        context = getApplicationContext();
 
         try {
             ViewConfiguration config = ViewConfiguration.get(this);
             @SuppressLint("SoonBlockedPrivateApi") Field menuKeyField = ViewConfiguration.class.getDeclaredField("sHasPermanentMenuKey");
-            if (menuKeyField != null) {
-                menuKeyField.setAccessible(true);
-                menuKeyField.setBoolean(config, false);
-            }
+            menuKeyField.setAccessible(true);
+            menuKeyField.setBoolean(config, false);
         } catch (Exception ex) {
             // Ignore
         }
@@ -89,10 +82,6 @@ public class GlobalState extends Application {
         }else{
         	Ln.getConfig().setLoggingLevel(Log.ERROR);
         }
-    }
-
-    public static Context getAppContext() {
-        return context;
     }
 
     private void initImageLoader() {
@@ -146,16 +135,21 @@ public class GlobalState extends Application {
     }
 
     public static List<Site> getSites() {
-        return sSites;
+        if(sSites != null) {
+            return Collections.unmodifiableList(new ArrayList<>(sSites));
+        }
+
+        return null;
     }
 
     public static List<Site> getProjectSites(String projectId) {
-        if(sSites == null || sSites.isEmpty() || TextUtils.isEmpty(projectId)) {
+        List<Site> sites = getSites();
+        if(sites == null || sites.isEmpty() || TextUtils.isEmpty(projectId)) {
             return null;
         }
 
         List<Site> result = new ArrayList<>();
-        for (Site site: sSites) {
+        for (Site site: sites) {
             if(projectId.equals(site.getProjectId())) {
                 result.add(site);
             }
@@ -165,11 +159,12 @@ public class GlobalState extends Application {
     }
 
     public static Site getSite(String siteId){
-        if(sSites == null || TextUtils.isEmpty(siteId)) {
+        List<Site> sites = getSites();
+        if(sites == null || TextUtils.isEmpty(siteId)) {
             return null;
         }
 
-        for (Site site: sSites) {
+        for (Site site: sites) {
             if(siteId.equals(site.getSiteId())) {
                 return site;
             }
@@ -186,7 +181,7 @@ public class GlobalState extends Application {
     	}
     	
         synchronized (mLock) {
-            GlobalState.sSites = mSites;
+            GlobalState.sSites =  new ArrayList<>(mSites);
         }
 
     }
@@ -195,7 +190,6 @@ public class GlobalState extends Application {
     	 synchronized (mLock) {
              GlobalState.sSites = null;
              GlobalState.mBestSite = null;
-             GlobalState.guidePhotos = null;
              GlobalState.currentUserLocation = null;
          }
     }
@@ -230,22 +224,6 @@ public class GlobalState extends Application {
 		synchronized (mLock) {
 			GlobalState.currentUserLocation = currentUserLocation;
         }		
-	}
-
-	public static List<Photo> getGuidePhotos() {
-		return guidePhotos;
-	}
-
-	public static boolean setGuidePhotos(List<Photo> guidePhotos) {
-		if(guidePhotos != null && guidePhotos.size() == 0){
-			return false;
-		}
-		
-		synchronized (mLock) {
-			GlobalState.guidePhotos = guidePhotos;
-		}
-		
-		return true;
 	}
 
     public void startActivityTransitionTimer() {

@@ -9,6 +9,8 @@ import java.util.Map;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
+
+import android.annotation.SuppressLint;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -133,6 +135,7 @@ public class BackgroundService extends IntentService {
         }
     }
     
+    @SuppressLint("UnspecifiedImmutableFlag")
     private void handleReminderIntent(Intent intent) {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this);
         notificationBuilder.setSmallIcon(R.drawable.ic_launcher);
@@ -142,8 +145,15 @@ public class BackgroundService extends IntentService {
         notificationBuilder.setDefaults(Notification.DEFAULT_SOUND);
         Intent startActivityIntent = new Intent(this, MainScreenActivity.class);
         startActivityIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, startActivityIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            pendingIntent = PendingIntent.getActivity(this, 0, startActivityIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        } else {
+            pendingIntent = PendingIntent.getActivity(this, 0, startActivityIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT);
+        }
+
         notificationBuilder.setContentIntent(pendingIntent);
         notificationBuilder.setAutoCancel(true);
         notificationBuilder.setVibrate(Config.VIBRATE_PATTERN);

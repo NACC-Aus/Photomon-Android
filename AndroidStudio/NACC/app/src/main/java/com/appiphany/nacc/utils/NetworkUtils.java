@@ -107,10 +107,12 @@ public class NetworkUtils {
 		}
 
 		HttpResponse httpResponse = null;
+		String url = "";
 		try {
-            String url = Uri.parse(Config.getActiveServer(context) + "sites.json").buildUpon().
+			url = Uri.parse(Config.getActiveServer(context) + "sites.json").buildUpon().
                     appendQueryParameter("project_id", project)
 					.appendQueryParameter("access_token", Config.getAccessToken(context)).build().toString();
+            Ln.d("url " + url);
 			HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
 			HttpRequest httpRequest = httpTransport.createRequestFactory().buildGetRequest(new GenericUrl(url));
 			httpRequest.setConnectTimeout(Config.HTTP_CONNECT_TIMEOUT);
@@ -140,6 +142,7 @@ public class NetworkUtils {
 		} catch (Exception ex) {
 			Ln.e(ex);
 			FirebaseCrashlytics.getInstance().setCustomKey("getAllSite project id", project);
+			FirebaseCrashlytics.getInstance().setCustomKey("getAllSite url", url);
 			FirebaseCrashlytics.getInstance().recordException(ex);
 		} finally {
 			if(httpResponse != null) {
