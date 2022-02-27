@@ -54,6 +54,8 @@ import com.appiphany.nacc.utils.Intents;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.LocationUtil;
 import com.appiphany.nacc.utils.UIUtils;
+import com.birjuvachhani.locus.Locus;
+import com.birjuvachhani.locus.LocusResult;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -80,9 +82,8 @@ import java.util.List;
 import java.util.Map;
 
 import de.greenrobot.event.EventBus;
-import io.nlopez.smartlocation.OnLocationUpdatedListener;
-import io.nlopez.smartlocation.SmartLocation;
-import io.nlopez.smartlocation.location.config.LocationParams;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 public class MapActivity extends BaseActivity implements View.OnClickListener, OnMapReadyCallback {
     private LinearLayout mDemoView;
@@ -137,9 +138,10 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         loadData();
 
         initActionBar();
-        SmartLocation.with(this).location().config(LocationParams.NAVIGATION).start(location -> {
+        Locus.INSTANCE.startLocationUpdates(this, locusResult -> {
+            Location location = locusResult.getLocation();
             if (location == null) {
-                return;
+                return null;
             }
 
             Ln.d("location update %s, %s", location.getLatitude(), location.getLongitude());
@@ -151,25 +153,23 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
                     zoomCurrentLocation();
                 }
 
-                return;
+                return null;
             }
 
             lastTimeUpdateLocation = SystemClock.elapsedRealtime();
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Intent locationIntent = new Intent(getActivityContext(), LocationService.class);
-                        locationIntent.addCategory(LocationService.SERVICE_TAG);
-                        locationIntent.setAction(LocationService.LOCATION_CHANGED);
-                        locationIntent.putExtra(LocationService.LOCATION_DATA, location);
-                        startService(locationIntent);
-                    } catch (Throwable throwable) {
-                        throwable.printStackTrace();
-                        FirebaseCrashlytics.getInstance().recordException(throwable);
-                    }
+            new Handler().postDelayed(() -> {
+                try {
+                    Intent locationIntent = new Intent(getActivityContext(), LocationService.class);
+                    locationIntent.addCategory(LocationService.SERVICE_TAG);
+                    locationIntent.setAction(LocationService.LOCATION_CHANGED);
+                    locationIntent.putExtra(LocationService.LOCATION_DATA, location);
+                    startService(locationIntent);
+                } catch (Throwable throwable) {
+                    throwable.printStackTrace();
+                    FirebaseCrashlytics.getInstance().recordException(throwable);
                 }
             }, 200);
+            return null;
         });
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -886,7 +886,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
 
     @Override
     protected void onDestroy() {
-        SmartLocation.with(this).location().stop();
+        Locus.INSTANCE.stopLocationUpdates();
         stopLocationService();
         stopDownloadGuideService();
         super.onDestroy();
