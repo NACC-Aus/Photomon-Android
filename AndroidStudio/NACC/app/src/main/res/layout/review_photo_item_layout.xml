@@ -77,7 +77,6 @@
                 android:id="@+id/image_desc_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignTop="@id/image_thumbnail_view"
                 android:layout_below="@id/image_name_view"
                 android:layout_centerVertical="true"
                 android:textColor="@android:color/white" >

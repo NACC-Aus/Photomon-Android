@@ -16,11 +16,6 @@ import java.util.TimeZone;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.assist.ImageScaleType;
-import com.nostra13.universalimageloader.core.assist.ImageSize;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -33,8 +28,7 @@ import androidx.exifinterface.media.ExifInterface;
 public class GeneralUtil {
 	public static final String SIMPLE_DATE_PATTERN = "HH:mm dd/MM/yyyy";
 	public static final int MIN_UPDATE_DAY = 1;
-	private static DisplayImageOptions displayScaleOption;
-	
+
 	public static boolean isDebugMode(){
 		try{
 			if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
@@ -97,23 +91,6 @@ public class GeneralUtil {
 
 		return Integer.MAX_VALUE;
 	}
-	
-	public static DisplayImageOptions getScaleDisplayOption() {
-		if (displayScaleOption == null) {
-			displayScaleOption = new DisplayImageOptions.Builder()
-			.cacheInMemory(true).cacheOnDisk(true).considerExifParams(true)
-			.imageScaleType(ImageScaleType.EXACTLY)
-			.resetViewBeforeLoading(true).build();
-		}
-		
-		return displayScaleOption;
-	}
-	
-	public static DisplayImageOptions getNewScaleOption(){
-    	return new DisplayImageOptions.Builder().cacheInMemory(true).cacheOnDisk(true).imageScaleType(ImageScaleType.EXACTLY).considerExifParams(true)
-				.resetViewBeforeLoading(true).build();
-    }
-	
 	
 	public static void saveBitmap(byte[] bitmapData, String fileName) throws Exception {
 		File file = new File(fileName);
@@ -190,41 +167,6 @@ public class GeneralUtil {
 		} catch (IOException ioe) {
 			// ignore
 		}
-	}
-	
-	public static boolean saveAndRotateBitmap(byte[] bitmapData, int rotate, String imagePath, Location location) throws Exception {
-		Boolean saveSuccess = false;		
-		try {
-			writeByteArrayToFile(new File(imagePath), bitmapData);
-			if(rotate != 0){
-				Matrix matrix = new Matrix();
-				matrix.setRotate(rotate);
-				DisplayImageOptions option = new DisplayImageOptions.Builder().considerExifParams(false)
-						.bitmapConfig(android.graphics.Bitmap.Config.RGB_565).cacheInMemory(false).cacheOnDisc(false).build();
-				Bitmap original = ImageLoader.getInstance().loadImageSync("file:///" + imagePath, new ImageSize(Config.CONFIG_WIDTH, Config.CONFIG_HEIGHT), option);
-				Ln.d("size: " + original.getWidth() + " , " + original.getHeight());
-				Bitmap cleaned = Bitmap.createBitmap(original, 0, 0, original.getWidth(), original.getHeight(), matrix, true);
-				Ln.d("size: " + cleaned.getWidth() + " , " + cleaned.getHeight());
-				original.recycle();
-				original = null;
-				saveBitmap(cleaned, imagePath);
-				cleaned.recycle();
-				cleaned = null;
-			}
-
-			if(location != null) {
-				loc2Exif(imagePath, location);
-			}
-
-			saveSuccess = true;
-		} catch (OutOfMemoryError e) {
-			e.printStackTrace();
-			System.gc();
-		}catch (Exception ex){
-			ex.printStackTrace();
-		}
-
-		return saveSuccess;
 	}
 
     private static void loc2Exif(String flNm, Location loc) {

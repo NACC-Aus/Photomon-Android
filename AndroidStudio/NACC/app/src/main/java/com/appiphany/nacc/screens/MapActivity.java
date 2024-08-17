@@ -524,7 +524,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         Intent alarmIntent = new Intent(this, BackgroundService.class);
         alarmIntent.setAction(BackgroundService.REMINDER_ACTION);
         PendingIntent alarmPendingIntent = PendingIntent.getService(this,
-                4, alarmIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+                4, alarmIntent, PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         alarmMgr.cancel(alarmPendingIntent);
         finish();
 

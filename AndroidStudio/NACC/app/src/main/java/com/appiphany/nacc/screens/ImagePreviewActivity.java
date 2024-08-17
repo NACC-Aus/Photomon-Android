@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Bitmap;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -44,13 +43,11 @@ import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.services.CacheService.UPLOAD_STATE;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.DialogUtil;
-import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Intents;
 import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.NetworkUtils;
 import com.appiphany.nacc.utils.UIUtils;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.listener.SimpleImageLoadingListener;
+import com.bumptech.glide.Glide;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -141,9 +138,10 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             mDirectionTextView.setText(mDirection);
             mDescriptionTextView.setText(UIUtils.getPhotoDate(new Date()));
             if (mFilename != null && mPhotoId != null) {
-            	File file = new File(mFilename);
-            	ImageLoader.getInstance().displayImage("file:///" + file.getAbsolutePath(),
-						mPreviewView, GeneralUtil.getScaleDisplayOption());
+                File file = new File(mFilename);
+                Glide.with(this).asBitmap()
+                        .load(file)
+                        .into(mPreviewView);
             } else {
                 finish();
             }
@@ -151,9 +149,9 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
 
         initActionBar();
 
-        if(!Config.isDemoMode(this)) {
+        if (!Config.isDemoMode(this)) {
             mBestSite = GlobalState.getBestSite();
-            if(selectedSite != null) {
+            if (selectedSite != null) {
                 getSupportActionBar().setTitle(selectedSite.getName());
                 mPhotoName = selectedSite.getName();
                 mSiteId = selectedSite.getSiteId();
@@ -172,20 +170,20 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
         mGuideImageView.setAlpha(0f);
         currentAlpha = 0f;
 
-        if(TextUtils.isEmpty(mGuidePhotoPath)){
+        if (TextUtils.isEmpty(mGuidePhotoPath)) {
             seekOpacityCamera.setVisibility(View.INVISIBLE);
-        }else{
+        } else {
             displayGuidePhoto(true);
         }
     }
 
-    private CacheService getCacheService(){
-    	if(cacheService == null){
-    		cacheService = CacheService.getInstance(this,
+    private CacheService getCacheService() {
+        if (cacheService == null) {
+            cacheService = CacheService.getInstance(this,
                     CacheService.createDBNameFromUser(Config.getActiveServer(this), Config.getActiveUser(this)));
-    	}
+        }
 
-    	return cacheService;
+        return cacheService;
     }
 
     @SuppressWarnings({"ConstantConditions", "deprecation"})
@@ -249,8 +247,8 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
                 if (sites != null && sites.size() > 0) {
                     updateSiteName(sites);
                 } else {
-                	showDialogHandler.sendEmptyMessage(SHOW_DIALOG);
-                	Ln.d("send message show dialog");
+                    showDialogHandler.sendEmptyMessage(SHOW_DIALOG);
+                    Ln.d("send message show dialog");
                 }
             }
         } else {
@@ -263,13 +261,13 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     @SuppressWarnings("deprecation")
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-        if(fromUser){
-            if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB){
+        if (fromUser) {
+            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.HONEYCOMB) {
                 mGuideImageView.setAlpha(progress);
                 currentAlpha = progress;
-            }else{
-                mGuideImageView.setAlpha(progress/10.0f);
-                currentAlpha = progress/10.0f;
+            } else {
+                mGuideImageView.setAlpha(progress / 10.0f);
+                currentAlpha = progress / 10.0f;
             }
         }
     }
@@ -284,57 +282,58 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
 
     }
 
-    private static class DialogHandler extends Handler{
-    	private final WeakReference<ImagePreviewActivity> mService;
+    private static class DialogHandler extends Handler {
+        private final WeakReference<ImagePreviewActivity> mService;
 
-    	DialogHandler(ImagePreviewActivity service) {
+        DialogHandler(ImagePreviewActivity service) {
             mService = new WeakReference<ImagePreviewActivity>(service);
         }
 
-    	public void handleMessage(Message msg) {
-    		ImagePreviewActivity service = mService.get();
+        public void handleMessage(Message msg) {
+            ImagePreviewActivity service = mService.get();
             if (service == null) {
-                 return;
+                return;
             }
 
-    		if (msg.what == SHOW_DIALOG) {
-    			Ln.d("handle show dialog message");
-    			if (!service.isFinishing()) {
-    				CacheService cacheService = CacheService.getInstance(service,
-    	                    CacheService.createDBNameFromUser(Config.getActiveServer(service), Config.getActiveUser(service)));
-    	            if (cacheService != null) {
-    	            	if(service.mUserLocation == null){
-    	            		service.mUserLocation = GlobalState.getCurrentUserLocation();
-    	            	}
+            if (msg.what == SHOW_DIALOG) {
+                Ln.d("handle show dialog message");
+                if (!service.isFinishing()) {
+                    CacheService cacheService = CacheService.getInstance(service,
+                            CacheService.createDBNameFromUser(Config.getActiveServer(service), Config.getActiveUser(service)));
+                    if (cacheService != null) {
+                        if (service.mUserLocation == null) {
+                            service.mUserLocation = GlobalState.getCurrentUserLocation();
+                        }
 
-    	            	if (service.mUserLocation == null) {
-	    	            	if (!NetworkUtils.isNetworkOnline(service)) {
-	    	            		DialogUtil.showSettingsAlert(service, R.string.wifi_setting_title,
-	    	                            R.string.wifi_setting_message, Settings.ACTION_WIFI_SETTINGS);
-	    	            	} else if (!NetworkUtils.isGPSAvailable(service)) {
-	    	            		DialogUtil.showSettingsAlert(service, R.string.gps_setting_title,
-	    	            				R.string.gps_setting_message, Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-	    	            	}
-    	            	} else {
-    	            		service.showAddSiteDialog(service, cacheService, service.mUserLocation);
-    	            	}
-    	            }
-    			}
-    		}
-    	}
+                        if (service.mUserLocation == null) {
+                            if (!NetworkUtils.isNetworkOnline(service)) {
+                                DialogUtil.showSettingsAlert(service, R.string.wifi_setting_title,
+                                        R.string.wifi_setting_message, Settings.ACTION_WIFI_SETTINGS);
+                            } else if (!NetworkUtils.isGPSAvailable(service)) {
+                                DialogUtil.showSettingsAlert(service, R.string.gps_setting_title,
+                                        R.string.gps_setting_message, Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            }
+                        } else {
+                            service.showAddSiteDialog(service, cacheService, service.mUserLocation);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     Dialog dialog;
+
     // show dialog to create new site for local
     private void showAddSiteDialog(final Activity activity, final CacheService cacheService, final Location location) {
-    	Ln.d("call showAddSiteDialog");
-        if(hasCancel || activity == null || activity.isFinishing()) {
+        Ln.d("call showAddSiteDialog");
+        if (hasCancel || activity == null || activity.isFinishing()) {
             return;
         }
 
         View contentView = View.inflate(getActivityContext(), R.layout.add_new_site, null);
         final EditText etSiteName = contentView.findViewById(R.id.site_name_edittext);
-    	if(dialog == null){
+        if (dialog == null) {
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivityContext());
             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
             builder.setCancelable(true);
@@ -375,7 +374,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
                             latitude = mBestSite.getLat();
                         }
 
-                        if(Config.isDemoMode(getActivityContext())) {
+                        if (Config.isDemoMode(getActivityContext())) {
                             Site site = new Site(UUID.randomUUID().toString(), siteName, latitude, longitude, Config.getCurrentProjectId(getActivityContext()));
                             if (cacheService.insertSite(site)) {
                                 getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
@@ -390,7 +389,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
                             getSupportActionBar().setTitle(site.getName());
                             mPhotoName = site.getName();
                             mSiteId = site.getSiteId();
-                        }else{
+                        } else {
                             dialog.dismiss();
                             getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
                             UIUtils.hideKeyboard(ImagePreviewActivity.this, etSiteName);
@@ -418,13 +417,13 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             int width = getResources().getDimensionPixelSize(R.dimen.dialog_width);
             dialog.getWindow().setLayout(width, RelativeLayout.LayoutParams.WRAP_CONTENT);
             dialog.getWindow().setGravity(Gravity.CENTER);
-    	}
+        }
 
-    	if(dialog.isShowing()){
-    		return;
-    	}
+        if (dialog.isShowing()) {
+            return;
+        }
 
-    	UIUtils.showKeyBoard(ImagePreviewActivity.this);
+        UIUtils.showKeyBoard(ImagePreviewActivity.this);
 
         etSiteName.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
@@ -438,11 +437,11 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
         dialog.show();
     }
 
-    private void addNewSite(String name, String lat, String lng){
+    private void addNewSite(String name, String lat, String lng) {
         new AddSiteTask(this).execute(name, lat, lng);
     }
 
-    private static class AddSiteTask extends AsyncTask<String, Void, Site>{
+    private static class AddSiteTask extends AsyncTask<String, Void, Site> {
         private WeakReference<ImagePreviewActivity> weakReference;
         private String currentProjectId;
 
@@ -461,11 +460,11 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
 
         @Override
         protected void onPostExecute(Site site) {
-            if(weakReference.get() == null || weakReference.get().getCacheService() == null){
+            if (weakReference.get() == null || weakReference.get().getCacheService() == null) {
                 return;
             }
 
-            if(site == null) {
+            if (site == null) {
                 Toast.makeText(weakReference.get(), R.string.msg_error_add_site, Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -495,11 +494,11 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             setSupportProgressBarIndeterminateVisibility(true);
             updateSiteName(GlobalState.getSites());
             if (mUserLocation == null) {
-            	mUserLocation = GlobalState.getCurrentUserLocation();
+                mUserLocation = GlobalState.getCurrentUserLocation();
 
-	        	if (mUserLocation == null) {
-	        		 getLocation();
-	        	}
+                if (mUserLocation == null) {
+                    getLocation();
+                }
             }
         }
     }
@@ -547,7 +546,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
                 }
 
                 if (GlobalState.getSites() != null)
-                updateSiteName(GlobalState.getSites());
+                    updateSiteName(GlobalState.getSites());
             }
 
         } catch (Exception e) {
@@ -566,13 +565,13 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-        case android.R.id.home:
-            discardChange();
-            finish();
-            break;
-        case R.id.done_menu:
-            goBackToMain(mFilename);
-            break;
+            case android.R.id.home:
+                discardChange();
+                finish();
+                break;
+            case R.id.done_menu:
+                goBackToMain(mFilename);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -623,12 +622,12 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
         if (clickedItem != null) {
             clickedItem.setEnabled(true);
         }
-        
-        if(mPhotoName == null){
-        	getLocation();
-        	updateSiteName(GlobalState.getSites());
+
+        if (mPhotoName == null) {
+            getLocation();
+            updateSiteName(GlobalState.getSites());
         }
-        
+
         if (mPhotoName == null) {
             UIUtils.buildAlertDialog(this, R.string.dialog_title, R.string.no_photo_name_error, false).show();
             return;
@@ -639,17 +638,17 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
 
     private void savePhoto(String filename) {
         if (filename != null) {
-        	updateSiteName(GlobalState.getSites());
-        	final int version = android.os.Build.VERSION.SDK_INT;
-        	float opacity;
-            if(version < android.os.Build.VERSION_CODES.HONEYCOMB){
-            	opacity = 255;
-            }else{
-            	opacity = 10.0f;
+            updateSiteName(GlobalState.getSites());
+            final int version = android.os.Build.VERSION.SDK_INT;
+            float opacity;
+            if (version < android.os.Build.VERSION_CODES.HONEYCOMB) {
+                opacity = 255;
+            } else {
+                opacity = 10.0f;
             }
 
             String siteId;
-            if(selectedSite != null && !TextUtils.isEmpty(selectedSite.getSiteId())) {
+            if (selectedSite != null && !TextUtils.isEmpty(selectedSite.getSiteId())) {
                 siteId = selectedSite.getSiteId();
             } else {
                 siteId = mSiteId;
@@ -688,50 +687,50 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
 
         @Override
         public void onLocationChanged(Location location) {
-        	Ln.d("[ImagePreviewAct] location change = " + location.getLatitude());
-        	mUserLocation = location;
+            Ln.d("[ImagePreviewAct] location change = " + location.getLatitude());
+            mUserLocation = location;
         }
     };
 
     private void updateSiteName(List<Site> sites) {
-		if (sites == null && mBestSite == null) {
-			if (mTask != null) {
-				mTask.cancel(true);
-			}
+        if (sites == null && mBestSite == null) {
+            if (mTask != null) {
+                mTask.cancel(true);
+            }
 
-			mTask = new GetSitesTask(this);
-			mTask.execute(Config.getActiveServer(this));
-			return;
-		}
+            mTask = new GetSitesTask(this);
+            mTask.execute(Config.getActiveServer(this));
+            return;
+        }
 
-		if(sites != null && sites.isEmpty()) {
+        if (sites != null && sites.isEmpty()) {
             CacheService cacheService = CacheService.getInstance(getActivityContext(),
                     CacheService.createDBNameFromUser(Config.getActiveServer(getActivityContext()), Config.getActiveUser(getActivityContext())));
-		    showAddSiteDialog(getActivityContext(), cacheService, mUserLocation);
-		    return;
+            showAddSiteDialog(getActivityContext(), cacheService, mUserLocation);
+            return;
         }
 
         setSupportProgressBarIndeterminateVisibility(false);
-        
-    	if(mUserLocation == null){
-    		mUserLocation = GlobalState.getCurrentUserLocation();
-    	}
-    	
-        if (mUserLocation != null) {
-        	mBestSite = GlobalState.getBestSite();
-        	if (mBestSite == null) {
-        		mBestSite = UIUtils.getBestSite(sites, mUserLocation, this);
-        	}
 
-        	if(selectedSite != null) {
+        if (mUserLocation == null) {
+            mUserLocation = GlobalState.getCurrentUserLocation();
+        }
+
+        if (mUserLocation != null) {
+            mBestSite = GlobalState.getBestSite();
+            if (mBestSite == null) {
+                mBestSite = UIUtils.getBestSite(sites, mUserLocation, this);
+            }
+
+            if (selectedSite != null) {
                 getSupportActionBar().setTitle(selectedSite.getName());
                 mPhotoName = selectedSite.getName();
                 mSiteId = selectedSite.getSiteId();
-            } else  if (mBestSite != null ) {
+            } else if (mBestSite != null) {
                 getSupportActionBar().setTitle(mBestSite.getName());
                 mPhotoName = mBestSite.getName();
                 mSiteId = mBestSite.getSiteId();
-            } 
+            }
         }
     }
 
@@ -741,25 +740,15 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
         Ln.d("displayGuidePhoto");
         if (mGuidePhotoPath != null) {
             if (show) {
-                mHandler.postDelayed(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        if(!mGuidePhotoPath.startsWith("http")){
-                            ImageLoader.getInstance().displayImage("file://" +  mGuidePhotoPath, mGuideImageView, GeneralUtil.getNewScaleOption(), new SimpleImageLoadingListener() {
-                                @Override
-                                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-
-                                }
-                            });
-                        }else{
-                            ImageLoader.getInstance().displayImage(mGuidePhotoPath, mGuideImageView, GeneralUtil.getNewScaleOption(),new SimpleImageLoadingListener() {
-                                @Override
-                                public void onLoadingComplete(String imageUri, View view, Bitmap loadedImage) {
-
-                                }
-                            });
-                        }
+                mHandler.postDelayed(() -> {
+                    if (!mGuidePhotoPath.startsWith("http")) {
+                        Glide.with(ImagePreviewActivity.this).asBitmap()
+                                .load("file://" + mGuidePhotoPath)
+                                .into(mGuideImageView);
+                    } else {
+                        Glide.with(ImagePreviewActivity.this).asBitmap()
+                                .load(mGuidePhotoPath)
+                                .into(mGuideImageView);
                     }
                 }, 700);
 
@@ -786,7 +775,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
 
         @Override
         protected List<Site> doInBackground(String... params) {
-            if(mContext.get() == null) {
+            if (mContext.get() == null) {
                 return null;
             }
 
@@ -826,62 +815,63 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             }
         }
     }
-    
+
     @Override
     protected void onPause() {
-    	super.onPause();
+        super.onPause();
     }
-	private class UpdateSiteReceiver extends BroadcastReceiver {
-		private WeakReference<ImagePreviewActivity> mContext;
 
-		public UpdateSiteReceiver(ImagePreviewActivity context) {
-			this.mContext = new WeakReference<>(context);
-			Ln.d("create receiver");
-		}
+    private class UpdateSiteReceiver extends BroadcastReceiver {
+        private WeakReference<ImagePreviewActivity> mContext;
 
-		@Override
-		public void onReceive(Context context, Intent intent) {
-			Ln.d("ImagePreviewActivity UpdateSiteReceiver onReceive");
-			if (intent == null || mContext == null || mContext.get() == null) {
-				return;
-			}
-
-			// update site
-			if (LocationService.UPDATE_SITE_ACTION.equalsIgnoreCase(intent
-					.getAction())) {
-				mBestSite = GlobalState.getBestSite();
-				
-				if (Config.isDemoMode(getActivityContext())) {
-					if (getCacheService() != null) {
-						List<Site> sites = getCacheService().getAllSite(Config.getCurrentProjectId(getActivityContext()));
-						if (sites != null && sites.size() > 0) {
-							updateSiteName(sites);
-						} else {
-							showDialogHandler.sendEmptyMessage(SHOW_DIALOG);
-							Ln.d("send message show dialog");
-						}
-					}
-				} else {
-					updateSiteName(GlobalState.getSites());
-				}
-			}
-		}
-	}
-	
-	private void registerLocationReceiver() {
-		if(!hasRegisterReceiver){	        
-	    	updateSiteReceiver = new UpdateSiteReceiver(this);
-	        IntentFilter intentFilter = new IntentFilter(LocationService.UPDATE_SITE_ACTION);
-	        intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
-	        registerReceiver(updateSiteReceiver, intentFilter);
-	        hasRegisterReceiver = true;
+        public UpdateSiteReceiver(ImagePreviewActivity context) {
+            this.mContext = new WeakReference<>(context);
+            Ln.d("create receiver");
         }
-	}
-	
-	private void unRegisterLocationReceiver() {
-		if(hasRegisterReceiver){
-        	unregisterReceiver(updateSiteReceiver);
-        	hasRegisterReceiver = false;
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Ln.d("ImagePreviewActivity UpdateSiteReceiver onReceive");
+            if (intent == null || mContext == null || mContext.get() == null) {
+                return;
+            }
+
+            // update site
+            if (LocationService.UPDATE_SITE_ACTION.equalsIgnoreCase(intent
+                    .getAction())) {
+                mBestSite = GlobalState.getBestSite();
+
+                if (Config.isDemoMode(getActivityContext())) {
+                    if (getCacheService() != null) {
+                        List<Site> sites = getCacheService().getAllSite(Config.getCurrentProjectId(getActivityContext()));
+                        if (sites != null && sites.size() > 0) {
+                            updateSiteName(sites);
+                        } else {
+                            showDialogHandler.sendEmptyMessage(SHOW_DIALOG);
+                            Ln.d("send message show dialog");
+                        }
+                    }
+                } else {
+                    updateSiteName(GlobalState.getSites());
+                }
+            }
         }
-	}
+    }
+
+    private void registerLocationReceiver() {
+        if (!hasRegisterReceiver) {
+            updateSiteReceiver = new UpdateSiteReceiver(this);
+            IntentFilter intentFilter = new IntentFilter(LocationService.UPDATE_SITE_ACTION);
+            intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
+            registerReceiver(updateSiteReceiver, intentFilter);
+            hasRegisterReceiver = true;
+        }
+    }
+
+    private void unRegisterLocationReceiver() {
+        if (hasRegisterReceiver) {
+            unregisterReceiver(updateSiteReceiver);
+            hasRegisterReceiver = false;
+        }
+    }
 }
