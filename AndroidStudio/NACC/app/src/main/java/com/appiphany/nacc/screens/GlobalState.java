@@ -17,15 +17,6 @@ import com.appiphany.nacc.services.CacheService;
 import com.appiphany.nacc.utils.Config;
 import com.appiphany.nacc.utils.GeneralUtil;
 import com.appiphany.nacc.utils.Ln;
-import com.nostra13.universalimageloader.cache.disc.impl.LimitedAgeDiskCache;
-import com.nostra13.universalimageloader.cache.disc.naming.HashCodeFileNameGenerator;
-import com.nostra13.universalimageloader.cache.memory.impl.UsingFreqLimitedMemoryCache;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
-import com.nostra13.universalimageloader.core.ImageLoader;
-import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
-import com.nostra13.universalimageloader.core.display.SimpleBitmapDisplayer;
-import com.nostra13.universalimageloader.core.download.BaseImageDownloader;
-import com.nostra13.universalimageloader.utils.StorageUtils;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -76,40 +67,11 @@ public class GlobalState extends Application {
         }
 
         initThreadPool();
-        initImageLoader();
         if(BuildConfig.DEBUG){
         	Ln.getConfig().setLoggingLevel(Log.VERBOSE);
         }else{
         	Ln.getConfig().setLoggingLevel(Log.ERROR);
         }
-    }
-
-    private void initImageLoader() {
-        File cacheDir = StorageUtils.getCacheDirectory(getApplicationContext());
-        DisplayImageOptions options = new DisplayImageOptions.Builder()
-                .resetViewBeforeLoading(true)
-                .cacheInMemory(true)
-                .cacheOnDisk(true)
-                .bitmapConfig(Bitmap.Config.RGB_565) // default
-                .displayer(new SimpleBitmapDisplayer()).considerExifParams(true)
-                .build();
-        ImageLoaderConfiguration.Builder builder = new ImageLoaderConfiguration.Builder(getApplicationContext())
-                .memoryCacheExtraOptions(Config.CONFIG_WIDTH, Config.CONFIG_HEIGHT)
-                .taskExecutor(getThreadPool())
-                .taskExecutorForCachedImages(getThreadPool())
-                .memoryCache(new UsingFreqLimitedMemoryCache(2 * 1024 * 1024)) // default
-                .diskCache(new LimitedAgeDiskCache(cacheDir, 3600 * 24 * 7))
-                .diskCacheFileNameGenerator(new HashCodeFileNameGenerator()) // default
-                .imageDownloader(new BaseImageDownloader(getApplicationContext())) // default
-                .defaultDisplayImageOptions(options) // default
-                .denyCacheImageMultipleSizesInMemory();
-        
-        if(GeneralUtil.isDebugMode()){
-        	builder.writeDebugLogs();
-        }
-        
-        ImageLoaderConfiguration config = builder.build();
-        ImageLoader.getInstance().init(config);
     }
 
     @Override

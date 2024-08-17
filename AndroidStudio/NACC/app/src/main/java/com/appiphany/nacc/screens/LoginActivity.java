@@ -153,8 +153,6 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
             mEmailText = mUsernameEditText.getText().toString();
             mPasswordText = mPasswordEditText.getText().toString();
 
-            saveAccountToCache();
-
             if (NetworkUtils.isNetworkOnline(LoginActivity.this)) {
                 if (UIUtils.isStringEmpty(mServerText)) {
                     mServerText = Config.DEFAULT_SERVER;
@@ -163,6 +161,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
                 if (!mServerText.endsWith("/")) {
                     mServerText += "/";
                 }
+                saveAccountToCache();
 
                 try {
                     GenericUrl genericUrl = new GenericUrl(mServerText);
@@ -229,8 +228,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
             Config.setActiveUser(this, mEmailText);
             Config.setDemoMode(this, result);
 
-            checkForPermission(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.CAMERA});
+            checkForPermission(APP_PERMISSIONS);
         }
     }
 
@@ -240,8 +238,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
     }
 
     private void goToMainScreen() {
-        if(!verifyPermissionGranted(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.CAMERA})){
+        if(!verifyPermissionGranted(APP_PERMISSIONS)){
             return;
         }
 

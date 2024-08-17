@@ -176,11 +176,12 @@ public class BackgroundService extends IntentService {
         int retryTimes = 0;
         if (doStartUpload(photoId, dbName)) {
             do {
-                if (!doUploadPhotos(imageDataPath, siteId, direction, retryTimes, takenDate, note, projectId)) {
-                    retryTimes++;
-                    doUploadPhotos(imageDataPath, siteId, direction, retryTimes, takenDate, note, projectId);
-                } else {
+                boolean result = doUploadPhotos(imageDataPath, siteId, direction, retryTimes, takenDate, note, projectId);
+                retryTimes++;
+                if (result) {
                     doUploadSuccess(photoId, dbName);
+                    break;
+                } else if (retryTimes >= 3) {
                     break;
                 }
             } while (true);

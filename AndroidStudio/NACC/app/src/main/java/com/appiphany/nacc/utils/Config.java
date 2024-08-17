@@ -2,11 +2,8 @@ package com.appiphany.nacc.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 
 import com.appiphany.nacc.screens.LoginActivity;
-import com.appiphany.nacc.ui.controls.NaccBitmapDisplayer;
-import com.nostra13.universalimageloader.core.DisplayImageOptions;
 
 public class Config {
 	public static final String LOG_TAG = "nacc";
@@ -42,18 +39,7 @@ public class Config {
     public static final String ZOOZ_KEY = "ZOOZ_KEY";
     public static final String DONATE_URL = "https://photomon.nacc.com.au/mobile/index.html";
     public static final String INFO_URL = "https://www.nacc.com.au/photomon";
-    
-    public static final DisplayImageOptions FULL_OPTIONS;
-    static {
-        FULL_OPTIONS = new DisplayImageOptions.Builder()
-                .resetViewBeforeLoading(true)
-                .cacheInMemory(true)
-                .cacheOnDisc(true)
-                .bitmapConfig(Bitmap.Config.RGB_565) // default
-                .displayer(new NaccBitmapDisplayer())
-                .considerExifParams(true)
-                .build();
-    }
+
 
     public static String getAccessToken(Context context) {
         SharedPreferences sharedPref = context.getSharedPreferences(USER_INFO_ACCESS_TAG, Context.MODE_PRIVATE);

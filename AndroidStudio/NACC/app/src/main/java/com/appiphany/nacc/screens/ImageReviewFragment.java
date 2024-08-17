@@ -44,7 +44,6 @@ import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.UIUtils;
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
-import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -103,9 +102,9 @@ public class ImageReviewFragment extends Fragment implements OnClickListener, On
         if (args != null) {
             mPhoto = (Photo) args.getSerializable(PHOTO_MODEL_ARGS);            
             if (mPhoto != null) {
-            	if(mPhoto.getUploadState() != UPLOAD_STATE.DOWNLOAD){
+            	if (mPhoto.getUploadState() != UPLOAD_STATE.DOWNLOAD){
             		Glide.with(getContext()).load(new File(mPhoto.getPhotoPath())).into(mReviewImageView);
-            	}else{
+            	} else{
                     Glide.with(getContext()).load(mPhoto.getPhotoPath()).into(mReviewImageView);
             	}
             	
@@ -410,11 +409,11 @@ public class ImageReviewFragment extends Fragment implements OnClickListener, On
             boolean result = false;
             if (mPhoto != null && mContext != null && mContext.get() != null) {
                 try {
-                    Bitmap scaledBitmap = null;
-                    if(mPhoto.getPhotoPath().startsWith("http")){
-                    	scaledBitmap = ImageLoader.getInstance().loadImageSync(mPhoto.getPhotoPath());
-                    }else {                    
-                        scaledBitmap = ImageLoader.getInstance().loadImageSync("file://" + mPhoto.getPhotoPath());
+                    Bitmap scaledBitmap;
+                    if (mPhoto.getPhotoPath().startsWith("http")){
+                        scaledBitmap = Glide.with(mContext.get()).asBitmap().load(mPhoto.getPhotoPath()).submit().get();
+                    } else {
+                        scaledBitmap = Glide.with(mContext.get()).asBitmap().load("file://" + mPhoto.getPhotoPath()).submit().get();
                     }
 
                     File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);

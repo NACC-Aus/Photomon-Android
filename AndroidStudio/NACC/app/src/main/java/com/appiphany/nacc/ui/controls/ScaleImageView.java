@@ -5,7 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.widget.ImageView;
 
-public class ScaleImageView extends ImageView {
+public class ScaleImageView extends androidx.appcompat.widget.AppCompatImageView {
 
 	public ScaleImageView(Context context) {
 		super(context);
