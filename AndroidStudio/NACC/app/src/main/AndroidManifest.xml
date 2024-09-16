@@ -14,7 +14,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_GPS" />
     <!-- Required only if your app targets Android 13. -->
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <!-- Required to maintain app compatibility. -->
