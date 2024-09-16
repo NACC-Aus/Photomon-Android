@@ -2,6 +2,7 @@ package com.appiphany.nacc.screens;
 
 import java.util.List;
 
+import com.appiphany.nacc.BuildConfig;
 import com.appiphany.nacc.events.UpdateSites;
 import com.appiphany.nacc.model.Site;
 import com.appiphany.nacc.services.CacheService;
@@ -187,6 +188,7 @@ public class LocationService extends Service{
             EventBus.getDefault().post(new UpdateSites());
 			Intent intent = new Intent();
 			intent.setAction(UPDATE_SITE_ACTION);
+			intent.setPackage(BuildConfig.APPLICATION_ID);
 			sendBroadcast(intent);
 			Ln.d("has send broadcast update site");
 			isRunning = false;
