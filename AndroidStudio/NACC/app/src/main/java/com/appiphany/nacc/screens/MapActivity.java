@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -886,7 +887,12 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
 
     @Override
     protected void onDestroy() {
-        Locus.INSTANCE.stopLocationUpdates();
+        // Prevent crash by this issue https://github.com/BirjuVachhani/locus-android/issues/90
+        try {
+            Locus.INSTANCE.stopLocationUpdates();
+        } catch (NoClassDefFoundError error) {
+            Ln.e(error);
+        }
         stopLocationService();
         stopDownloadGuideService();
         super.onDestroy();

@@ -12,6 +12,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -863,7 +864,11 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
             updateSiteReceiver = new UpdateSiteReceiver(this);
             IntentFilter intentFilter = new IntentFilter(LocationService.UPDATE_SITE_ACTION);
             intentFilter.addCategory(Intent.CATEGORY_DEFAULT);
-            registerReceiver(updateSiteReceiver, intentFilter);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ) {
+                registerReceiver(updateSiteReceiver, intentFilter, Context.RECEIVER_NOT_EXPORTED);
+            } else {
+                registerReceiver(updateSiteReceiver, intentFilter);
+            }
             hasRegisterReceiver = true;
         }
     }
