@@ -7,11 +7,15 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.appiphany.nacc.R;
 import com.appiphany.nacc.utils.UIUtils;
@@ -50,6 +54,23 @@ public class BaseActivity extends AppCompatActivity {
 	protected Activity getActivityContext(){
 		return this;
 	}
+
+    protected void setLayoutInsets(int viewId) {
+        View rootLayout = findViewById(viewId);
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout, (v, windowInsets) -> {
+            // Get the insets for the system bars
+            Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+
+            // Apply padding to the ListView to account for the status and navigation bars
+            v.setPadding(
+                    v.getPaddingLeft(),
+                    systemBars.top,
+                    v.getPaddingRight(),
+                    systemBars.bottom
+            );
+            return windowInsets;
+        });
+    }
 
 	@Override
 	protected void onResume() {

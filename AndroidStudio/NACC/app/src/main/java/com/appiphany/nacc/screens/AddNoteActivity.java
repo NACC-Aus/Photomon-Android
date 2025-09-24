@@ -32,6 +32,7 @@ public class AddNoteActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_add_note);
+        setLayoutInsets(R.id.rootLayout);
         mEtNote = (EditText) findViewById(R.id.note_edittex);
         initActionBar();
 

@@ -39,6 +39,7 @@ public class SiteManagementActivity extends BaseActivity implements OnItemClickL
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_manage_sites);
+		setLayoutInsets(R.id.listSites);
         lvSites = (ListView) findViewById(R.id.listSites);
 		mMode = null;
 		lvSites.setItemsCanFocus(false);

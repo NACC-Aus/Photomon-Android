@@ -115,6 +115,7 @@ public class ImageTakingActivity extends BaseActivity implements OnClickListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_taking_picture_layout);
+        setLayoutInsets(R.id.rootLayout);
 
         cameraView = findViewById(R.id.camera);
         mSurfaceViewLayout = findViewById(R.id.surface_view_layout);

@@ -20,7 +20,7 @@ import com.appiphany.nacc.utils.NetworkUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
 
 public class DownloadService extends IntentService {
 	public static final String DOWNLOAD_GUIDE = "com.appiphany.nacc.DOWNLOAD_GUIDE";

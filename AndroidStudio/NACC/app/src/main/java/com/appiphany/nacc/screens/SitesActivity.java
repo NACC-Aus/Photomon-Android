@@ -2,7 +2,6 @@ package com.appiphany.nacc.screens;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import android.content.Context;
 import android.content.Intent;
@@ -38,6 +37,7 @@ public class SitesActivity extends BaseActivity implements LoaderManager.LoaderC
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_site_list);
+		setLayoutInsets(R.id.rootLayout);
 		initActionBar();
 		getSupportLoaderManager().initLoader(LOADER_ID, null, this);
 		lvSites = findViewById(R.id.lvSites);

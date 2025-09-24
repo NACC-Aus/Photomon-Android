@@ -113,6 +113,7 @@ public class ImagePreviewActivity extends BaseActivity implements OnClickListene
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
 
         setContentView(R.layout.activity_picture_preview_layout);
+        setLayoutInsets(R.id.rootLayout);
 
         mPreviewView = findViewById(R.id.image_preview_view);
         mDirectionTextView = findViewById(R.id.image_name_text);

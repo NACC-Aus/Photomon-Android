@@ -1,6 +1,5 @@
 package com.appiphany.nacc.screens;
 
-import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -73,6 +72,7 @@ public class LoginActivity extends BaseActivity implements OnClickListener {
         getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.activity_login);
+        setLayoutInsets(R.id.rootLayout);
         mUsernameEditText = (EditText) findViewById(R.id.email_input_view);
         mPasswordEditText = (EditText) findViewById(R.id.password_input_view);
         mSubmitButton = (Button) findViewById(R.id.login_button_view);

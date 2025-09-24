@@ -52,6 +52,7 @@ public class ImageReviewActivity extends BaseActivity implements ViewPager.OnPag
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_image_review_layout);
+        setLayoutInsets(R.id.rootLayout);
         Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler(GeneralUtil.getLogFilePath(this)));
         mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
         

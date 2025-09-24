@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
 
 public class OnlineSitesActivity extends BaseActivity implements LoaderManager.LoaderCallbacks<List<Site>> {
     private static final int LOADER_ID = OnlineSitesActivity.class.hashCode();
@@ -58,6 +58,7 @@ public class OnlineSitesActivity extends BaseActivity implements LoaderManager.L
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sites_online);
+        setLayoutInsets(R.id.rootLayout);
         progressLoadSites = findViewById(R.id.progressLoadSites);
         initActionBar();
         getSupportLoaderManager().initLoader(LOADER_ID, null, this);

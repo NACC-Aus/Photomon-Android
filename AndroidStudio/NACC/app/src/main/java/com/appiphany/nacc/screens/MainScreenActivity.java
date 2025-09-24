@@ -50,7 +50,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 public class MainScreenActivity extends BaseActivity implements OnItemClickListener, View.OnClickListener {
     private ListView mListView;
@@ -85,6 +87,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.activity_main_screen_layout);
+        setLayoutInsets(R.id.rootLayout);
 
         firstLoading = true;
         mListView = findViewById(R.id.list_photos);
@@ -602,6 +605,7 @@ public class MainScreenActivity extends BaseActivity implements OnItemClickListe
         EventBus.getDefault().unregister(this);
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(UpdateProject event){
         initActionBar();
         EventBus.getDefault().removeStickyEvent(event);

@@ -23,6 +23,7 @@ public class DonateWebActivity extends BaseActivity {
 		super.onCreate(savedInstanceState);
 		
 		setContentView(R.layout.activity_web);
+		setLayoutInsets(R.id.rootLayout);
 		initActionBar();
 		
 		mProgressBar = (ProgressBar) findViewById(R.id.progressBar);

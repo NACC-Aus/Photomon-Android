@@ -19,6 +19,7 @@ public class InfoActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_web);
+        setLayoutInsets(R.id.rootLayout);
         final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);        
         final WebView info = (WebView) findViewById(R.id.webView);        
         WebSettings settings = info.getSettings();

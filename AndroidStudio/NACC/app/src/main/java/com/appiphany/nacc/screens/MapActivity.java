@@ -18,7 +18,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -56,7 +55,6 @@ import com.appiphany.nacc.utils.Ln;
 import com.appiphany.nacc.utils.LocationUtil;
 import com.appiphany.nacc.utils.UIUtils;
 import com.birjuvachhani.locus.Locus;
-import com.birjuvachhani.locus.LocusResult;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
@@ -82,9 +80,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.greenrobot.event.EventBus;
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 public class MapActivity extends BaseActivity implements View.OnClickListener, OnMapReadyCallback {
     private LinearLayout mDemoView;
@@ -120,6 +118,7 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         getWindow().setSoftInputMode(
                 WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN);
         setContentView(R.layout.activity_map);
+        setLayoutInsets(R.id.rootLayout);
 
         firstLoading = true;
         mDemoView = findViewById(R.id.demo_view);
@@ -918,11 +917,13 @@ public class MapActivity extends BaseActivity implements View.OnClickListener, O
         EventBus.getDefault().unregister(this);
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(UpdateProject event) {
         initActionBar();
         EventBus.getDefault().removeStickyEvent(event);
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
     public void onEventMainThread(UpdateSites event) {
         drawPhotoMarkers();
         if (canZoomMap) {

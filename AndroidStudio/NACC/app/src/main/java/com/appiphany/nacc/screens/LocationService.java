@@ -21,7 +21,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
 
 public class LocationService extends Service{
 	public static final String LOCATION_CHANGED = "location_changed";
