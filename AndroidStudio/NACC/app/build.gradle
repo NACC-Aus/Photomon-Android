@@ -12,8 +12,8 @@ android {
         minSdkVersion 23
         compileSdkVersion 36
         targetSdkVersion 36
-        versionCode 15
-        versionName "1.2.2"
+        versionCode 16
+        versionName "1.2.3"
         multiDexEnabled true
     }
     buildFeatures {
@@ -22,7 +22,7 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
     packagingOptions {
@@ -50,7 +50,7 @@ dependencies {
 
     implementation 'com.google.code.gson:gson:2.13.2'
 
-    implementation('com.google.http-client:google-http-client-android:2.0.0') {
+    implementation('com.google.http-client:google-http-client-android:2.1.0') {
         exclude module: 'httpclient' //by artifact name
         exclude group: 'org.apache.httpcomponents' //by group
         exclude group: 'org.apache.httpcomponents', module: 'httpclient' //by both name and group
@@ -58,15 +58,15 @@ dependencies {
 
     implementation 'joda-time:joda-time:2.14.0'
     api 'com.otaliastudios:cameraview:2.7.2'
-    implementation 'androidx.exifinterface:exifinterface:1.4.1'
+    implementation 'androidx.exifinterface:exifinterface:1.4.2'
 
     implementation 'com.github.bumptech.glide:glide:5.0.5'
-    implementation 'com.google.android.gms:play-services-maps:19.2.0'
+    implementation 'com.google.android.gms:play-services-maps:20.0.0'
     implementation 'com.google.android.gms:play-services-location:21.3.0'
 
-    implementation 'androidx.work:work-runtime:2.10.4'
+    implementation 'androidx.work:work-runtime:2.11.1'
 
-    implementation platform('com.google.firebase:firebase-bom:34.3.0')
+    implementation platform('com.google.firebase:firebase-bom:34.10.0')
     implementation 'com.google.firebase:firebase-crashlytics'
     implementation 'com.google.firebase:firebase-analytics'
 
